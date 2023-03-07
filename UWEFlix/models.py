@@ -46,6 +46,9 @@ class Screen(models.Model):
     screen_name = models.CharField(max_length=255)
     capacity = models.SmallIntegerField()
 
+    def __str__(self):
+        return f'{self.screen_name}'
+
 class Showing(models.Model):
     screen = models.OneToOneField(Screen, on_delete=models.PROTECT)
     film = models.OneToOneField(Film, on_delete=models.PROTECT)

@@ -1,7 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import *
+from .serializers import *
 
 def home(request):
     
@@ -52,5 +57,17 @@ def logout_user(request):
     else:
         messages.error(request, "unable to log you out")
     return redirect('home')
+
+@api_view(['GET', 'POST'])
+def film_list(request):
+    if request.method == 'GET':
+        queryset = Film.objects.all()
+        serializer = FilmSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = FilmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response('ok')
 
     
