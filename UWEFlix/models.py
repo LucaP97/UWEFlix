@@ -34,7 +34,7 @@ class CinemaManager(models.Model): # this will extend the User class
     pass
 
 class Film(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     age_rating = models.SmallIntegerField()
     duration = models.DecimalField(max_digits=5, decimal_places=2)
     short_trailer_description = models.TextField(null=False)
@@ -43,7 +43,7 @@ class Film(models.Model):
         return f'{self.title}'
 
 class Screen(models.Model):
-    screen_name = models.CharField(max_length=255)
+    screen_name = models.CharField(max_length=255, unique=True)
     capacity = models.SmallIntegerField()
 
     def __str__(self):

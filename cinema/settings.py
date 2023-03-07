@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'debug_toolbar',
     'UWEFlix',
     'authenticate',
     'club',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'cinema.urls'
@@ -72,6 +74,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'cinema.wsgi.application'
+
+
+# this is for django debug toolbar, should be removed for production?
+INTERNAL_IPS = [
+    "127.0.0.1"
+]
 
 
 # Database
@@ -129,3 +137,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = BASE_DIR / 'static_collected'
 
 # LOGIN_REDIRECT_URL = 'home/'
+
+REST_FRAMEWORK = {
+    'COERCE_DECIMAL_TO_STRING': False
+}

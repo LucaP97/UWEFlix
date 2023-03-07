@@ -16,7 +16,7 @@ def home(request):
         'name': name
     })
 
-
+##################################################################################
 def login_user(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -57,7 +57,9 @@ def logout_user(request):
     else:
         messages.error(request, "unable to log you out")
     return redirect('home')
+##################################################################################
 
+# films
 @api_view(['GET', 'POST'])
 def film_list(request):
     if request.method == 'GET':
@@ -69,5 +71,50 @@ def film_list(request):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response('ok')
+
+@api_view()
+def film_detail(request, id):
+    film = get_object_or_404(Film, pk=id)
+    serializer = FilmSerializer(film)
+    return Response(serializer.data)
+
+# screens
+@api_view(['GET', 'POST'])
+def screen_list(request):
+    if request.method == 'GET':
+        queryset = Screen.objects.all()
+        serializer = ScreenSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = ScreenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response('ok')
+    
+@api_view()
+def screen_detail(request, id):
+    screen = get_object_or_404(Screen, pk=id)
+    serializer = ScreenSerializer(screen)
+    return Response(serializer.data)
+    
+
+# showings
+@api_view(['GET', 'POST'])
+def showing_list(request):
+    if request.method == 'GET':
+        queryset = Showing.objects.select_related('film', 'screen').all()
+        serializer = ShowingSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = ShowingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response('ok')
+    
+@api_view()
+def showing_detail(request, id):
+    showing = get_object_or_404(Showing, pk=id)
+    serializer = ShowingSerializer(showing)
+    return Response(serializer.data)
 
     
