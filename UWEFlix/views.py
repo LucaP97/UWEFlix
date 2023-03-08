@@ -70,7 +70,7 @@ def film_list(request):
         serializer = FilmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response('ok')
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def film_detail(request, id):
@@ -100,13 +100,22 @@ def screen_list(request):
         serializer = ScreenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response('ok')
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-@api_view()
+@api_view(['GET', 'PUT', 'DELETE'])
 def screen_detail(request, id):
     screen = get_object_or_404(Screen, pk=id)
-    serializer = ScreenSerializer(screen)
-    return Response(serializer.data)
+    if request.method == 'GET':    
+        serializer = ScreenSerializer(screen)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = ScreenSerializer(screen, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        screen.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 # showings
@@ -120,7 +129,7 @@ def showing_list(request):
         serializer = ShowingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response('ok')
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 @api_view()
 def showing_detail(request, id):
