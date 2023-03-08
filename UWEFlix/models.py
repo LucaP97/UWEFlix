@@ -51,7 +51,7 @@ class Screen(models.Model):
 
 class Showing(models.Model):
     screen = models.OneToOneField(Screen, on_delete=models.PROTECT)
-    film = models.OneToOneField(Film, on_delete=models.PROTECT)
+    film = models.ForeignKey(Film, on_delete=models.PROTECT, related_name='showing')
     showing_time = models.DateTimeField(auto_now=False)
     tickets_sold = models.SmallIntegerField(default=0)
 

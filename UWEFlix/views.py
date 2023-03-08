@@ -72,11 +72,22 @@ def film_list(request):
         serializer.save()
         return Response('ok')
 
-@api_view()
+@api_view(['GET', 'PUT', 'DELETE'])
 def film_detail(request, id):
     film = get_object_or_404(Film, pk=id)
-    serializer = FilmSerializer(film)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        serializer = FilmSerializer(film)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = FilmSerializer(film, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        if film.showing.count() > 0:
+            return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        film.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # screens
 @api_view(['GET', 'POST'])
