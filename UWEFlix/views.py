@@ -134,7 +134,16 @@ def showing_list(request):
 @api_view()
 def showing_detail(request, id):
     showing = get_object_or_404(Showing, pk=id)
-    serializer = ShowingSerializer(showing)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        serializer = ShowingSerializer(showing)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = ShowingSerializer(showing, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        showing.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     
