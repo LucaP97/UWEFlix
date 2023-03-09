@@ -12,6 +12,7 @@ urlpatterns = [
     path("screens/<int:id>", views.screen_detail),
     path("showings/", views.showing_list),
     path("showings/<int:id>", views.showing_detail),
-    path("booking/", views.booking_view),
+    path("showings/booking/<int:id>", views.booking_request),
+    path("bookings/", views.booking_list),
 ]
 

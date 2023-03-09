@@ -4,9 +4,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status,generics
 from .models import *
 from .serializers import *
+
+print('username: admin password: LMicyb8=O\n')
 
 def home(request):
     
@@ -146,10 +148,36 @@ def showing_detail(request, id):
         showing.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view()
-def booking_view(request):
-    queryset = Booking.objects.all()
-    serializer = BookingSerializer(queryset,many=True)
-    return Response(serializer.data)
+@api_view(['GET', 'POST'])
+def booking_list(request):
+    if request.method == 'GET':
+        queryset = Booking.objects.all()
+        serializer = BookingSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = BookingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['GET','POST'])
+def booking_request(request, id):
+    booking = get_object_or_404(Showing, pk=id)
+    if request.method == 'GET':
+        serializer = BookingSerializer(booking)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = BookingSerializer(booking, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+    elif request.method == 'POST':
+        serializer = BookingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    elif request.method == 'DELETE':
+        booking.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
 
     

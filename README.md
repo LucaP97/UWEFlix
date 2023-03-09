@@ -1,4 +1,23 @@
 # UWEFlix
+***********************************************************************************
+
+added booking - can now request to booking a showing
+
+added to admin page - easier to CRUD any models made
+
+created customer users
+
+test users:
+
+username = Test1
+password = testpassword
+
+username = Test
+password = testpassword
+
+
+***********************************************************************************
+added booking in views, models and serializers
 
 ***********************************************************************************
 When creating your virtual environment, please use this command:

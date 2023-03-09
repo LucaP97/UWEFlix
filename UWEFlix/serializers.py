@@ -26,4 +26,10 @@ class ShowingSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['film','screen']
+        fields = '__all__'
+        
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['film','showing_time', 'screen','customer']
+    

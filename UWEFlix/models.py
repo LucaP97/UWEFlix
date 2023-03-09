@@ -1,6 +1,7 @@
 from django.db import models
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 # from django.contrib.auth.password_validation import validate_password
 
 # class Address(models.Model): 
@@ -36,7 +37,7 @@ class CinemaManager(models.Model): # this will extend the User class
 class Film(models.Model):
     title = models.CharField(max_length=255, unique=True)
     age_rating = models.SmallIntegerField()
-    duration = models.DecimalField(max_digits=5, decimal_places=2)
+    duration = models.DurationField()
     short_trailer_description = models.TextField(null=False)
 
     def __str__(self):
@@ -77,7 +78,22 @@ class Ticket(models.Model):
     ]
 
     ticket_price = models.CharField(max_length=1, choices=PRICE_CHOICE)
+
+class Customer(models.Model):
+    customer = models.ForeignKey(User,on_delete=models.SET_NULL,blank=True,null=True)
+    def __str__(self) -> str:
+        return self.customer.username
     
 class Booking(models.Model):
-    screen = models.CharField(max_length=32,blank=True,null=True)
-    film = models.CharField(max_length=128,blank=True,null=True)
+    booking_ref = models.CharField(max_length=6,blank=True,null=True)
+    customer = models.ForeignKey(Customer,on_delete=models.SET_NULL,blank=True,null=True, related_name= 'booking')
+    film = models.ForeignKey(Film,on_delete=models.SET_NULL,null=True, related_name= 'booking')
+    screen = Showing.screen
+    showing_time = Showing.showing_time
+    ticket_quantity = models.IntegerField(default=0)
+
+    
+    
+    
+    
+    
