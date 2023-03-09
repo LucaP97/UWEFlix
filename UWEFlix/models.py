@@ -77,3 +77,7 @@ class Ticket(models.Model):
     ]
 
     ticket_price = models.CharField(max_length=1, choices=PRICE_CHOICE)
+    
+class Booking(models.Model):
+    screen = models.CharField(max_length=32,blank=True,null=True)
+    film = models.CharField(max_length=128,blank=True,null=True)

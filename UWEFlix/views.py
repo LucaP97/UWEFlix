@@ -146,4 +146,10 @@ def showing_detail(request, id):
         showing.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view()
+def booking_view(request):
+    queryset = Booking.objects.all()
+    serializer = BookingSerializer(queryset,many=True)
+    return Response(serializer.data)
+
     

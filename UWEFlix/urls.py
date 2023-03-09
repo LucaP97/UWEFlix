@@ -12,5 +12,6 @@ urlpatterns = [
     path("screens/<int:id>", views.screen_detail),
     path("showings/", views.showing_list),
     path("showings/<int:id>", views.showing_detail),
+    path("booking/", views.booking_view),
 ]
 
