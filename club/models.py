@@ -1,8 +1,12 @@
+from django.conf import settings
 from django.db import models
 
 # # Create your models here.
 # class CinemaManager(models.Model): # this will extend the User class
 #     pass
+
+class ClubRepresentative(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 class Address(models.Model):
     street_number = models.CharField(max_length=50)
