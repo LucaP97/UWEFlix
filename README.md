@@ -1,4 +1,6 @@
 # UWEFlix
+***********************************************************************************
+added booking in views, models and serializers
 
 ***********************************************************************************
 When creating your virtual environment, please use this command:
