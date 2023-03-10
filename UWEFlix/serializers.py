@@ -1,3 +1,4 @@
+from django.utils import dateformat
 from rest_framework import serializers
 from .models import *
 
@@ -18,7 +19,7 @@ class ShowingSerializer(serializers.ModelSerializer):
         model = Showing
         fields = ['screen', 'film', 'showing_time']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['showing_time'] = instance.showing_time.strftime('%Y-%m-%d %H:%M:%S')
-        return representation
+    showing_time = serializers.SerializerMethodField(method_name='showing_time_conversion')
+
+    def showing_time_conversion(self, showing: Showing):
+        return dateformat.format(showing.showing_time, 'jS F Y h:i:s A')

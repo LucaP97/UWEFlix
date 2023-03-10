@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
 from .models import *
 from .serializers import *
@@ -60,90 +61,97 @@ def logout_user(request):
 ##################################################################################
 
 # films
-@api_view(['GET', 'POST'])
-def film_list(request):
-    if request.method == 'GET':
+class FilmList(APIView):
+    def get(self, request):
         queryset = Film.objects.all()
         serializer = FilmSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-    elif request.method == 'POST':
+    
+    def post(self, request):
         serializer = FilmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def film_detail(request, id):
-    film = get_object_or_404(Film, pk=id)
-    if request.method == 'GET':
+class FilmDetail(APIView):
+    def get(self, request, id):
+        film = get_object_or_404(Film, pk=id)
         serializer = FilmSerializer(film)
         return Response(serializer.data)
-    elif request.method == 'PUT':
+    
+    def put(self, request, id):
+        film = get_object_or_404(Film, pk=id)
         serializer = FilmSerializer(film, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    elif request.method == 'DELETE':
+    
+    def delete(self, request, id):
+        film = get_object_or_404(Film, pk=id)
         if film.showing.count() > 0:
             return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         film.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # screens
-@api_view(['GET', 'POST'])
-def screen_list(request):
-    if request.method == 'GET':
+class ScreenList(APIView):
+    def get(self, request):
         queryset = Screen.objects.all()
         serializer = ScreenSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-    elif request.method == 'POST':
+    
+    def post(self, request):
         serializer = ScreenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-@api_view(['GET', 'PUT', 'DELETE'])
-def screen_detail(request, id):
-    screen = get_object_or_404(Screen, pk=id)
-    if request.method == 'GET':    
+
+class ScreenDetail(APIView):
+    def get(self, request, id):
+        screen = get_object_or_404(Screen, pk=id)
         serializer = ScreenSerializer(screen)
         return Response(serializer.data)
-    elif request.method == 'PUT':
+    
+    def put(self, request, id):
+        screen = get_object_or_404(Screen, pk=id)
         serializer = ScreenSerializer(screen, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    elif request.method == 'DELETE':
+    
+    def delete(self, request, id):
+        screen = get_object_or_404(Screen, pk=id)
         screen.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 # showings
-@api_view(['GET', 'POST'])
-def showing_list(request):
-    if request.method == 'GET':
+class ShowingList(APIView):
+    def get(self, request):
         queryset = Showing.objects.select_related('film', 'screen').all()
         serializer = ShowingSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-    elif request.method == 'POST':
+    
+    def post(self, request):
         serializer = ShowingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-@api_view()
-def showing_detail(request, id):
-    showing = get_object_or_404(Showing, pk=id)
-    if request.method == 'GET':
+class ShowingDetail(APIView):
+    def get(self, request, id):
+        showing = get_object_or_404(Showing, pk=id)
         serializer = ShowingSerializer(showing)
         return Response(serializer.data)
-    elif request.method == 'PUT':
+    
+    def put(self, request, id):
+        showing = get_object_or_404(Showing, pk=id)
         serializer = ShowingSerializer(showing, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    elif request.method == 'DELETE':
+    
+    def delete(self, request, id):
+        showing = get_object_or_404(Showing, pk=id)
         showing.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    

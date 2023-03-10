@@ -6,11 +6,11 @@ urlpatterns = [
     path("login/", views.login_user, name="login"),
     path("register_user/", views.register, name="register_user"),
     path("logout_user/", views.logout_user, name="logout_user"),
-    path("films/", views.film_list),
-    path("films/<int:id>", views.film_detail),
-    path("screens/", views.screen_list),
-    path("screens/<int:id>", views.screen_detail),
-    path("showings/", views.showing_list),
-    path("showings/<int:id>", views.showing_detail),
+    path("films/", views.FilmList.as_view()),
+    path("films/<int:id>", views.FilmDetail.as_view()),
+    path("screens/", views.ScreenList.as_view()),
+    path("screens/<int:id>", views.ScreenDetail.as_view()),
+    path("showings/", views.ShowingList.as_view()),
+    path("showings/<int:id>", views.ShowingDetail.as_view()),
 ]
 
