@@ -1,16 +1,17 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
 from . import views
+
+router = SimpleRouter()
+router.register('films', views.FilmViewSet)
+router.register('screens', views.ScreenViewSet)
+router.register('showings', views.ShowingViewSet)
 
 urlpatterns = [
     path("home/", views.home, name="home"),
     path("login/", views.login_user, name="login"),
     path("register_user/", views.register, name="register_user"),
     path("logout_user/", views.logout_user, name="logout_user"),
-    path("films/", views.FilmList.as_view()),
-    path("films/<int:id>", views.FilmDetail.as_view()),
-    path("screens/", views.ScreenList.as_view()),
-    path("screens/<int:id>", views.ScreenDetail.as_view()),
-    path("showings/", views.ShowingList.as_view()),
-    path("showings/<int:id>", views.ShowingDetail.as_view()),
+    path('', include(router.urls)),
 ]
 
