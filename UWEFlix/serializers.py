@@ -26,7 +26,12 @@ class ShowingSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = '__all__'
+        fields = ['booking_ref','customer','film','screen','showing_time','ticket_quantity']
+        extra_kwargs = {
+            'film':{'read_only':True},
+            'screen':{'read_only':True},
+            'showing_time':{'read_only':True}
+        }
         
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:

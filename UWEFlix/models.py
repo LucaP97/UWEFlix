@@ -88,8 +88,8 @@ class Booking(models.Model):
     booking_ref = models.CharField(max_length=6,blank=True,null=True)
     customer = models.ForeignKey(Customer,on_delete=models.SET_NULL,blank=True,null=True, related_name= 'booking')
     film = models.ForeignKey(Film,on_delete=models.SET_NULL,null=True, related_name= 'booking')
-    screen = Showing.screen
-    showing_time = Showing.showing_time
+    screen = models.CharField(max_length=100,blank=True,null=True)
+    showing_time = models.DateTimeField(auto_now=False,blank=True,null=True)
     ticket_quantity = models.IntegerField(default=0)
 
     

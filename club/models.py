@@ -37,6 +37,7 @@ class PaymentDetails(models.Model):
 
 class Account(models.Model):
     club = models.OneToOneField(Club, on_delete=models.PROTECT)
-    payment_details = models.ForeignKey(PaymentDetails, on_delete=models.CASCADE)
+    payment_details = models.OneToOneField(PaymentDetails, on_delete=models.CASCADE)
     account_title = models.CharField(max_length=255, primary_key=True)
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2)
+

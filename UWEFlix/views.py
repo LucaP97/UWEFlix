@@ -168,16 +168,17 @@ def booking_request(request, id):
         return Response(serializer.data)
     elif request.method == 'PUT':
         serializer = BookingSerializer(booking, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
     elif request.method == 'POST':
         serializer = BookingSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     elif request.method == 'DELETE':
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
     
 
     
