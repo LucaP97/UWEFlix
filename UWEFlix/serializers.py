@@ -23,3 +23,12 @@ class ShowingSerializer(serializers.ModelSerializer):
 
     def showing_time_conversion(self, showing: Showing):
         return dateformat.format(showing.showing_time, 'jS F Y h:i:s A')
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['pk','film','screen','showing_time','ticket_amount']
+        
+        
+        

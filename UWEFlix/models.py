@@ -53,7 +53,7 @@ class CinemaManager(models.Model): # this will extend the User class
 class Film(models.Model):
     title = models.CharField(max_length=255, unique=True)
     age_rating = models.SmallIntegerField()
-    duration = models.DecimalField(max_digits=5, decimal_places=2)
+    duration = models.DurationField(default=0)
     short_trailer_description = models.TextField(null=False)
 
     def __str__(self):
@@ -83,9 +83,12 @@ class Ticket(models.Model):
         (TICKET_TYPE_CHILD, 'Child'),
     ]
 
-    ticket_type = models.CharField(max_length=1, choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
+    #ticket_type = models.CharField(max_length=1, choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
 
-    showing = models.OneToOneField(Showing, on_delete=models.PROTECT)
+    #showing = models.OneToOneField(Showing, on_delete=models.PROTECT)
+    
+    ticket_type = models.CharField(max_length=100,blank=True,null=True)
+    showing = models.CharField(max_length=100,blank=True,null=True)
 
     PRICE_CHOICE = [
         (TICKET_TYPE_STUDENT, '10'),
@@ -93,4 +96,18 @@ class Ticket(models.Model):
         (TICKET_TYPE_CHILD, '5'),
     ]
 
-    ticket_price = models.CharField(max_length=1, choices=PRICE_CHOICE)
+    #ticket_price = models.CharField(max_length=1, choices=PRICE_CHOICE)
+    
+    ticket_price = models.CharField(max_length=100,blank=True,null=True)
+    
+    film = models.CharField(max_length=100,blank=True,null=True)
+    screen = models.CharField(max_length=100,blank=True,null=True)
+    showing_time = models.CharField(max_length=100,null=True)
+    
+class Booking(models.Model):
+    film = models.CharField(max_length=100,blank=True,null=True)
+    screen = models.CharField(max_length=100,blank=True,null=True)
+    showing_time = models.CharField(max_length=100,blank=True,null=True)
+    ticket_amount = models.IntegerField(default=0)
+    
+    

@@ -8,9 +8,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import status
+from rest_framework import status, viewsets
 from .models import *
 from .serializers import *
+
+print("username: admin password: LMicyb8=O\n")
 
 def home(request):
     
@@ -86,3 +88,39 @@ class ScreenViewSet(ModelViewSet):
 class ShowingViewSet(ModelViewSet):
     queryset = Showing.objects.select_related('film', 'screen').all()
     serializer_class = ShowingSerializer
+
+
+@api_view(['GET','POST'])
+def booking_request(request,id):
+    
+    try:
+        booking = Showing.objects.get(pk=id)
+    except Showing.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = BookingSerializer(booking)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = BookingSerializer(booking, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            
+    elif request.method == 'POST':
+        serializer = BookingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            
+            # get ticket amount
+            ticket_amount = int(request.data.get('ticket_amount'))
+            
+            # create amount of tickets
+            for tickets in range(ticket_amount):
+                tickets = Ticket.objects.create(ticket_type = 'A', ticket_price = '10', film = serializer.data['film'], screen = serializer.data['screen'], showing_time = serializer.data['showing_time'])
+                tickets.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    elif request.method == 'DELETE':
+        booking.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

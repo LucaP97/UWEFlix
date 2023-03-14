@@ -1,4 +1,10 @@
 # UWEFlix
+**********************************************************************************
+
+added booking logic - can now input amount of tickts wanted
+
+need to adjust it so that it creates amount of tickts corresponding to the amount of Adult tickets, Child tickets and Student tickets
+
 
 ***********************************************************************************
 When creating your virtual environment, please use this command:
