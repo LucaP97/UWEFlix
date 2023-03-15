@@ -11,10 +11,9 @@ test booking inputs:
     "child": 0
 }
 
-
 {
-    "film": "spiderman",
-    "screen": "1",
+    "film": "Batman",
+    "screen": "2",
     "showing_time": "2023-03-10 12:34:56+00:00",
     "student": 0,
     "adult": 0,
