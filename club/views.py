@@ -14,6 +14,15 @@ class ClubRepresentativeViewSet(CreateModelMixin, RetrieveModelMixin, UpdateMode
     queryset = ClubRepresentative.objects.all()
     serializer_class = ClubRepresentativeSerializer
 
+    def create(self, request, *args, **kwargs):
+
+        return super().create(request, *args, **kwargs)
+    
+
+class ClubViewSet(ModelViewSet):
+    queryset = Club.objects.all()
+    serializer_class = ClubSerializer
+
     
 
 

@@ -6,38 +6,34 @@ import random
 # class CinemaManager(models.Model): # this will extend the User class
 #     pass
 
-class ClubRepresentative(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    club_representative_number = models.IntegerField(unique=True)
-    name = models.CharField(max_length=255, null=True)
-    password = models.CharField(max_length=255, unique=True)
-
-    
 class Address(models.Model):
-    street_number = models.CharField(max_length=50)
+    street_number = models.CharField(max_length=255)
     street = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
-    postcode = models.CharField(max_length=255)
+    post_code = models.CharField(max_length=255)
 
     def __str__(self) -> str:
         return self.street_number + ' ' + self.street
 
-
 class ContactDetails(models.Model):
-    mobile_number = models.CharField(max_length=50)
-    landline_number = models.CharField(max_length=50)
-    email = models.EmailField(unique=True)
-
-    def __str__(self) -> str:
-        return self.email
+    landline_number = models.CharField(max_length=255)
+    mobile_number = models.CharField(max_length=255)
+    club_email = models.CharField(max_length=255, unique=True)
 
 class Club(models.Model):
-    address = models.ForeignKey(Address, on_delete=models.CASCADE, null=True)
-    contact_details = models.ForeignKey(ContactDetails, on_delete=models.CASCADE, null=True)
-    club_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    address = models.OneToOneField(Address, on_delete=models.PROTECT, related_name='club')
+    contact_details = models.OneToOneField(ContactDetails, on_delete=models.PROTECT, related_name='club')
+
+class ClubRepresentative(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date_of_birth = models.DateField(null=True, blank=True)
+    club_representative_number = models.IntegerField(unique=True, null=True)
+    name = models.CharField(max_length=255, null=True)
+    # club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name='club_representative')
 
     def __str__(self) -> str:
-        return self.club_name
+        return self.name
     
 class PaymentDetails(models.Model):
     card_name = models.CharField(max_length=255)
