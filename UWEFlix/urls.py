@@ -6,6 +6,7 @@ router = SimpleRouter()
 router.register('films', views.FilmViewSet)
 router.register('screens', views.ScreenViewSet)
 router.register('showings', views.ShowingViewSet)
+router.register('bookings', views.BookingViewSet)
 
 urlpatterns = [
     path("home/", views.home, name="home"),

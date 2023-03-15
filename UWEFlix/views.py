@@ -11,6 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import status, viewsets
 from .models import *
 from .serializers import *
+from decimal import Decimal
 
 print("username: admin password: LMicyb8=O\n")
 
@@ -88,6 +89,10 @@ class ScreenViewSet(ModelViewSet):
 class ShowingViewSet(ModelViewSet):
     queryset = Showing.objects.select_related('film', 'screen').all()
     serializer_class = ShowingSerializer
+    
+class BookingViewSet(ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
 
 
 @api_view(['GET','POST'])
@@ -108,19 +113,67 @@ def booking_request(request,id):
             serializer.save()
             
     elif request.method == 'POST':
-        serializer = BookingSerializer(data=request.data)
+        serializer = BookingSerializer(data=request.data)        
         if serializer.is_valid():
-            serializer.save()
             
+            # get reference
+            showing_ref = id
             # get ticket amount
-            ticket_amount = int(request.data.get('ticket_amount'))
+            tkt_student_amnt = int(request.data.get('student'))
+            tkt_adult_amnt = int(request.data.get('adult'))
+            tkt_child_amnt = int(request.data.get('child'))
             
-            # create amount of tickets
-            for tickets in range(ticket_amount):
-                tickets = Ticket.objects.create(ticket_type = 'A', ticket_price = '10', film = serializer.data['film'], screen = serializer.data['screen'], showing_time = serializer.data['showing_time'])
-                tickets.save()
-
+            global ticket_ref
+            # create amount of tickets          
+            if tkt_student_amnt != 0:
+                for tickets in range(tkt_student_amnt):
+                    tickets = Ticket.objects.create(
+                        ticket_showing_ref = showing_ref,
+                        ticket_type = 'Student',
+                        ticket_price = '10', 
+                        film = serializer.data['film'],
+                        screen = serializer.data['screen'],
+                        showing_time = serializer.data['showing_time'])
+                    tickets.save()
+                
+            if tkt_adult_amnt != 0:
+                for tickets in range(tkt_adult_amnt):
+                    tickets = Ticket.objects.create(
+                        ticket_showing_ref = showing_ref,
+                        ticket_type = 'Adult',
+                        ticket_price = '15', 
+                        film = serializer.data['film'],
+                        screen = serializer.data['screen'],
+                        showing_time = serializer.data['showing_time'])
+                    tickets.save()
+            
+            if tkt_child_amnt != 0:
+                for tickets in range(tkt_child_amnt):
+                    tickets = Ticket.objects.create(
+                        ticket_showing_ref = showing_ref,
+                        ticket_type = 'child',
+                        ticket_price = '5', 
+                        film = serializer.data['film'],
+                        screen = serializer.data['screen'],
+                        showing_time = serializer.data['showing_time'])
+                    tickets.save()        
+            
+            total_ticket_price = Decimal((tkt_student_amnt * 10)+(tkt_adult_amnt * 15)+(tkt_child_amnt * 5))
+            
+            b = Booking.objects.create(
+                showing_ref = showing_ref,
+                film = request.data.get('film'),
+                screen = request.data.get('screen'),
+                showing_time = request.data.get('showing_time'),
+                student = tkt_student_amnt,
+                adult = tkt_adult_amnt,
+                child = tkt_child_amnt,
+                total_price = total_ticket_price
+                )            
+            b.save()
+            
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     elif request.method == 'DELETE':
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -28,7 +28,7 @@ class ShowingSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['pk','film','screen','showing_time','ticket_amount']
-        
+        fields = ['pk','film','screen','showing_time','student','adult','child']
+
         
         

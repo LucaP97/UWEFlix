@@ -1,5 +1,28 @@
 # UWEFlix
 **********************************************************************************
+test booking inputs:
+
+{
+    "film": "spiderman",
+    "screen": "1",
+    "showing_time": "2023-03-29 12:00:00+00:00",
+    "student": 0,
+    "adult": 0,
+    "child": 0
+}
+
+
+{
+    "film": "spiderman",
+    "screen": "1",
+    "showing_time": "2023-03-10 12:34:56+00:00",
+    "student": 0,
+    "adult": 0,
+    "child": 0
+}
+
+
+**********************************************************************************
 
 added booking logic - can now input amount of tickts wanted
 
