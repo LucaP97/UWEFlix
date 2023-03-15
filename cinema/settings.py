@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'djoser',
     'debug_toolbar',
@@ -151,3 +152,9 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'authenticate.User'
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'authenticate.serializers.UserCreateSerializer'
+    }
+}

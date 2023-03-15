@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+import random
 
 # # Create your models here.
 # class CinemaManager(models.Model): # this will extend the User class
@@ -7,7 +8,11 @@ from django.db import models
 
 class ClubRepresentative(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    club_representative_number = models.IntegerField(unique=True)
+    name = models.CharField(max_length=255, null=True)
+    password = models.CharField(max_length=255, unique=True)
 
+    
 class Address(models.Model):
     street_number = models.CharField(max_length=50)
     street = models.CharField(max_length=255)

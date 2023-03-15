@@ -50,6 +50,11 @@ class CinemaManager(models.Model): # this will extend the User class
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
 
+class customer(models.Model):
+    cardholder_name = models.CharField(max_length=255)
+    card_number = models.CharField(max_length=255)
+    expiry_date = models.DateField()
+
 class Film(models.Model):
     title = models.CharField(max_length=255, unique=True)
     age_rating = models.SmallIntegerField()
@@ -69,7 +74,8 @@ class Screen(models.Model):
 class Showing(models.Model):
     screen = models.OneToOneField(Screen, on_delete=models.PROTECT, related_name='screen')
     film = models.ForeignKey(Film, on_delete=models.PROTECT, related_name='showing')
-    showing_time = models.DateTimeField(auto_now=False)
+    showing_date = models.DateField(auto_now_add=False, null=True)
+    showing_time = models.TimeField(auto_now_add=False)
     tickets_sold = models.SmallIntegerField(default=0)
 
 class Ticket(models.Model):

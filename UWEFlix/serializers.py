@@ -17,9 +17,6 @@ class ScreenSerializer(serializers.ModelSerializer):
 class ShowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Showing
-        fields = ['screen', 'film', 'showing_time']
+        fields = ['screen', 'film', 'showing_date', 'showing_time']
 
-    showing_time = serializers.SerializerMethodField(method_name='showing_time_conversion')
-
-    def showing_time_conversion(self, showing: Showing):
-        return dateformat.format(showing.showing_time, 'jS F Y h:i:s A')
+   
