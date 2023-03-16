@@ -28,12 +28,10 @@ class Club(models.Model):
 class ClubRepresentative(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date_of_birth = models.DateField(null=True, blank=True)
-    club_representative_number = models.IntegerField(unique=True, null=True)
-    name = models.CharField(max_length=255, null=True)
-    # club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name='club_representative')
+    club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name='club_representative')
 
     def __str__(self) -> str:
-        return self.name
+        return self.user.first_name
     
 class PaymentDetails(models.Model):
     card_name = models.CharField(max_length=255)
