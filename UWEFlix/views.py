@@ -97,7 +97,6 @@ class BookingViewSet(ModelViewSet):
 
 @api_view(['GET','POST'])
 def booking_request(request,id):
-    
     try:
         booking = Showing.objects.get(pk=id)
     except Showing.DoesNotExist:
@@ -118,45 +117,56 @@ def booking_request(request,id):
             
             # get reference
             showing_ref = id
+            
+            age_rating = booking.film
+            
             # get ticket amount
             tkt_student_amnt = int(request.data.get('student'))
             tkt_adult_amnt = int(request.data.get('adult'))
             tkt_child_amnt = int(request.data.get('child'))
             
-            global ticket_ref
+            
+            # need to check if film is age appropriate for children
+            if (str(age_rating.age_rating) == '18') and (tkt_child_amnt > 0):
+                return Response({'error': 'This film is not age appropriate for children.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            
+            
             # create amount of tickets          
             if tkt_student_amnt != 0:
                 for tickets in range(tkt_student_amnt):
                     tickets = Ticket.objects.create(
-                        ticket_showing_ref = showing_ref,
-                        ticket_type = 'Student',
-                        ticket_price = '10', 
+                        showing = booking,
+                        ticket_type = 'S',
+                        ticket_price = 'S', 
                         film = serializer.data['film'],
                         screen = serializer.data['screen'],
                         showing_time = serializer.data['showing_time'])
+                    # tickets.showing = booking
                     tickets.save()
                 
             if tkt_adult_amnt != 0:
                 for tickets in range(tkt_adult_amnt):
                     tickets = Ticket.objects.create(
-                        ticket_showing_ref = showing_ref,
-                        ticket_type = 'Adult',
-                        ticket_price = '15', 
+                        showing = booking,
+                        ticket_type = 'A',
+                        ticket_price = 'A', 
                         film = serializer.data['film'],
                         screen = serializer.data['screen'],
                         showing_time = serializer.data['showing_time'])
+                    # tickets.showing = booking
                     tickets.save()
             
             if tkt_child_amnt != 0:
                 for tickets in range(tkt_child_amnt):
                     tickets = Ticket.objects.create(
-                        ticket_showing_ref = showing_ref,
-                        ticket_type = 'child',
-                        ticket_price = '5', 
+                        showing = booking,
+                        ticket_type = 'C',
+                        ticket_price = 'C', 
                         film = serializer.data['film'],
                         screen = serializer.data['screen'],
-                        showing_time = serializer.data['showing_time'])
-                    tickets.save()        
+                        showing_time = serializer.data['showing_time'])      
+                    # tickets.showing = booking
+                    tickets.save()
             
             total_ticket_price = Decimal((tkt_student_amnt * 10)+(tkt_adult_amnt * 15)+(tkt_child_amnt * 5))
             
