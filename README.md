@@ -1,5 +1,16 @@
 # UWEFlix
 **********************************************************************************
+in models.py:
+
+ticket type and price are now back to choices fields
+    
+showing has been changed from "OneToOneField" to "ForeignKey" as OneToOne does not allow for multiple tickets to have the same showing object whilst ForeignKey         does as it is a "one to many" type of relationship
+
+in views.py:
+
+No child tickets will be made if booking for an 18 movie - an error message will show if an attempt is made
+
+**********************************************************************************
 test booking inputs:
 
 {
