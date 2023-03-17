@@ -25,6 +25,9 @@ class Club(models.Model):
     address = models.OneToOneField(Address, on_delete=models.PROTECT, related_name='club')
     contact_details = models.OneToOneField(ContactDetails, on_delete=models.PROTECT, related_name='club')
 
+    def __str__(self) -> str:
+        return self.name
+
 class ClubRepresentative(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -33,13 +36,15 @@ class ClubRepresentative(models.Model):
     def __str__(self) -> str:
         return self.user.first_name
     
-class PaymentDetails(models.Model):
+class PaymmentDetails(models.Model):
     card_name = models.CharField(max_length=255)
     card_number = models.CharField(max_length=255)
     expiry_date = models.DateField()
+    
 
 class Account(models.Model):
-    club = models.OneToOneField(Club, on_delete=models.PROTECT)
-    payment_details = models.ForeignKey(PaymentDetails, on_delete=models.CASCADE)
-    account_title = models.CharField(max_length=255, primary_key=True)
-    discount_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name="account")
+    # should be either surname and initial of employee (which employee?), or club name
+    account_title = models.CharField(max_length=255)
+    payment_details = models.OneToOneField(PaymmentDetails, on_delete=models.CASCADE)
+    discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)

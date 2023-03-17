@@ -5,6 +5,7 @@ from . import views
 router = DefaultRouter()
 router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
+router.register('account', views.AccountViewSet)
 # router.register('films', views.FilmViewSet)
 # router.register('screens', views.ScreenViewSet)
 # router.register('showings', views.ShowingViewSet)

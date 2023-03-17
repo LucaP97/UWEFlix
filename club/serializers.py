@@ -2,23 +2,10 @@ from django.apps import apps
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.response import Response
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import *
 import random
-
-# def generate_random_number():
-#     while True:
-#         random_number = random.randint(100000, 999999)
-#         user_model = apps.get_model('authenticate', 'User')
-#         if not ClubRepresentative.objects.filter(club_representative_number=random_number).exists():
-#             return random_number
-
-# def generate_password():
-#     while True:
-#         password = get_random_string(length=12)
-#         if not ClubRepresentative.objects.filter(club_representative_number=random_number).exists():
-#             return random_number
-        
         
             
 class ClubRepresentativeSerializer(serializers.ModelSerializer): 
@@ -30,7 +17,7 @@ class ClubRepresentativeSerializer(serializers.ModelSerializer):
     # username_string = random.randint(100000, 999999)
     class Meta:
         model = ClubRepresentative
-        fields = ['id', 'date_of_birth', 'first_name', 'last_name', 'email']
+        fields = ['id', 'date_of_birth', 'first_name', 'last_name', 'email', 'club']
 
     def create(self, validated_data):
         username_string = random.randint(100000, 999999)
@@ -52,17 +39,9 @@ class ClubRepresentativeSerializer(serializers.ModelSerializer):
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
-        club_representative = ClubRepresentative.objects.create(user=user, **validated_data)
+        # club_representative = ClubRepresentative.objects.create(user=user, **validated_data)
 
-        return {
-            'user': {
-                'username': user.username,
-                'password': password_string
-            },
-            'club_representative': {
-                'date of birth': club_representative.date_of_birth
-            }
-        }
+        return ClubRepresentative.objects.create(user=user, **validated_data)
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,6 +53,7 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
         model = ContactDetails
         fields = ['landline_number', 'mobile_number', 'club_email']
 
+# this needs to be redone, club serializer should be separate
 class ClubSerializer(serializers.ModelSerializer):
     address = AddressSerializer()
     contact_details = ContactDetailsSerializer()
@@ -89,3 +69,21 @@ class ClubSerializer(serializers.ModelSerializer):
         contact_details = ContactDetails.objects.create(**contact_details_data)
         club = Club.objects.create(address=address, contact_details=contact_details, **validated_data)
         return club
+    
+######## accounts ########
+
+class PaymentDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymmentDetails
+        fields = ['card_name', 'card_number', 'expiry_date']
+
+class AccountSerializer(serializers.ModelSerializer):
+    payment_details = PaymentDetailsSerializer()
+    class Meta:
+        model = Account
+        fields = ['club', 'account_title', 'account_title', 'discount_rate', 'payment_details']
+
+    def create(self, validated_data):
+        payment_details_data = validated_data.pop('payment_details')
+        payment_details = PaymmentDetails.objects.create(**payment_details_data)
+        return Account.objects.create(payment_details=payment_details, **validated_data)
