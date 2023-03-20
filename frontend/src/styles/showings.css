@@ -1,0 +1,18 @@
+.showing-card {
+    margin-bottom: 20px;
+  }
+
+  .showing-card-header {
+    background-color: #343a40;
+    color: #fff;
+  }
+
+  .showing-card-header h4 {
+    margin-bottom: 0;
+  }
+
+  img {
+      margin-bottom: 10px;
+      width:382px;
+      height: 566px;
+  }
