@@ -4,7 +4,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -94,3 +95,31 @@ class ShowingViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ShowingFilter
     search_fields = ['film__title']
+
+# class TicketViewSet(ModelViewSet):
+#     queryset = Ticket.objects.all()
+#     serializer_class = TicketSerializer
+
+
+#### booking ####
+ 
+class BookingViewSet(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    queryset = Booking.objects.prefetch_related('items__showing').all()
+    serializer_class = BookingSerializer
+
+
+class BookingItemViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddBookingItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateBookingItemSerializer
+        return BookingItemSerializer
+    
+    def get_serializer_context(self):
+        return {'booking_id': self.kwargs['booking_pk']}
+
+    def get_queryset(self):
+        return BookingItem.objects.filter(booking__id=self.kwargs['booking_pk'])

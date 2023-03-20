@@ -29,6 +29,14 @@ class AccountViewSet(ModelViewSet):
     serializer_class = AccountSerializer
 
 
+class StatementsViewSet(ModelViewSet):
+    queryset = Statements.objects.all()
+    serializer_class = StatementSerializer
+
+    def get_serializer_context(self):
+        return {'account_id': self.kwargs['account_pk']}
+
+
     
 
 

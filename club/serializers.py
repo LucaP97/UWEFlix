@@ -79,6 +79,7 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     payment_details = PaymentDetailsSerializer()
+    account_title = serializers.CharField(read_only=True)
     class Meta:
         model = Account
         fields = ['club', 'account_title', 'account_title', 'discount_rate', 'payment_details']
@@ -87,3 +88,13 @@ class AccountSerializer(serializers.ModelSerializer):
         payment_details_data = validated_data.pop('payment_details')
         payment_details = PaymmentDetails.objects.create(**payment_details_data)
         return Account.objects.create(payment_details=payment_details, **validated_data)
+    
+class StatementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Statements
+        fields = ['amount_due']
+
+    def create(self, validated_data):
+        account_id = self.context['account_id']
+        return Statements.objects.create(account_id=account_id, **validated_data)
+        # return super().create(validated_data)
