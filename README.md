@@ -15,4 +15,7 @@ username: admin
 password: LMicyb8=O
 
 
+Link to Trello: https://trello.com/b/J8gx00a2/sprints
+
+
 Link to Jira: https://uweflixgroup3.atlassian.net/jira/software/projects/UW/boards/1/backlog
