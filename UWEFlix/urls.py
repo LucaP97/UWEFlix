@@ -4,6 +4,7 @@ from rest_framework_nested import routers
 from . import views
 
 router = routers.DefaultRouter()
+router.register('customer', views.CustomerViewSet)
 router.register('films', views.FilmViewSet)
 router.register('screens', views.ScreenViewSet)
 router.register('showings', views.ShowingViewSet)

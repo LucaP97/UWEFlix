@@ -27,12 +27,16 @@ class CinemaManager(models.Model): # this will extend the User class
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
 
-class customer(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    birth_date = models.DateField(null=True, blank=True)
+
+class CardDetails(models.Model):
     cardholder_name = models.CharField(max_length=255)
     card_number = models.CharField(max_length=255)
     expiry_date = models.DateField()
+
+class Customer(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    birth_date = models.DateField(null=True, blank=True)
+    card_details = models.ForeignKey(CardDetails, on_delete=models.CASCADE, related_name='customer', null=True)
 
 
 # Uweflix items

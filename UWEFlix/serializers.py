@@ -1,6 +1,41 @@
 from django.utils import dateformat
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import *
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user = BaseUserCreateSerializer()
+    # first_name = serializers.CharField(max_length=255)
+    # last_name = serializers.CharField(max_length=255)
+    # username = serializers.CharField(max_length=255)
+    # email = serializers.CharField(max_length=255)
+    # password = serializers.CharField(max_length=128)
+
+    # def create(self, validated_data):
+    #     first_name = validated_data.pop('first_name')
+    #     last_name = validated_data.pop('last_name')
+    #     username = validated_data.pop('username')
+    #     password = validated_data.pop('password')
+    #     email = validated_data.pop('email')
+
+    #     user_data = {
+    #         'first_name': first_name,
+    #         'last_name': last_name,
+    #         'username': username,
+    #         'password': password,
+    #         'email': email
+    #     }
+
+    #     user_serializer = BaseUserCreateSerializer(data=user_data)
+    #     user_serializer.is_valid(raise_exception=True)
+    #     user = user_serializer.save()
+
+    #     return Customer.objects.create(user=user, **validated_data)
+
+    class Meta: 
+        model = Customer
+        fields = ['id', 'user', 'birth_date']
 
 class FilmSerializer(serializers.ModelSerializer):
     class Meta:
@@ -115,7 +150,7 @@ class UpdateBookingItemSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    items = BookingItemSerializer(many=True, required=False)
+    items = BookingItemSerializer(many=True, required=False, read_only=True)
     total_price = serializers.SerializerMethodField()
 
     def get_total_price(self, booking):
