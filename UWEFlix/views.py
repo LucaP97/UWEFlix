@@ -14,6 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
 from .serializers import *
 from .filters import *
+from .permissions import *
 
 def home(request):
     
@@ -118,9 +119,18 @@ class ShowingViewSet(ModelViewSet):
     queryset = Showing.objects.select_related('film', 'screen').all()
     serializer_class = ShowingSerializer
 
+    #### the 'get_serializer_class' is wrong, need to think how to implement <<<<<<
+    # def get_serializer_class(self):
+    #     if self.request.method == 'GET':
+    #         return SimpleFilmSerializer
+    #     else:
+    #         return FilmSerializer
+        
+
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ShowingFilter
     search_fields = ['film__title']
+    permission_classes = [IsAdminOrReadOnly]
 
 # class TicketViewSet(ModelViewSet):
 #     queryset = Ticket.objects.all()

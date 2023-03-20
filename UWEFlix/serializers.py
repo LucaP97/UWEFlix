@@ -37,10 +37,17 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = ['id', 'user', 'birth_date']
 
+
 class FilmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Film
         fields = ['title', 'age_rating', 'duration', 'short_trailer_description']
+
+
+class SimpleFilmSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Film
+        fields = ['title']
 
 
 class ScreenSerializer(serializers.ModelSerializer):
@@ -59,7 +66,8 @@ class ShowingSerializer(serializers.ModelSerializer):
     # film = FilmSerializer()
     class Meta:
         model = Showing
-        fields = ['screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
+
 
     
 

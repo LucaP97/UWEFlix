@@ -11,7 +11,7 @@ from uuid import uuid4
 
 ## users
 class CinemaManager(models.Model): # this will extend the User class
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cinema_manager')
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
