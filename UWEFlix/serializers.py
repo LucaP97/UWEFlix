@@ -1,4 +1,5 @@
 from django.utils import dateformat
+from django.db import transaction
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import *
@@ -6,32 +7,7 @@ from .models import *
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = BaseUserCreateSerializer()
-    # first_name = serializers.CharField(max_length=255)
-    # last_name = serializers.CharField(max_length=255)
-    # username = serializers.CharField(max_length=255)
-    # email = serializers.CharField(max_length=255)
-    # password = serializers.CharField(max_length=128)
 
-    # def create(self, validated_data):
-    #     first_name = validated_data.pop('first_name')
-    #     last_name = validated_data.pop('last_name')
-    #     username = validated_data.pop('username')
-    #     password = validated_data.pop('password')
-    #     email = validated_data.pop('email')
-
-    #     user_data = {
-    #         'first_name': first_name,
-    #         'last_name': last_name,
-    #         'username': username,
-    #         'password': password,
-    #         'email': email
-    #     }
-
-    #     user_serializer = BaseUserCreateSerializer(data=user_data)
-    #     user_serializer.is_valid(raise_exception=True)
-    #     user = user_serializer.save()
-
-    #     return Customer.objects.create(user=user, **validated_data)
 
     class Meta: 
         model = Customer
@@ -167,3 +143,60 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['id', 'items', 'total_price']
+
+
+### orders
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    showing = ShowingSerializer()
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'showing', 'ticket_type', 'quantity']
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+
+
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['payment_status']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    with transaction.atomic():
+        booking_id = serializers.UUIDField()
+
+        def validate_booking_id(self, booking_id):
+            if not Booking.objects.filter(pk=booking_id).exists():
+                raise serializers.ValidationError('No booking with the given ID was found.')
+            if BookingItem.objects.filter(booking_id=booking_id).count() == 0:
+                raise serializers.ValidationError('The booking is empty.')
+            return booking_id
+
+        def save(self, **kwargs):
+            booking_id = self.validated_data['booking_id']
+
+            (customer, created) = Customer.objects.get_or_create(user_id=self.context['user_id'])
+            order = Order.objects.create(customer=customer)
+
+            # this is currently a queryset, we want to turn it into a collection via a list comprehension
+            booking_items = BookingItem.objects.select_related('showing').filter(booking_id=self.validated_data['booking_id'])
+            order_items = [
+                OrderItem(
+                    order=order,
+                    showing=item.showing,
+                    ticket_type=item.ticket_type,
+                    # price is required here
+                    quantity=item.quantity
+                ) for item in booking_items
+            ]
+
+            OrderItem.objects.bulk_create(order_items)
+
+            Booking.objects.filter(pk=booking_id).delete()
+
+            return order
