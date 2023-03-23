@@ -2,6 +2,7 @@ from django.utils import dateformat
 from django.db import transaction
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from .signals import order_created
 from .models import *
 
 
@@ -80,6 +81,7 @@ class BookingItemSerializer(serializers.ModelSerializer):
         elif booking_item.ticket_type == 'C':
             return booking_item.quantity * booking_item.showing.child_price
         else:
+            # this should return raise exception
             return None
     
     class Meta:
