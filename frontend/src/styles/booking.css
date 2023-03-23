@@ -1,0 +1,56 @@
+.film-container {
+    width: 94vw;
+    height: 62vh;
+    padding: 3vw;
+    margin: 3vw;
+    background-color: aliceblue;
+    border-radius: 12px;
+
+}
+
+.booking-container {
+    width: 94vw;
+    height: 14%;
+    padding: 3vw;
+    margin: 3vw;
+    background-color: aliceblue;
+    border-radius: 12px;
+
+}
+
+.image-booking {
+    margin-bottom: 12px;
+    max-width: 30vw; 
+    max-height: 100%; 
+    border-radius: 10px;
+    float: left;
+}
+
+.film-details {
+    max-width: max-content;
+    float: left;
+    padding-left: 2vw;
+    inline-size: 62%; 
+  
+}
+
+.title {
+    font-size: 34px;
+}
+
+p{
+    font-size: 19px;
+}
+
+.age-rating {
+    color: white;
+    background-color: rgb(13, 110, 253);
+    font-size: 18px;
+    padding: 5px;
+    padding-right: 7px;
+    border-radius: 6px;
+    padding-top: 1px;
+    padding-bottom: 2px;
+    margin-right: 6px;
+    
+}

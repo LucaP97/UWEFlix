@@ -24,7 +24,7 @@ class ShowingSerializer(serializers.ModelSerializer):
     # film = FilmSerializer()
     class Meta:
         model = Showing
-        fields = ['screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
 
     
 
