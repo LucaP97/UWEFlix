@@ -11,7 +11,7 @@ from uuid import uuid4
 
 ## users
 class CinemaManager(models.Model): # this will extend the User class
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cinema_manager')
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
@@ -27,12 +27,18 @@ class CinemaManager(models.Model): # this will extend the User class
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
 
-class customer(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    birth_date = models.DateField(null=True, blank=True)
+
+class CardDetails(models.Model):
     cardholder_name = models.CharField(max_length=255)
     card_number = models.CharField(max_length=255)
     expiry_date = models.DateField()
+
+class Customer(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    birth_date = models.DateField(null=True, blank=True)
+    card_details = models.ForeignKey(CardDetails, on_delete=models.CASCADE, related_name='customer', null=True)
+
+
 
 
 # Uweflix items
@@ -81,6 +87,34 @@ class Ticket(models.Model):
 
 
 ### abstract objects
+
+class Order(models.Model):
+    PAYMENT_STATUS_PENDING = 'P'
+    PAYMENT_STATUS_COMPLETE = 'C'
+    PAYMENT_STATUS_FAILED = 'F'
+    PAYMENT_STATUS_CHOICES = [
+        (PAYMENT_STATUS_PENDING, 'Pending'),
+        (PAYMENT_STATUS_COMPLETE, 'Complete'),
+        (PAYMENT_STATUS_FAILED, 'Failed')
+    ]
+
+    placed_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+
+    # class Meta:
+    #     permissions = [
+    #         ('cancel_order', 'Can cancel order')
+    #     ]
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
+    showing = models.ForeignKey(Showing, on_delete=models.PROTECT, related_name='orderitems')
+    ticket_type = models.CharField(max_length=255)
+    quantity = models.PositiveSmallIntegerField()
+
+
 
 class Booking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)

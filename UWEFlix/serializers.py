@@ -1,11 +1,30 @@
 from django.utils import dateformat
+from django.db import transaction
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from .signals import order_created
 from .models import *
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user = BaseUserCreateSerializer()
+
+
+    class Meta: 
+        model = Customer
+        fields = ['id', 'user', 'birth_date']
+
 
 class FilmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Film
         fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri']
+
+
+class SimpleFilmSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Film
+        fields = ['title']
 
 
 class ScreenSerializer(serializers.ModelSerializer):
@@ -25,6 +44,10 @@ class ShowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Showing
         fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3ef3a5b5990ee021a43aa45dcfbb26039ba0c1a1
 
     
 
@@ -61,6 +84,7 @@ class BookingItemSerializer(serializers.ModelSerializer):
         elif booking_item.ticket_type == 'C':
             return booking_item.quantity * booking_item.showing.child_price
         else:
+            # this should return raise exception
             return None
     
     class Meta:
@@ -115,7 +139,7 @@ class UpdateBookingItemSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    items = BookingItemSerializer(many=True, required=False)
+    items = BookingItemSerializer(many=True, required=False, read_only=True)
     total_price = serializers.SerializerMethodField()
 
     def get_total_price(self, booking):
@@ -124,3 +148,60 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['id', 'items', 'total_price']
+
+
+### orders
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    showing = ShowingSerializer()
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'showing', 'ticket_type', 'quantity']
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+
+
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['payment_status']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    with transaction.atomic():
+        booking_id = serializers.UUIDField()
+
+        def validate_booking_id(self, booking_id):
+            if not Booking.objects.filter(pk=booking_id).exists():
+                raise serializers.ValidationError('No booking with the given ID was found.')
+            if BookingItem.objects.filter(booking_id=booking_id).count() == 0:
+                raise serializers.ValidationError('The booking is empty.')
+            return booking_id
+
+        def save(self, **kwargs):
+            booking_id = self.validated_data['booking_id']
+
+            (customer, created) = Customer.objects.get_or_create(user_id=self.context['user_id'])
+            order = Order.objects.create(customer=customer)
+
+            # this is currently a queryset, we want to turn it into a collection via a list comprehension
+            booking_items = BookingItem.objects.select_related('showing').filter(booking_id=self.validated_data['booking_id'])
+            order_items = [
+                OrderItem(
+                    order=order,
+                    showing=item.showing,
+                    ticket_type=item.ticket_type,
+                    # price is required here
+                    quantity=item.quantity
+                ) for item in booking_items
+            ]
+
+            OrderItem.objects.bulk_create(order_items)
+
+            Booking.objects.filter(pk=booking_id).delete()
+
+            return order
