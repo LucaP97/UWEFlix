@@ -18,10 +18,10 @@ booking_router = routers.NestedDefaultRouter(router, 'booking', lookup='booking'
 booking_router.register('items', views.BookingItemViewSet, basename='booking-items')
 
 urlpatterns = [
-    path("home/", views.home, name="home"),
-    path("login/", views.login_user, name="login"),
-    path("register_user/", views.register, name="register_user"),
-    path("logout_user/", views.logout_user, name="logout_user"),
+    # path("home/", views.home, name="home"),
+    # path("login/", views.login_user, name="login"),
+    # path("register_user/", views.register, name="register_user"),
+    # path("logout_user/", views.logout_user, name="logout_user"),
     path('', include(router.urls)),
     path('', include(booking_router.urls)),
 ]

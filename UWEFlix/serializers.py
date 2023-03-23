@@ -18,7 +18,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 class FilmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Film
-        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri']
+        fields = ['title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri']
 
 
 class SimpleFilmSerializer(serializers.ModelSerializer):
@@ -38,16 +38,34 @@ class SimpleScreenSerializer(serializers.ModelSerializer):
         fields = ['screen_name']
 
 
+class PriceSerializer(serializers.ModelSerializer):
+    student = serializers.IntegerField()
+    adult = serializers.IntegerField()
+    child = serializers.IntegerField()
+    class Meta:
+        model = Price
+        fields = ['student', 'adult', 'child']
+
 class ShowingSerializer(serializers.ModelSerializer):
+    price = PriceSerializer()
     
-    # film = FilmSerializer()
+    def create(self, validated_data):
+        price_data = validated_data.pop('price')
+        price_serializer = PriceSerializer(data=price_data)
+        price_serializer.is_valid(raise_exception=True)
+        price = price_serializer.save()
+
+        showing = Showing.objects.create(price=price, **validated_data)
+        # Price.objects.create(showing=showing, **price_data)
+
+        return showing
+
     class Meta:
         model = Showing
-        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
-<<<<<<< HEAD
-=======
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price']
 
->>>>>>> 3ef3a5b5990ee021a43aa45dcfbb26039ba0c1a1
+    
+
 
     
 
@@ -78,11 +96,11 @@ class BookingItemSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, booking_item:BookingItem):
         if booking_item.ticket_type == 'S':
-            return booking_item.quantity * booking_item.showing.student_price
+            return booking_item.quantity * booking_item.showing.price.student
         elif booking_item.ticket_type == 'A':
-            return booking_item.quantity * booking_item.showing.adult_price
+            return booking_item.quantity * booking_item.showing.price.adult
         elif booking_item.ticket_type == 'C':
-            return booking_item.quantity * booking_item.showing.child_price
+            return booking_item.quantity * booking_item.showing.price.child
         else:
             # this should return raise exception
             return None
@@ -154,15 +172,31 @@ class BookingSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     showing = ShowingSerializer()
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, booking_item:BookingItem):
+        if booking_item.ticket_type == 'S':
+            return booking_item.quantity * booking_item.showing.price.student
+        elif booking_item.ticket_type == 'A':
+            return booking_item.quantity * booking_item.showing.price.adult
+        elif booking_item.ticket_type == 'C':
+            return booking_item.quantity * booking_item.showing.price.child
+        else:
+            # this should return raise exception
+            return None
     class Meta:
         model = OrderItem
-        fields = ['id', 'showing', 'ticket_type', 'quantity']
+        fields = ['id', 'showing', 'ticket_type', 'quantity', 'total_price']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, order):
+        return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items', 'total_price']
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
@@ -203,5 +237,7 @@ class CreateOrderSerializer(serializers.Serializer):
             OrderItem.objects.bulk_create(order_items)
 
             Booking.objects.filter(pk=booking_id).delete()
+
+            order_created.send_robust(self.__class__, order=order)
 
             return order

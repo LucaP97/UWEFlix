@@ -62,28 +62,34 @@ class Screen(models.Model):
 
 ### need to remove 'null=true' from showing date -> db needs to be restarted for this 
 
+class Price(models.Model):
+    child = models.DecimalField(max_digits=5, decimal_places=2, default=3)
+    student = models.DecimalField(max_digits=5, decimal_places=2, default=5)
+    adult = models.DecimalField(max_digits=5, decimal_places=2, default=7)
+
+
 class Showing(models.Model):
     screen = models.ForeignKey(Screen, on_delete=models.PROTECT, related_name='showing')
     film = models.ForeignKey(Film, on_delete=models.PROTECT, related_name='showing')
     showing_date = models.DateField(auto_now_add=False, null=True)
     showing_time = models.TimeField(auto_now_add=False)
     tickets_sold = models.SmallIntegerField(default=0)
-    child_price = models.DecimalField(max_digits=5, decimal_places=2, default=3)
-    student_price = models.DecimalField(max_digits=5, decimal_places=2, default=5)
-    adult_price = models.DecimalField(max_digits=5, decimal_places=2, default=7)
+    price = models.ForeignKey(Price, on_delete=models.CASCADE, related_name='showing')
+    
 
-class Ticket(models.Model):
-    TICKET_TYPE_STUDENT = 'S'
-    TICKET_TYPE_ADULT = 'A'
-    TICKET_TYPE_CHILD = 'C'
+# class Ticket(models.Model):
+#     TICKET_TYPE_STUDENT = 'S'
+#     TICKET_TYPE_ADULT = 'A'
+#     TICKET_TYPE_CHILD = 'C'
 
-    TICKET_TYPE_CHOICE = [
-        (TICKET_TYPE_STUDENT, 'Student'),
-        (TICKET_TYPE_ADULT, 'Adult'),
-        (TICKET_TYPE_CHILD, 'Child'),
-    ]
+#     TICKET_TYPE_CHOICE = [
+#         (TICKET_TYPE_STUDENT, 'Student'),
+#         (TICKET_TYPE_ADULT, 'Adult'),
+#         (TICKET_TYPE_CHILD, 'Child'),
+#     ]
 
-    ticket_type = models.CharField(max_length=1, choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
+#     ticket_type = models.CharField(max_length=1, choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
+
 
 
 ### abstract objects
