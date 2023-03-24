@@ -33,11 +33,13 @@ class CardDetails(models.Model):
     card_number = models.CharField(max_length=255)
     expiry_date = models.DateField()
 
-class Customer(models.Model):
+class Student(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     birth_date = models.DateField(null=True, blank=True)
     card_details = models.ForeignKey(CardDetails, on_delete=models.CASCADE, related_name='customer', null=True)
 
+class Customer(models.Model):
+    pass
 
 
 
