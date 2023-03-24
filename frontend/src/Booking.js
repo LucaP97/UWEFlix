@@ -26,11 +26,6 @@ function Booking() {
 	console.log(state);
 	const { showings, image, title, duration, age, description } = state;
 
-	//Ticket costs
-	const SPRICE = 8;
-	const APRICE = 12;
-	const CPRICE = 7;
-
 	const [studentTickets, setStudentTickets] = useState(0);
 	const [childTickets, setChildTickets] = useState(0);
 	const [adultTickets, setAdultTickets] = useState(0);

@@ -44,10 +44,6 @@ class ShowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Showing
         fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'child_price', 'student_price', 'adult_price']
-<<<<<<< HEAD
-=======
-
->>>>>>> 3ef3a5b5990ee021a43aa45dcfbb26039ba0c1a1
 
     
 
