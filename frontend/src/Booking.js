@@ -23,7 +23,6 @@ function ageRatingColor(age) {
 
 function Booking() {
 	const { state } = useLocation();
-	console.log(state);
 	const { showings, image, title, duration, age, description } = state;
 
 	const [studentTickets, setStudentTickets] = useState(0);
@@ -35,15 +34,16 @@ function Booking() {
 	const [showingID, setShowingID] = useState(0)
 
 	function calculatePrice() {
+		console.log(showings[0])
 		if (showingID == 0) {
 			const tempS = showings[0]
 			const cost =
-			studentTickets * tempS.student_price + adultTickets * tempS.adult_price + childTickets * tempS.child_price;
+			studentTickets * tempS.price.student + adultTickets * tempS.price.adult + childTickets * tempS.price.child;
 			return cost
 		} else {
 			const showingSelected = showings.find((showing) => showing.id == showingID)
 			const cost =
-			studentTickets * showingSelected.student_price + adultTickets * showingSelected.adult_price + childTickets * showingSelected.child_price;
+			studentTickets * showingSelected.price.student + adultTickets * showingSelected.price.adult + childTickets * showingSelected.price.child;
 			return cost
 		}
 	}
@@ -55,7 +55,6 @@ function Booking() {
 
 	return (
 		<div style={{ height: "88vh" }}>
-			{console.log(studentTickets)}
 			<div className="film-container">
 				<img
 					className="image-booking"
