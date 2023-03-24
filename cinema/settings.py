@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'UWEFlix',
     'authenticate',
     'club',
-    'corsheaders'
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
