@@ -234,7 +234,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items', 'total_price']
+        fields = ['id', 'student', 'placed_at', 'payment_status', 'items', 'total_price']
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
@@ -257,8 +257,8 @@ class CreateOrderSerializer(serializers.Serializer):
         def save(self, **kwargs):
             booking_id = self.validated_data['booking_id']
 
-            (customer, created) = Customer.objects.get_or_create(user_id=self.context['user_id'])
-            order = Order.objects.create(customer=customer)
+            (student, created) = Student.objects.get_or_create(user_id=self.context['user_id'])
+            order = Order.objects.create(student=student)
 
             # this is currently a queryset, we want to turn it into a collection via a list comprehension
             booking_items = BookingItem.objects.select_related('showing').filter(booking_id=self.validated_data['booking_id'])

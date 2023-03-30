@@ -196,8 +196,8 @@ class OrderViewSet(ModelViewSet):
         if user.is_staff:
             return Order.objects.all()
         
-        (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
-        return Order.objects.filter(customer_id=customer_id)
+        (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
+        return Order.objects.filter(student_id=student_id)
 
 
 class OrderItemViewSet(ModelViewSet):
