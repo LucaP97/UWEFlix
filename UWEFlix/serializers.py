@@ -1,4 +1,5 @@
 from django.utils import dateformat
+from django.contrib.auth.models import Group
 from django.db import transaction
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
@@ -6,13 +7,50 @@ from .signals import order_created
 from .models import *
 
 
-class CustomerSerializer(serializers.ModelSerializer):
-    user = BaseUserCreateSerializer()
+class UserCreateSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ['first_name', 'last_name', 'email', 'username', 'password']
 
+
+class StudentRegistrationSerializer(serializers.ModelSerializer):
+    user = UserCreateSerializer()
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_data['first_name'] = user_data.pop('first_name')
+        user_data['last_name'] = user_data.pop('last_name')
+        
+        user_serializer = UserCreateSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+
+        return Student.objects.create(user=user, **validated_data)
 
     class Meta: 
-        model = Customer
+        model = Student
         fields = ['id', 'user', 'birth_date']
+
+
+class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
+    user = UserCreateSerializer()
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_data['first_name'] = user_data.pop('first_name')
+        user_data['last_name'] = user_data.pop('last_name')
+
+        user_serializer = UserCreateSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+
+        group = Group.objects.get(name='Cinema Manager')
+        group.user_set.add(user)
+
+        return CinemaManager.objects.create(user=user, **validated_data)
+
+    class Meta():
+        model = CinemaManager
+        fields = ['id', 'user']
 
 
 class FilmSerializer(serializers.ModelSerializer):

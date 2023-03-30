@@ -7,41 +7,51 @@ from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import *
 import random
         
+
+class ClubRepresentativeUserSerializer(BaseUserCreateSerializer):
+    username = serializers.CharField(read_only=True)
+    password = serializers.CharField(write_only=True, default=get_random_string(length=12))
+
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ['first_name', 'last_name', 'email', 'username', 'password']
+
+    def save(self, **kwargs):
+        self.validated_data['username'] = str(random.randint(100000, 999999))
+        return super().save(**kwargs)
+    
             
 class ClubRepresentativeSerializer(serializers.ModelSerializer): 
-    # user_id = serializers.IntegerField()
-    first_name = serializers.CharField(max_length=255, write_only=True)
-    last_name = serializers.CharField(max_length=255, write_only=True)
-    email = serializers.CharField(max_length=255, write_only=True)
+    user = ClubRepresentativeUserSerializer()
 
-    # username_string = random.randint(100000, 999999)
     class Meta:
         model = ClubRepresentative
-        fields = ['id', 'date_of_birth', 'first_name', 'last_name', 'email', 'club']
+        fields = ['id', 'date_of_birth', 'user', 'club']
 
     def create(self, validated_data):
-        username_string = random.randint(100000, 999999)
-        password_string = get_random_string(length=12)
-        email = validated_data.pop('email')
-        # first_name = validated_data.pop('first_name')
-        first_name = validated_data.pop('first_name')
-        last_name = validated_data.pop('last_name')
+        user_data = validated_data.pop('user')
+        user_data['username'] = str(random.randint(100000, 999999))
+        generated_password = get_random_string(length=12)
+        user_data['password'] = generated_password
 
-        user_data = {
-            'username': username_string,
-            'email': email,
-            'password': password_string,
-            'first_name': first_name,
-            'last_name': last_name
-        }
+        user_serializer = ClubRepresentativeUserSerializer(data=user_data)
+        # user_serializer.is_valid(raise_exception=True)
 
-        user_serializer = BaseUserCreateSerializer(data=user_data)
-        user_serializer.is_valid(raise_exception=True)
+        if not user_serializer.is_valid():
+            print("user serializer errors: ", user_serializer.errors)
+            raise serializers.ValidationError(user_serializer.errors)
+
         user = user_serializer.save()
 
-        # club_representative = ClubRepresentative.objects.create(user=user, **validated_data)
+        club_representative = ClubRepresentative.objects.create(user=user, **validated_data)
+        club_representative.__dict__['generated_password'] = generated_password
 
-        return ClubRepresentative.objects.create(user=user, **validated_data)
+        return club_representative
+    
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['user']['password'] = instance.__dict__.get('generated_password')
+        return ret
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
