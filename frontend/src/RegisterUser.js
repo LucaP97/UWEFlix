@@ -11,7 +11,6 @@ const RegisterUser = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(`Submitted: ${username}, ${email}, ${password}, ${firstName}, ${lastName}`);
     
     //submit to server
     const response = await registerUser(

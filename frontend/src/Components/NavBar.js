@@ -39,7 +39,7 @@ function NavBar() {
         {/* Change login to logout if user is logged in */}
         <ul className="navbar-nav">
             <li className="nav-item">
-              <a className="nav-link" href="#" style={{fontWeight: 'bold'}}>Login</a>
+              <a className="nav-link" href="/login" style={{fontWeight: 'bold'}}>Login</a>
             </li>
             <ul className="navbar-nav">
             <li className="nav-item">

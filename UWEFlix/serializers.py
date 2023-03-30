@@ -56,7 +56,7 @@ class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
 class FilmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Film
-        fields = ['title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri']
+        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri']
 
 
 class SimpleFilmSerializer(serializers.ModelSerializer):
