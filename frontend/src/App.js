@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Showings from './Showings'
 import Booking from './Booking'
 import RegisterUser from './RegisterUser';
+import LoginUser from './LoginUser';
 import NavBar from './Components/NavBar';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Routes>
           <Route path="/"/>
             <Route path="/register" element={<RegisterUser />}/>
+            <Route path="/login" element={<LoginUser />}/>
             <Route path="/showings" element={<Showings />}/>
             <Route path="/showings/booking" element={<Booking />}/>
           </Routes>
