@@ -7,7 +7,7 @@ from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import *
 import random
         
-
+ 
 class ClubRepresentativeUserSerializer(BaseUserCreateSerializer):
     username = serializers.CharField(read_only=True)
     password = serializers.CharField(write_only=True, default=get_random_string(length=12))
@@ -65,12 +65,13 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 # this needs to be redone, club serializer should be separate
 class ClubSerializer(serializers.ModelSerializer):
+    # this should be CreateClubSerializer
     address = AddressSerializer()
     contact_details = ContactDetailsSerializer()
 
     class Meta:
         model = Club
-        fields = ['name', 'address', 'contact_details']
+        fields = ['name', 'address', 'contact_details', 'club_number']
 
     def create(self, validated_data):
         address_data = validated_data.pop('address')
@@ -90,13 +91,18 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
 class AccountSerializer(serializers.ModelSerializer):
     payment_details = PaymentDetailsSerializer()
     account_title = serializers.CharField(read_only=True)
+    account_number = serializers.CharField(read_only=True)
     class Meta:
         model = Account
-        fields = ['club', 'account_title', 'account_title', 'discount_rate', 'payment_details']
+        fields = ['id', 'club', 'account_number', 'account_title', 'account_title', 'discount_rate', 'payment_details']
 
     def create(self, validated_data):
         payment_details_data = validated_data.pop('payment_details')
         payment_details = PaymmentDetails.objects.create(**payment_details_data)
+
+        validated_data['account_title'] = validated_data['club'].name
+        validated_data['account_number'] = str(random.randint(100000, 999999))
+
         return Account.objects.create(payment_details=payment_details, **validated_data)
     
 class StatementSerializer(serializers.ModelSerializer):

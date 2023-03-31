@@ -25,6 +25,7 @@ class Club(models.Model):
     name = models.CharField(max_length=255)
     address = models.OneToOneField(Address, on_delete=models.PROTECT, related_name='club')
     contact_details = models.OneToOneField(ContactDetails, on_delete=models.PROTECT, related_name='club')
+    club_number = models.SmallIntegerField()
 
     def __str__(self) -> str:
         return self.name
@@ -50,6 +51,7 @@ class Account(models.Model):
     account_title = models.CharField(max_length=255)
     payment_details = models.OneToOneField(PaymmentDetails, on_delete=models.CASCADE)
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    account_number = models.CharField(max_length=2)
 
     def __str__ (self) -> str:
         return self.account_title
