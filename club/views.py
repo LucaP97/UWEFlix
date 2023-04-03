@@ -8,6 +8,14 @@ from rest_framework import status
 from .models import *
 from .serializers import *
 import random
+from .tasks import *
+
+
+### celery tasks
+
+def say_hello(request):
+    create_statements().delay()
+
 
 # Create your views here.
 class ClubRepresentativeViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):

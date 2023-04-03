@@ -165,3 +165,5 @@ DJOSER = {
         'current_user': 'authenticate.serializers.UserSerializer',
     }
 }
+
+CELERY_BROKER_URL = 'redis://localhost:6379/1'
