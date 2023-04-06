@@ -9,9 +9,10 @@ router = routers.DefaultRouter()
 router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
 router.register('accounts', views.AccountViewSet)
+router.register('booking-item', views.BookingItemViewSet)
 
-accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
-accounts_router.register('statements', views.StatementsViewSet, basename='account-statement')
+# accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
+# accounts_router.register('statements', views.StatementsViewSet, basename='account-statement')
 
 
 urlpatterns = [
@@ -20,5 +21,5 @@ urlpatterns = [
 #     path("register_user/", views.register, name="register_user"),
 #     path("logout_user/", views.logout_user, name="logout_user"),
     path('', include(router.urls)),
-    path('', include(accounts_router.urls)),
+    # path('', include(accounts_router.urls)),
 ]

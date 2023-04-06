@@ -1,13 +1,14 @@
 from django.apps import apps
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from rest_framework.response import Response
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import *
 import random
         
- 
+# user serializer
 class ClubRepresentativeUserSerializer(BaseUserCreateSerializer):
     username = serializers.CharField(read_only=True)
     password = serializers.CharField(write_only=True, default=get_random_string(length=12))
@@ -19,13 +20,13 @@ class ClubRepresentativeUserSerializer(BaseUserCreateSerializer):
         self.validated_data['username'] = str(random.randint(100000, 999999))
         return super().save(**kwargs)
     
-            
+# profile serializer
 class ClubRepresentativeSerializer(serializers.ModelSerializer): 
     user = ClubRepresentativeUserSerializer()
 
     class Meta:
         model = ClubRepresentative
-        fields = ['id', 'date_of_birth', 'user', 'club']
+        fields = ['id', 'user_id', 'date_of_birth', 'user', 'club']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -105,12 +106,51 @@ class AccountSerializer(serializers.ModelSerializer):
 
         return Account.objects.create(payment_details=payment_details, **validated_data)
     
-class StatementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Statements
-        fields = ['amount_due']
 
-    def create(self, validated_data):
-        account_id = self.context['account_id']
-        return Statements.objects.create(account_id=account_id, **validated_data)
-        # return super().create(validated_data)
+
+# class StatementSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Statements
+#         fields = ['amount_due']
+
+#     def create(self, validated_data):
+#         account_id = self.context['account_id']
+#         return Statements.objects.create(account_id=account_id, **validated_data)
+#         # return super().create(validated_data)
+
+
+
+#### booking ####
+
+class BookingItemSerializer(serializers.ModelSerializer):
+    
+    TICKET_TYPE_STUDENT = 'S'
+    TICKET_TYPE_ADULT = 'A'
+    TICKET_TYPE_CHILD = 'C'
+
+    TICKET_TYPE_CHOICE = [
+        (TICKET_TYPE_STUDENT, 'Student'),
+    ]
+
+    ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
+    total_price = serializers.SerializerMethodField()
+
+
+    available_showings = serializers.SerializerMethodField()
+
+    def get_avaolable_showings(self, obj):
+        showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='Showing')
+        showings = showing_content_type.model_class().objects.all()
+
+        showing_list = []
+        for showing in showings:
+            showing_list.append(showing.id)
+
+        return showing_list
+
+    class Meta:
+        model = BookingItem
+        # 'content_object',
+        fields = ['id', 'booking', 'ticket_type', 'total_price', 'content_type', 'object_id',  'quantity', 'available_showings']
+
+    

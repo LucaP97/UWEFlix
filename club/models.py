@@ -1,6 +1,9 @@
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 import random
+from uuid import uuid4
 
 # # Create your models here.
 # class CinemaManager(models.Model): # this will extend the User class
@@ -51,7 +54,7 @@ class Account(models.Model):
     account_title = models.CharField(max_length=255)
     payment_details = models.OneToOneField(PaymmentDetails, on_delete=models.CASCADE)
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    account_number = models.CharField(max_length=2)
+    account_number = models.CharField(max_length=2, unique=True)
 
     def __str__ (self) -> str:
         return self.account_title
@@ -63,3 +66,45 @@ class Statements(models.Model):
 class AccountManager(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # date = models.DateField(auto_now_add=True)
+
+
+class Order(models.Model):
+    PAYMENT_STATUS_PENDING = 'P'
+    PAYMENT_STATUS_COMPLETE = 'C'
+    PAYMENT_STATUS_FAILED = 'F'
+    PAYMENT_STATUS_CHOICES = [
+        (PAYMENT_STATUS_PENDING, 'Pending'),
+        (PAYMENT_STATUS_COMPLETE, 'Complete'),
+        (PAYMENT_STATUS_FAILED, 'Failed')
+    ]
+    placed_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES)
+    club = models.ForeignKey(Club, on_delete=models.PROTECT)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
+    # two attributes needed when using ContentType: Type (contentType), and ID
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+    ticket_type = models.CharField(max_length=255)
+    quantity = models.PositiveSmallIntegerField()
+
+
+class Booking(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class BookingItem(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='items')
+    ticket_type = models.CharField(max_length=1, default='S')
+    quantity = models.PositiveSmallIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+
+    class Meta:
+        unique_together = ('booking', 'ticket_type')
