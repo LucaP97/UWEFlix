@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from rest_framework.response import Response
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from generic_relations.relations import GenericRelatedField
 from .models import *
 import random
         
@@ -121,9 +122,11 @@ class AccountSerializer(serializers.ModelSerializer):
 
 ### Content Types ###
 
+Showing = ContentType.objects.get(app_label='UWEFlix', model='showing').model_class()
+
 class ShowingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ContentType.objects.get(app_label='UWEFlix', model='showing').model_class()
+        model = Showing
         fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price']
 
 
@@ -141,21 +144,25 @@ class BookingItemSerializer(serializers.ModelSerializer):
     ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT, read_only=True)
     # total_price = serializers.SerializerMethodField()
 
+    content_object  = GenericRelatedField({
+        ContentType.objects.get(app_label='UWEFlix', model='showing'): ShowingSerializer,
+    })
 
-    showings = serializers.SerializerMethodField()
 
-    def get_showings(self, obj):
-        showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
-        Showing = showing_content_type.model_class()
-        showings = Showing.objects.all()
+    # showings = serializers.SerializerMethodField()
 
-        return ShowingSerializer(showings, many=True).data
+    # def get_showings(self, obj):
+    #     showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
+    #     Showing = showing_content_type.model_class()
+    #     showings = Showing.objects.all()
+
+    #     return ShowingSerializer(showings, many=True).data
 
 
     class Meta:
         model = BookingItem
         # 'content_object',
-        fields = ['id', 'booking', 'ticket_type', 'quantity', 'showings']
+        fields = ['id', 'booking', 'ticket_type', 'quantity', 'content_object']
 
 
 class BookingSerialier(serializers.ModelSerializer):

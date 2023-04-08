@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'djoser',
+    'generic_relations',
     'debug_toolbar',
     'UWEFlix',
     'authenticate',
