@@ -61,11 +61,18 @@ class AccountViewSet(ModelViewSet):
 #     def get_serializer_context(self):
 #         return {'account_id': self.kwargs['account_pk']}
 
+
+### Booking ###
+
+class BookingViewSet(ModelViewSet):
+    queryset = Booking.objects.prefetch_related('items').all()
+    serializer_class = BookingSerialier
+
 class BookingItemViewSet(ModelViewSet):
     queryset = BookingItem.objects.all()
     serializer_class = BookingItemSerializer
 
 
-    
+
 
 

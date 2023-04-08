@@ -9,6 +9,7 @@ router = routers.DefaultRouter()
 router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
 router.register('accounts', views.AccountViewSet)
+router.register('booking', views.BookingViewSet)
 router.register('booking-item', views.BookingItemViewSet)
 
 # accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')

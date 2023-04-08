@@ -119,38 +119,50 @@ class AccountSerializer(serializers.ModelSerializer):
 #         # return super().create(validated_data)
 
 
+### Content Types ###
+
+class ShowingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentType.objects.get(app_label='UWEFlix', model='showing').model_class()
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price']
+
+
 
 #### booking ####
 
 class BookingItemSerializer(serializers.ModelSerializer):
     
     TICKET_TYPE_STUDENT = 'S'
-    TICKET_TYPE_ADULT = 'A'
-    TICKET_TYPE_CHILD = 'C'
 
     TICKET_TYPE_CHOICE = [
         (TICKET_TYPE_STUDENT, 'Student'),
     ]
 
-    ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
-    total_price = serializers.SerializerMethodField()
+    ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT, read_only=True)
+    # total_price = serializers.SerializerMethodField()
 
 
-    available_showings = serializers.SerializerMethodField()
+    showings = serializers.SerializerMethodField()
 
-    def get_avaolable_showings(self, obj):
-        showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='Showing')
-        showings = showing_content_type.model_class().objects.all()
+    def get_showings(self, obj):
+        showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
+        Showing = showing_content_type.model_class()
+        showings = Showing.objects.all()
 
-        showing_list = []
-        for showing in showings:
-            showing_list.append(showing.id)
+        return ShowingSerializer(showings, many=True).data
 
-        return showing_list
 
     class Meta:
         model = BookingItem
         # 'content_object',
-        fields = ['id', 'booking', 'ticket_type', 'total_price', 'content_type', 'object_id',  'quantity', 'available_showings']
+        fields = ['id', 'booking', 'ticket_type', 'quantity', 'showings']
 
-    
+
+class BookingSerialier(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    items = BookingItemSerializer(many=True, required=False, read_only=True)
+    # total_price
+
+    class Meta:
+        model = Booking
+        fields = ['id', 'items']

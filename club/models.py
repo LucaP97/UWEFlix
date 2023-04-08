@@ -93,6 +93,8 @@ class OrderItem(models.Model):
     quantity = models.PositiveSmallIntegerField()
 
 
+### booking ###
+
 class Booking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -104,7 +106,7 @@ class BookingItem(models.Model):
     quantity = models.PositiveSmallIntegerField()
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
+    content_object = GenericForeignKey('content_type', 'object_id')
 
-    class Meta:
-        unique_together = ('booking', 'ticket_type')
+    # class Meta:
+    #     unique_together = ('booking', 'ticket_type')
