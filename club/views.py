@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.utils.crypto import get_random_string
+from django.db.models import Prefetch
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
@@ -69,8 +70,21 @@ class BookingViewSet(ModelViewSet):
     serializer_class = BookingSerialier
 
 class BookingItemViewSet(ModelViewSet):
-    queryset = BookingItem.objects.all()
-    serializer_class = BookingItemSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddBookingItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateBookingItemSerializer
+        return BookingItemSerializer
+    
+    def get_serializer_context(self):
+        return {'booking_id': self.kwargs['booking_pk']}
+    
+    def get_queryset(self):
+        # return BookingItem.objects.filter(booking__id=self.kwargs['booking_pk'])
+        return BookingItem.objects.prefetch_related('showing_object', 'showing_object__price').filter(booking__id=self.kwargs['booking_pk'])
 
 
 

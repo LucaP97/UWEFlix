@@ -125,9 +125,14 @@ class AccountSerializer(serializers.ModelSerializer):
 Showing = ContentType.objects.get(app_label='UWEFlix', model='showing').model_class()
 
 class ShowingSerializer(serializers.ModelSerializer):
+    price_student = serializers.SerializerMethodField()
+
     class Meta:
         model = Showing
-        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price']
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price_student']
+
+    def get_price_student(self, showing:Showing):
+        return showing.price.student 
 
 
 
@@ -142,34 +147,90 @@ class BookingItemSerializer(serializers.ModelSerializer):
     ]
 
     ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT, read_only=True)
-    # total_price = serializers.SerializerMethodField()
 
-    content_object  = GenericRelatedField({
-        ContentType.objects.get(app_label='UWEFlix', model='showing'): ShowingSerializer,
+
+    total_price = serializers.SerializerMethodField()
+
+    
+
+    showing_object = GenericRelatedField({
+        Showing: ShowingSerializer(),
     })
 
-
-    # showings = serializers.SerializerMethodField()
-
-    # def get_showings(self, obj):
-    #     showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
-    #     Showing = showing_content_type.model_class()
-    #     showings = Showing.objects.all()
-
-    #     return ShowingSerializer(showings, many=True).data
-
+    def get_total_price(self, booking_item:BookingItem):
+        return booking_item.quantity * booking_item.showing_object.price.student
+    
 
     class Meta:
         model = BookingItem
         # 'content_object',
-        fields = ['id', 'booking', 'ticket_type', 'quantity', 'content_object']
+        fields = ['id', 'booking', 'ticket_type', 'quantity', 'showing_object', 'total_price']
+
+
+class AddBookingItemSerializer(serializers.ModelSerializer):
+    TICKET_TYPE_STUDENT = 'S'
+
+    TICKET_TYPE_CHOICE = [
+        (TICKET_TYPE_STUDENT, 'Student'),
+    ]
+
+    ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT, read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
+
+    def validate_showing_id(self, value):
+        if not Showing.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("No showing with the given ID was found.")
+        return value
+    
+    def validate_quantity(self, value):
+        if value < 10:
+            raise serializers.ValidationError("Quantity must be at least 10")
+        return value
+    
+    def save(self, **kwargs):
+        booking_id = self.context['booking_id']
+        showing_id = self.validated_data['showing_id']
+        # ticket_type = self.validated_data['ticket_type']
+        quantity = self.validated_data['quantity']
+
+        try:
+            booking_item = BookingItem.objects.get(booking_id=booking_id, showing_id=showing_id)#, ticket_type=ticket_type)
+            booking_item.quantity += quantity
+            booking_item.save()
+            self.instance = booking_item
+        except BookingItem.DoesNotExist:
+            self.instance = BookingItem.objects.create(booking_id=booking_id, showing_type=self.showing_content_type, **self.validated_data)
+
+        return self.instance
+    
+    
+    class Meta:
+        model = BookingItem
+        fields = ['id', 'showing_id', 'ticket_type', 'quantity']
+
+
+class UpdateBookingItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingItem
+        fields = ['quantity']
 
 
 class BookingSerialier(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     items = BookingItemSerializer(many=True, required=False, read_only=True)
-    # total_price
+    total_price = serializers.SerializerMethodField()
+
+    def validate_quantity(self, value):
+        if value < 10:
+            raise serializers.ValidationError("Quantity must be at least 10")
+        return value
+
+    def get_total_price(self, booking):
+        return sum([BookingItemSerializer(item).get_total_price(item) for item in booking.items.all()])
 
     class Meta:
         model = Booking
-        fields = ['id', 'items']
+        fields = ['id', 'items', 'total_price']

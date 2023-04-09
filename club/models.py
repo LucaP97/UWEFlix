@@ -104,9 +104,10 @@ class BookingItem(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='items')
     ticket_type = models.CharField(max_length=1, default='S')
     quantity = models.PositiveSmallIntegerField()
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    # content types for showing
+    showing_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    showing_id = models.PositiveIntegerField()
+    showing_object = GenericForeignKey('showing_type', 'showing_id')
 
-    # class Meta:
-    #     unique_together = ('booking', 'ticket_type')
+    class Meta:
+        unique_together = ('booking', 'showing_type', 'showing_id')
