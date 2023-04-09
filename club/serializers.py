@@ -2,6 +2,7 @@ from django.apps import apps
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.response import Response
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
@@ -222,6 +223,7 @@ class BookingSerialier(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     items = BookingItemSerializer(many=True, required=False, read_only=True)
     total_price = serializers.SerializerMethodField()
+    # discounted_price = serializers.SerializerMethodField()
 
     def validate_quantity(self, value):
         if value < 10:
@@ -230,7 +232,83 @@ class BookingSerialier(serializers.ModelSerializer):
 
     def get_total_price(self, booking):
         return sum([BookingItemSerializer(item).get_total_price(item) for item in booking.items.all()])
+    
+    # def get_discounted_price(self, booking):
+    #     return self.get_total_price(booking) * (1 - booking.account.discount_rate)
 
     class Meta:
         model = Booking
         fields = ['id', 'items', 'total_price']
+
+
+### orders ###
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    showing_object = GenericRelatedField({
+        Showing: ShowingSerializer(),
+    })
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, order_item:OrderItem):
+        return order_item.quantity * order_item.showing_object.price.student
+    
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'order', 'showing_object', 'quantity', 'total_price']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, order):
+        return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
+
+    class Meta:
+        model = Order
+        fields = ['id', 'account', 'placed_at', 'payment_status', 'items', 'total_price']
+
+
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['payment_status']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    with transaction.atomic():
+        booking_id = serializers.UUIDField()
+
+        def validate_booking_id(self, booking_id):
+            if not Booking.objects.filter(pk=booking_id).exists():
+                raise serializers.ValidationError("No booking with the given ID was found.")
+            if BookingItem.objects.filter(booking_id=booking_id).count() == 0:
+                raise serializers.ValidationError("The booking is empty.")
+            return booking_id
+        
+        def save(self, **kwargs):
+            booking_id = self.validated_data['booking_id']
+
+            ## need to think here about getting the account from club
+            account = Account.objects.get(id=self.context['account_id'])
+            order = Order.objects.create(account=account)
+
+            booking_items = BookingItem.objects.select_related('showing_type').filter(booking_id=self.validated_data['booking_id'])
+            order_items = [
+                OrderItem(
+                    order=order,
+                    showing_type=item.showing_type,
+                    showing_id=item.showing_id,
+                    ticket_type=item.ticket_type,
+                    quantity=item.quantity
+                ) for item in booking_items
+            ]
+
+            OrderItem.objects.bulk_create(order_items)
+
+            Booking.objects.filter(pk=booking_id).delete()
+
+            # this is for signals, not sure if we need?
+            # order_created.send_robust(sender=self.__class__, order=order)
+
+            return order

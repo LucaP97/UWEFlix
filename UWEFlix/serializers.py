@@ -232,6 +232,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, order):
         return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
+    
     class Meta:
         model = Order
         fields = ['id', 'student', 'placed_at', 'payment_status', 'items', 'total_price']

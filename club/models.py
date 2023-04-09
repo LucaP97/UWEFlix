@@ -68,6 +68,34 @@ class AccountManager(models.Model):
     # date = models.DateField(auto_now_add=True)
 
 
+# class ClubOrder(models.Model):
+#     PAYMENT_STATUS_PENDING = 'P'
+#     PAYMENT_STATUS_COMPLETE = 'C'
+#     PAYMENT_STATUS_FAILED = 'F'
+#     PAYMENT_STATUS_CHOICES = [
+#         (PAYMENT_STATUS_PENDING, 'Pending'),
+#         (PAYMENT_STATUS_COMPLETE, 'Complete'),
+#         (PAYMENT_STATUS_FAILED, 'Failed')
+#     ]
+#     placed_at = models.DateTimeField(auto_now_add=True)
+#     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES)
+#     club = models.ForeignKey(Club, on_delete=models.PROTECT)
+#     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+
+# class ClubOrderItem(models.Model):
+#     order = models.ForeignKey(ClubOrder, on_delete=models.PROTECT, related_name='items')
+#     # two attributes needed when using ContentType: Type (contentType), and ID
+#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+#     object_id = models.PositiveIntegerField()
+#     content_object = GenericForeignKey()
+#     ticket_type = models.CharField(max_length=255)
+#     quantity = models.PositiveSmallIntegerField()
+
+
+### orders ###
+
+
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
@@ -77,24 +105,31 @@ class Order(models.Model):
         (PAYMENT_STATUS_COMPLETE, 'Complete'),
         (PAYMENT_STATUS_FAILED, 'Failed')
     ]
+
+    # ticket_type = models.CharField(max_length=1, default='S')
     placed_at = models.DateTimeField(auto_now_add=True)
-    payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES)
-    club = models.ForeignKey(Club, on_delete=models.PROTECT)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='order')
 
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
-    # two attributes needed when using ContentType: Type (contentType), and ID
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
-    ticket_type = models.CharField(max_length=255)
+    # content types for showing
+    showing_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    showing_id = models.PositiveIntegerField()
+    showing_object = GenericForeignKey('showing_type', 'showing_id')
+    
+    ticket_type = models.CharField(max_length=1, default='S')
     quantity = models.PositiveSmallIntegerField()
 
 
 ### booking ###
 
+# requirements wants booking as an account (maybe do not allow edits to currently bookingItem)
+# does this mean an account list model is required?
+# statements will be full of accounts
+
+# should this include the account? 
 class Booking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
