@@ -55,7 +55,7 @@ class Account(models.Model):
     payment_details = models.OneToOneField(PaymmentDetails, on_delete=models.CASCADE)
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     account_number = models.CharField(max_length=2, unique=True)
-    # account_balance = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    account_balance = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     def __str__ (self) -> str:
         return self.account_title
@@ -121,6 +121,18 @@ class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='order')
+
+    # handled by signals
+    # def update_account_balance(self):
+    #     try:
+    #         total_price = sum([item.total_price() for item in self.items.all()])
+    #         discount_amount = (total_price * self.account.discount_rate) / 100
+    #         discount_price = total_price - discount_amount
+    #         self.account.account_balance += discount_price
+    #         self.account.save()
+    #         print(f"Total Price: {total_price}, Discount Amount: {discount_amount}, Discount Price: {discount_price}, New Account Balance: {self.account.account_balance}")
+    #     except Exception as e:
+    #         print(f"Error updating account balance: {e}")
 
 
 

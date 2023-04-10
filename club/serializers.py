@@ -260,16 +260,26 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
     total_price = serializers.SerializerMethodField()
+    discounted_total_price = serializers.SerializerMethodField()
 
     def get_total_price(self, order):
         return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
+    
+    def get_discounted_total_price(self, order):
+        discount_amount = (self.get_total_price(order) * order.account.discount_rate) / 100
+        return self.get_total_price(order) - discount_amount
 
     class Meta:
         model = Order
-        fields = ['id', 'account', 'placed_at', 'payment_status', 'items', 'total_price']
+        fields = ['id', 'account', 'placed_at', 'payment_status', 'items', 'total_price', 'discounted_total_price']
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
+
+    # was going to reduce the account balance here, but.
+    # should it be done in accounts, when the club rep adds funds?
+    # this would mean removing payment status for club also.
+
     class Meta:
         model = Order
         fields = ['payment_status']
@@ -285,6 +295,13 @@ class CreateOrderSerializer(serializers.Serializer):
             if BookingItem.objects.filter(booking_id=booking_id).count() == 0:
                 raise serializers.ValidationError("The booking is empty.")
             return booking_id
+        
+        def update_account_balance(self, order):
+            total_price = sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
+            discount_amount = (total_price * order.account.discount_rate) / 100
+            discount_price = total_price - discount_amount
+            order.account.account_balance += discount_price
+            order.account.save()
         
         def save(self, **kwargs):
             booking_id = self.validated_data['booking_id']
@@ -306,6 +323,8 @@ class CreateOrderSerializer(serializers.Serializer):
 
             OrderItem.objects.bulk_create(order_items)
 
+            self.update_account_balance(order)
+
             Booking.objects.filter(pk=booking_id).delete()
 
             # this is for signals, not sure if we need?
@@ -318,4 +337,4 @@ class AccountSerializer(serializers.ModelSerializer):
     order = OrderSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order']
+        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'account_balance']
