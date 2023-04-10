@@ -315,6 +315,7 @@ class CreateOrderSerializer(serializers.Serializer):
         
 
 class AccountSerializer(serializers.ModelSerializer):
+    order = OrderSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ['id', 'club', 'account_title', 'discount_rate', 'order']
+        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order']

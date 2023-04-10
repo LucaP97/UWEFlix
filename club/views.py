@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.utils.crypto import get_random_string
 from django.db.models import Prefetch
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
@@ -9,6 +10,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from .models import *
+from .filters import *
 from .serializers import *
 import random
 from .tasks import *
@@ -58,6 +60,10 @@ class AddAccountViewSet(ModelViewSet):
 class AccountViewSet(ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
+    filter_backends = [DjangoFilterBackend]
+    # filterset_fields = ['account_number']
+    filterset_class = AccountFilter
+
 
 
 # class StatementsViewSet(ModelViewSet):

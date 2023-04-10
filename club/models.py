@@ -55,6 +55,7 @@ class Account(models.Model):
     payment_details = models.OneToOneField(PaymmentDetails, on_delete=models.CASCADE)
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     account_number = models.CharField(max_length=2, unique=True)
+    # account_balance = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     def __str__ (self) -> str:
         return self.account_title
