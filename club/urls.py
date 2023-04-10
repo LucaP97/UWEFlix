@@ -8,6 +8,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
+router.register('add_account', views.AddAccountViewSet)
 router.register('accounts', views.AccountViewSet)
 router.register('booking', views.BookingViewSet)
 router.register('orders', views.OrderViewSet, basename='orders')

@@ -59,6 +59,16 @@ class Account(models.Model):
     def __str__ (self) -> str:
         return self.account_title
 
+
+# class AccountList(models.Model):
+#     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+#     date = models.DateField(auto_now_add=True)
+#     amount_due = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+#     def __str__(self) -> str:
+#         return self.account.account_title
+
+
 class Statements(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='statement')
     amount_due = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -112,6 +122,7 @@ class Order(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='order')
 
 
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
     # content types for showing
@@ -121,6 +132,7 @@ class OrderItem(models.Model):
     
     ticket_type = models.CharField(max_length=1, default='S')
     quantity = models.PositiveSmallIntegerField()
+    
 
 
 ### booking ###

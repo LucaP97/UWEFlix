@@ -91,7 +91,7 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
         model = PaymmentDetails
         fields = ['card_name', 'card_number', 'expiry_date']
 
-class AccountSerializer(serializers.ModelSerializer):
+class AddAccountSerializer(serializers.ModelSerializer):
     payment_details = PaymentDetailsSerializer()
     account_title = serializers.CharField(read_only=True)
     account_number = serializers.CharField(read_only=True)
@@ -312,3 +312,9 @@ class CreateOrderSerializer(serializers.Serializer):
             # order_created.send_robust(sender=self.__class__, order=order)
 
             return order
+        
+
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['id', 'club', 'account_title', 'discount_rate', 'order']

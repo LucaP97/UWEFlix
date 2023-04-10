@@ -51,6 +51,10 @@ class ClubViewSet(ModelViewSet):
     serializer_class = ClubSerializer
 
 
+class AddAccountViewSet(ModelViewSet):
+    queryset = Account.objects.all()
+    serializer_class = AddAccountSerializer
+
 class AccountViewSet(ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
