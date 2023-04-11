@@ -319,6 +319,12 @@ class CreditListSerializer(serializers.ModelSerializer):
         model = CreditList
         fields = ['id', 'amount', 'placed_at']
 
+
+class SimpleCreditListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreditList
+        fields = ['id', 'amount', 'placed_at']
+
 class PaymentDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -345,9 +351,10 @@ class CreateAccountSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     order = OrderSerializer(many=True, read_only=True)
+    credit_list = SimpleCreditListSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'account_balance']
+        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'credit_list', 'account_balance']
 
 
 class AccountAddFundsSerializer(serializers.Serializer):
@@ -369,3 +376,24 @@ class AccountAddFundsSerializer(serializers.Serializer):
     class Meta:
         model = Account
         fields = ['credit_list']
+
+
+### statements ###
+
+
+
+class StatementSerializer(serializers.ModelSerializer):
+    account = AccountSerializer()
+    credit_list = SimpleCreditListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Statements
+        fields = ['id', 'name', 'account']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        account_representation = representation['account']
+
+        orders = account_representation.pop('order')
+        credit_list = CreditList.objects.filter(account_id=account_representation['id'])
+
