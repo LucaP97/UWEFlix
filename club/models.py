@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 import random
 from uuid import uuid4
+from datetime import datetime
 
 # # Create your models here.
 # class CinemaManager(models.Model): # this will extend the User class
@@ -47,6 +48,11 @@ class PaymmentDetails(models.Model):
     expiry_date = models.DateField()
 
 
+class CreditList(models.Model):
+    placed_at = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+
 #### accounts ####
 class Account(models.Model):
     club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name="account")
@@ -56,6 +62,7 @@ class Account(models.Model):
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     account_number = models.CharField(max_length=2, unique=True)
     account_balance = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    credit_list = models.ForeignKey(CreditList, on_delete=models.CASCADE, related_name='account', null=True, blank=True)
 
     def __str__ (self) -> str:
         return self.account_title
@@ -72,7 +79,8 @@ class Account(models.Model):
 
 class Statements(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='statement')
-    amount_due = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    name = models.CharField(max_length=255, default="end of month statement: "+datetime.now().strftime('%B')+"-"+str(datetime.now().year))
+
 
 class AccountManager(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

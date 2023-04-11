@@ -53,16 +53,38 @@ class ClubViewSet(ModelViewSet):
     serializer_class = ClubSerializer
 
 
-class AddAccountViewSet(ModelViewSet):
-    queryset = Account.objects.all()
-    serializer_class = AddAccountSerializer
+# class AddAccountViewSet(ModelViewSet):
+#     queryset = Account.objects.all()
+#     serializer_class = AddAccountSerializer
 
 class AccountViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
+
     queryset = Account.objects.all()
-    serializer_class = AccountSerializer
+    # serializer_class = AccountSerializer
     filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['account_number']
     filterset_class = AccountFilter
+
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateAccountSerializer
+        elif self.request.method == 'PUT':
+            return AccountAddFundsSerializer
+        elif self.request.method == 'PATCH':
+            return CreateAccountSerializer
+        return AccountSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Account.objects.all()
+        account_id = user.clubrepresentative.club.account.id
+        return Account.objects.filter(id=account_id)
 
 
 

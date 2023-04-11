@@ -84,41 +84,14 @@ class ClubSerializer(serializers.ModelSerializer):
         club = Club.objects.create(address=address, contact_details=contact_details, **validated_data)
         return club
     
-######## accounts ########
 
-class PaymentDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymmentDetails
-        fields = ['card_name', 'card_number', 'expiry_date']
-
-class AddAccountSerializer(serializers.ModelSerializer):
-    payment_details = PaymentDetailsSerializer()
-    account_title = serializers.CharField(read_only=True)
-    account_number = serializers.CharField(read_only=True)
-    class Meta:
-        model = Account
-        fields = ['id', 'club', 'account_number', 'account_title', 'account_title', 'discount_rate', 'payment_details']
-
-    def create(self, validated_data):
-        payment_details_data = validated_data.pop('payment_details')
-        payment_details = PaymmentDetails.objects.create(**payment_details_data)
-
-        validated_data['account_title'] = validated_data['club'].name
-        validated_data['account_number'] = str(random.randint(100000, 999999))
-
-        return Account.objects.create(payment_details=payment_details, **validated_data)
     
 
 
-# class StatementSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Statements
-#         fields = ['amount_due']
-
-#     def create(self, validated_data):
-#         account_id = self.context['account_id']
-#         return Statements.objects.create(account_id=account_id, **validated_data)
-#         # return super().create(validated_data)
+class StatementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Statements
+        fields = ['amount_due']
 
 
 ### Content Types ###
@@ -333,8 +306,66 @@ class CreateOrderSerializer(serializers.Serializer):
             return order
         
 
+
+######## accounts ########
+
+class CreditListSerializer(serializers.ModelSerializer):
+    def validate_amount(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Amount must be greater than 0.")
+        return value
+
+    class Meta:
+        model = CreditList
+        fields = ['id', 'amount', 'placed_at']
+
+class PaymentDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PaymmentDetails
+        fields = ['card_name', 'card_number', 'expiry_date']
+
+class CreateAccountSerializer(serializers.ModelSerializer):
+    payment_details = PaymentDetailsSerializer()
+    account_title = serializers.CharField(read_only=True)
+    account_number = serializers.CharField(read_only=True)
+    class Meta:
+        model = Account
+        fields = ['id', 'club', 'account_number', 'account_title', 'account_title', 'discount_rate', 'payment_details']
+
+    def create(self, validated_data):
+        payment_details_data = validated_data.pop('payment_details')
+        payment_details = PaymmentDetails.objects.create(**payment_details_data)
+
+        validated_data['account_title'] = validated_data['club'].name
+        validated_data['account_number'] = str(random.randint(100000, 999999))
+
+        return Account.objects.create(payment_details=payment_details, **validated_data)
+
+
 class AccountSerializer(serializers.ModelSerializer):
     order = OrderSerializer(many=True, read_only=True)
     class Meta:
         model = Account
         fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'account_balance']
+
+
+class AccountAddFundsSerializer(serializers.Serializer):
+    credit_list = CreditListSerializer()
+
+    def update(self, instance, validated_data):
+        credit_data = validated_data.pop('credit_list')
+        amount = credit_data['amount']
+        if amount > instance.account_balance:
+            raise serializers.ValidationError("Amount must be less or equal to account balance.")
+        instance.account_balance -= amount
+        instance.save()
+
+        credit_list = CreditList.objects.create(**credit_data)
+        credit_list.save()
+
+        return instance
+    
+    class Meta:
+        model = Account
+        fields = ['credit_list']
