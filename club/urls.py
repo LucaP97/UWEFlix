@@ -13,6 +13,8 @@ router.register('accounts', views.AccountViewSet, basename='accounts')
 router.register('booking', views.BookingViewSet)
 router.register('orders', views.OrderViewSet, basename='orders')
 router.register('order-items', views.OrderItemViewSet)
+router.register('credit', views.CreditViewSet)
+# router.register('credit-item', views.CreditItemViewSet)
 
 # accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
 # accounts_router.register('statements', views.StatementsViewSet, basename='account-statement')

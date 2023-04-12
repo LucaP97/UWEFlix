@@ -88,10 +88,10 @@ class ClubSerializer(serializers.ModelSerializer):
     
 
 
-class StatementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Statements
-        fields = ['amount_due']
+# class StatementSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Statements
+#         fields = ['amount_due']
 
 
 ### Content Types ###
@@ -309,21 +309,48 @@ class CreateOrderSerializer(serializers.Serializer):
 
 ######## accounts ########
 
-class CreditListSerializer(serializers.ModelSerializer):
+# class CreditSerializer(serializers.ModelSerializer):
+#     def validate_amount(self, value):
+#         if value < 0:
+#             raise serializers.ValidationError("Amount must be greater than 0.")
+#         return value
+
+#     class Meta:
+#         model = Credit 
+#         fields = ['id', 'amount', 'placed_at']
+
+
+# class SimpleCreditSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Credit
+#         fields = ['id', 'amount', 'placed_at']
+
+
+# class CreditListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Credit
+#         fields = ['id', 'credit', 'account']
+
+
+class CreditSerializer(serializers.ModelSerializer):
+
     def validate_amount(self, value):
         if value < 0:
             raise serializers.ValidationError("Amount must be greater than 0.")
         return value
 
     class Meta:
-        model = CreditList
+        model = Credit
         fields = ['id', 'amount', 'placed_at']
 
 
-class SimpleCreditListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CreditList
-        fields = ['id', 'amount', 'placed_at']
+# class CreditSerializer(serializers.ModelSerializer):
+#     items = CreditItemSerializer(many=True)
+
+#     class Meta:
+#         model = Credit
+#         fields = ['id', 'account', 'items']
+
 
 class PaymentDetailsSerializer(serializers.ModelSerializer):
 
@@ -351,49 +378,29 @@ class CreateAccountSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     order = OrderSerializer(many=True, read_only=True)
-    credit_list = SimpleCreditListSerializer(many=True, read_only=True)
+    credit = CreditSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'credit_list', 'account_balance']
+        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'credit', 'account_balance']
+
 
 
 class AccountAddFundsSerializer(serializers.Serializer):
-    credit_list = CreditListSerializer()
+    credit = CreditSerializer()
 
     def update(self, instance, validated_data):
-        credit_data = validated_data.pop('credit_list')
+        credit_data = validated_data.pop('credit')
         amount = credit_data['amount']
         if amount > instance.account_balance:
             raise serializers.ValidationError("Amount must be less or equal to account balance.")
         instance.account_balance -= amount
         instance.save()
 
-        credit_list = CreditList.objects.create(**credit_data)
-        credit_list.save()
+        credit = Credit.objects.create(account=instance, **credit_data)
+        credit.save()
 
         return instance
     
     class Meta:
         model = Account
-        fields = ['credit_list']
-
-
-### statements ###
-
-
-
-class StatementSerializer(serializers.ModelSerializer):
-    account = AccountSerializer()
-    credit_list = SimpleCreditListSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Statements
-        fields = ['id', 'name', 'account']
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        account_representation = representation['account']
-
-        orders = account_representation.pop('order')
-        credit_list = CreditList.objects.filter(account_id=account_representation['id'])
-
+        fields = ['credit']

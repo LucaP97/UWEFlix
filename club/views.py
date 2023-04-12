@@ -166,3 +166,13 @@ class OrderViewSet(ModelViewSet):
 class OrderItemViewSet(ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+
+
+class CreditViewSet(ModelViewSet):
+    queryset = Credit.objects.all()
+    serializer_class = CreditSerializer
+
+
+# class CreditViewSet(ModelViewSet):
+#     queryset = Credit.objects.all()
+#     serializer_class = CreditSerializer

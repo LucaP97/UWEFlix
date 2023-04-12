@@ -49,7 +49,12 @@ class PaymmentDetails(models.Model):
 
 
 
+
 #### accounts ####
+
+
+
+
 class Account(models.Model):
     club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name="account")
     # should be either surname and initial of employee (which employee?), or club name
@@ -58,16 +63,24 @@ class Account(models.Model):
     discount_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     account_number = models.CharField(max_length=2, unique=True)
     account_balance = models.DecimalField(max_digits=9, decimal_places=2, default=0)
-    # credit_list = models.ForeignKey(CreditList, on_delete=models.CASCADE, related_name='account', null=True, blank=True)
 
     def __str__ (self) -> str:
         return self.account_title
+    
+# class CreditItem(models.Model):
+#     placed_at = models.DateTimeField(auto_now_add=True)
+#     amount = models.DecimalField(max_digits=10, decimal_places=2)
+#     # account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='credit')
 
+class Credit(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='credit', null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    placed_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
 
-class CreditList(models.Model):
-    placed_at = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='credit_list')
+########
+# creditlist should have accuont has foreign key, rather than the other way around
+
 
 
 # class AccountList(models.Model):
@@ -79,9 +92,9 @@ class CreditList(models.Model):
 #         return self.account.account_title
 
 
-class Statements(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='statement')
-    name = models.CharField(max_length=255, default="end of month statement: "+datetime.now().strftime('%B')+"-"+str(datetime.now().year))
+# class Statements(models.Model):
+#     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='statement')
+#     name = models.CharField(max_length=255, default="end of month statement: "+datetime.now().strftime('%B')+"-"+str(datetime.now().year))
 
 
 class AccountManager(models.Model):
