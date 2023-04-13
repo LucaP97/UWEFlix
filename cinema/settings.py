@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'UWEFlix',
     'authenticate',
     'club',
+    'accounts',
     'corsheaders',
 ]
 
