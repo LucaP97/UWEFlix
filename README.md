@@ -22,5 +22,5 @@ Link to Jira: https://uweflixgroup3.atlassian.net/jira/software/projects/UW/boar
 
 
 Club rep:
-username: 469244
-password: IKdyAL7xFD6J
+username: 358673
+password: kZZu0YehVJJG

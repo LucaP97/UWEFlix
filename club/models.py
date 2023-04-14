@@ -105,7 +105,7 @@ class AccountManager(models.Model):
 
 ### orders ###
 
-class Order(models.Model):
+class ClubOrder(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
     PAYMENT_STATUS_FAILED = 'F'
@@ -118,7 +118,7 @@ class Order(models.Model):
     # ticket_type = models.CharField(max_length=1, default='S')
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='order')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='club_order')
 
     # handled by signals
     # def update_account_balance(self):
@@ -134,11 +134,11 @@ class Order(models.Model):
 
 
 
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
+class ClubOrderItem(models.Model):
+    club_order = models.ForeignKey(ClubOrder, on_delete=models.PROTECT, related_name='club_items')
     # content types for showing
-    showing_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    showing_id = models.PositiveIntegerField()
+    showing_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    showing_id = models.PositiveIntegerField(null=True, blank=True)
     showing_object = GenericForeignKey('showing_type', 'showing_id')
     
     ticket_type = models.CharField(max_length=1, default='S')
@@ -149,19 +149,19 @@ class OrderItem(models.Model):
 ### booking ###
 
 # should this include the account? 
-class Booking(models.Model):
+class ClubBooking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class BookingItem(models.Model):
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='items')
+class ClubBookingItem(models.Model):
+    club_booking = models.ForeignKey(ClubBooking, on_delete=models.CASCADE, related_name='club_items')
     ticket_type = models.CharField(max_length=1, default='S')
     quantity = models.PositiveSmallIntegerField()
     # content types for showing
-    showing_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    showing_id = models.PositiveIntegerField()
+    showing_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    showing_id = models.PositiveIntegerField(null=True, blank=True)
     showing_object = GenericForeignKey('showing_type', 'showing_id')
 
-    class Meta:
-        unique_together = ('booking', 'showing_type', 'showing_id')
+    # class Meta:
+    #     unique_together = ('booking', 'showing_type', 'showing_id')

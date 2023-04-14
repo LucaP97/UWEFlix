@@ -6,8 +6,9 @@ from . import views
 
 
 router = routers.DefaultRouter()
-router.register('orders', views.UweflixAccountsViewSet)
-router.register('accounts', views.ClubAccountsViewSet)
+# router.register('orders', views.UweflixAccountsViewSet)
+# router.register('statements', views.StatementViewSet)
+
 
 # booking_router = routers.NestedDefaultRouter(router, 'booking', lookup='booking')
 # booking_router.register('items', views.BookingItemViewSet, basename='booking-items')

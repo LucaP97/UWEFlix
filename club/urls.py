@@ -10,17 +10,17 @@ router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
 # router.register('add_account', views.AddAccountViewSet)
 router.register('accounts', views.AccountViewSet, basename='accounts')
-router.register('booking', views.BookingViewSet)
-router.register('orders', views.OrderViewSet, basename='orders')
-router.register('order-items', views.OrderItemViewSet)
+router.register('club_booking', views.ClubBookingViewSet)
+router.register('club_orders', views.ClubOrderViewSet, basename='club_orders')
+router.register('club_order-items', views.ClubOrderItemViewSet)
 router.register('credit', views.CreditViewSet)
 # router.register('credit-item', views.CreditItemViewSet)
 
 # accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
 # accounts_router.register('statements', views.StatementsViewSet, basename='account-statement')
 
-booking_router = routers.NestedDefaultRouter(router, 'booking', lookup='booking')
-booking_router.register('items', views.BookingItemViewSet, basename='booking-items')
+booking_router = routers.NestedDefaultRouter(router, 'club_booking', lookup='club_booking')
+booking_router.register('club_items', views.ClubBookingItemViewSet, basename='club_booking-items')
 
 urlpatterns = [
 #     path("home/", views.home, name="home"),

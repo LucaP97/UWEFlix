@@ -98,31 +98,32 @@ class AccountViewSet(ModelViewSet):
 
 ### Booking ###
 
-class BookingViewSet(ModelViewSet):
-    queryset = Booking.objects.prefetch_related('items').all()
-    serializer_class = BookingSerialier
+class ClubBookingViewSet(ModelViewSet):
+    queryset = ClubBooking.objects.prefetch_related('club_items').all()
+    serializer_class = ClubBookingSerialier
 
-class BookingItemViewSet(ModelViewSet):
+class ClubBookingItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return AddBookingItemSerializer
         elif self.request.method == 'PATCH':
-            return UpdateBookingItemSerializer
-        return BookingItemSerializer
+            return UpdateClubBookingItemSerializer
+        return ClubBookingItemSerializer
     
     def get_serializer_context(self):
-        return {'booking_id': self.kwargs['booking_pk']}
+        return {'club_booking_id': self.kwargs['club_booking_pk']}
     
     def get_queryset(self):
         # return BookingItem.objects.filter(booking__id=self.kwargs['booking_pk'])
-        return BookingItem.objects.prefetch_related('showing_object', 'showing_object__price').filter(booking__id=self.kwargs['booking_pk'])
+        print(self.kwargs)
+        return ClubBookingItem.objects.prefetch_related('showing_object', 'showing_object__price').filter(club_booking__id=self.kwargs['club_booking_pk'])
 
 
 
 
-class OrderViewSet(ModelViewSet):
+class ClubOrderViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     def get_permissions(self):
@@ -132,18 +133,18 @@ class OrderViewSet(ModelViewSet):
     
     # for now, associating the order with the user ID (which is linked to the club rep), rather than the account
     def create(self, request, *args, **kwargs):
-        serializer = CreateOrderSerializer(data=request.data, context={'account_id': self.request.user.clubrepresentative.club.account.id})
+        serializer = CreateClubOrderSerializer(data=request.data, context={'account_id': self.request.user.clubrepresentative.club.account.id})
         serializer.is_valid(raise_exception=True)
-        order = serializer.save()
-        serializer = OrderSerializer(order)
+        club_order = serializer.save()
+        serializer = ClubOrderSerializer(club_order)
         return Response(serializer.data)
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return CreateOrderSerializer
+            return CreateClubOrderSerializer
         elif self.request.method == 'PATCH':
-            return UpdateOrderSerializer
-        return OrderSerializer
+            return UpdateClubOrderSerializer
+        return ClubOrderSerializer
     
     # this should check if club rep is associated with 
 
@@ -157,15 +158,15 @@ class OrderViewSet(ModelViewSet):
         ### this should be enough for the implementation, needs testing
 
         if user.is_staff:
-            return Order.objects.all()
+            return ClubOrder.objects.all()
         
         account_id = user.clubrepresentative.club.account.id
-        return Order.objects.filter(account_id=account_id)
+        return ClubOrder.objects.filter(account_id=account_id)
     
 
-class OrderItemViewSet(ModelViewSet):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+class ClubOrderItemViewSet(ModelViewSet):
+    queryset = ClubOrderItem.objects.all()
+    serializer_class = ClubOrderItemSerializer
 
 
 class CreditViewSet(ModelViewSet):

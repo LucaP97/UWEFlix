@@ -112,7 +112,7 @@ class ShowingSerializer(serializers.ModelSerializer):
 
 #### booking ####
 
-class BookingItemSerializer(serializers.ModelSerializer):
+class ClubBookingItemSerializer(serializers.ModelSerializer):
     
     TICKET_TYPE_STUDENT = 'S'
 
@@ -131,14 +131,14 @@ class BookingItemSerializer(serializers.ModelSerializer):
         Showing: ShowingSerializer(),
     })
 
-    def get_total_price(self, booking_item:BookingItem):
+    def get_total_price(self, booking_item:ClubBookingItem):
         return booking_item.quantity * booking_item.showing_object.price.student
     
 
     class Meta:
-        model = BookingItem
+        model = ClubBookingItem
         # 'content_object',
-        fields = ['id', 'booking', 'ticket_type', 'quantity', 'showing_object', 'total_price']
+        fields = ['id', 'club_booking', 'ticket_type', 'quantity', 'showing_object', 'total_price']
 
 
 class AddBookingItemSerializer(serializers.ModelSerializer):
@@ -165,36 +165,36 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
         return value
     
     def save(self, **kwargs):
-        booking_id = self.context['booking_id']
+        club_booking_id = self.context['club_booking_id']
         showing_id = self.validated_data['showing_id']
         # ticket_type = self.validated_data['ticket_type']
         quantity = self.validated_data['quantity']
 
         try:
-            booking_item = BookingItem.objects.get(booking_id=booking_id, showing_id=showing_id)#, ticket_type=ticket_type)
-            booking_item.quantity += quantity
-            booking_item.save()
-            self.instance = booking_item
-        except BookingItem.DoesNotExist:
-            self.instance = BookingItem.objects.create(booking_id=booking_id, showing_type=self.showing_content_type, **self.validated_data)
+            club_booking_item = ClubBookingItem.objects.get(club_booking_id=club_booking_id, showing_id=showing_id)#, ticket_type=ticket_type)
+            club_booking_item.quantity += quantity
+            club_booking_item.save()
+            self.instance = club_booking_item
+        except ClubBookingItem.DoesNotExist:
+            self.instance = ClubBookingItem.objects.create(club_booking_id=club_booking_id, showing_type=self.showing_content_type, **self.validated_data)
 
         return self.instance
     
     
     class Meta:
-        model = BookingItem
+        model = ClubBookingItem
         fields = ['id', 'showing_id', 'ticket_type', 'quantity']
 
 
-class UpdateBookingItemSerializer(serializers.ModelSerializer):
+class UpdateClubBookingItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BookingItem
+        model = ClubBookingItem
         fields = ['quantity']
 
 
-class BookingSerialier(serializers.ModelSerializer):
+class ClubBookingSerialier(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
-    items = BookingItemSerializer(many=True, required=False, read_only=True)
+    club_items = ClubBookingItemSerializer(many=True, required=False, read_only=True)
     total_price = serializers.SerializerMethodField()
     # discounted_price = serializers.SerializerMethodField()
 
@@ -203,107 +203,107 @@ class BookingSerialier(serializers.ModelSerializer):
             raise serializers.ValidationError("Quantity must be at least 10")
         return value
 
-    def get_total_price(self, booking):
-        return sum([BookingItemSerializer(item).get_total_price(item) for item in booking.items.all()])
+    def get_total_price(self, club_booking):
+        return sum([ClubBookingItemSerializer(club_item).get_total_price(club_item) for club_item in club_booking.club_items.all()])
     
     # def get_discounted_price(self, booking):
     #     return self.get_total_price(booking) * (1 - booking.account.discount_rate)
 
     class Meta:
-        model = Booking
-        fields = ['id', 'items', 'total_price']
+        model = ClubBooking
+        fields = ['id', 'club_items', 'total_price']
 
 
-### orders ###
+### Club orders ###
 
-class OrderItemSerializer(serializers.ModelSerializer):
+class ClubOrderItemSerializer(serializers.ModelSerializer):
     showing_object = GenericRelatedField({
         Showing: ShowingSerializer(),
     })
     total_price = serializers.SerializerMethodField()
 
-    def get_total_price(self, order_item:OrderItem):
-        return order_item.quantity * order_item.showing_object.price.student
+    def get_total_price(self, club_order_item:ClubOrderItem):
+        return club_order_item.quantity * club_order_item.showing_object.price.student
     
     class Meta:
-        model = OrderItem
-        fields = ['id', 'order', 'showing_object', 'quantity', 'total_price']
+        model = ClubOrderItem
+        fields = ['id', 'club_order', 'showing_object', 'quantity', 'total_price']
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
+class ClubOrderSerializer(serializers.ModelSerializer):
+    club_items = ClubOrderItemSerializer(many=True)
     total_price = serializers.SerializerMethodField()
     discounted_total_price = serializers.SerializerMethodField()
 
-    def get_total_price(self, order):
-        return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
+    def get_total_price(self, club_order):
+        return sum([ClubOrderItemSerializer(item).get_total_price(item) for item in club_order.club_items.all()])
     
-    def get_discounted_total_price(self, order):
-        discount_amount = (self.get_total_price(order) * order.account.discount_rate) / 100
-        return self.get_total_price(order) - discount_amount
+    def get_discounted_total_price(self, club_order):
+        discount_amount = (self.get_total_price(club_order) * club_order.account.discount_rate) / 100
+        return self.get_total_price(club_order) - discount_amount
 
     class Meta:
-        model = Order
-        fields = ['id', 'account', 'placed_at', 'payment_status', 'items', 'total_price', 'discounted_total_price']
+        model = ClubOrder
+        fields = ['id', 'account', 'placed_at', 'payment_status', 'club_items', 'total_price', 'discounted_total_price']
 
 
-class UpdateOrderSerializer(serializers.ModelSerializer):
+class UpdateClubOrderSerializer(serializers.ModelSerializer):
 
     # was going to reduce the account balance here, but.
     # should it be done in accounts, when the club rep adds funds?
     # this would mean removing payment status for club also.
 
     class Meta:
-        model = Order
+        model = ClubOrder
         fields = ['payment_status']
 
 
-class CreateOrderSerializer(serializers.Serializer):
+class CreateClubOrderSerializer(serializers.Serializer):
     with transaction.atomic():
-        booking_id = serializers.UUIDField()
+        club_booking_id = serializers.UUIDField()
 
-        def validate_booking_id(self, booking_id):
-            if not Booking.objects.filter(pk=booking_id).exists():
+        def validate_club_booking_id(self, club_booking_id):
+            if not ClubBooking.objects.filter(pk=club_booking_id).exists():
                 raise serializers.ValidationError("No booking with the given ID was found.")
-            if BookingItem.objects.filter(booking_id=booking_id).count() == 0:
+            if ClubBookingItem.objects.filter(club_booking_id=club_booking_id).count() == 0:
                 raise serializers.ValidationError("The booking is empty.")
-            return booking_id
+            return club_booking_id
         
-        def update_account_balance(self, order):
-            total_price = sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
-            discount_amount = (total_price * order.account.discount_rate) / 100
+        def update_account_balance(self, club_order):
+            total_price = sum([ClubOrderItemSerializer(item).get_total_price(item) for item in club_order.club_items.all()])
+            discount_amount = (total_price * club_order.account.discount_rate) / 100
             discount_price = total_price - discount_amount
-            order.account.account_balance += discount_price
-            order.account.save()
+            club_order.account.account_balance += discount_price
+            club_order.account.save()
         
         def save(self, **kwargs):
-            booking_id = self.validated_data['booking_id']
+            club_booking_id = self.validated_data['club_booking_id']
 
             ## need to think here about getting the account from club
             account = Account.objects.get(id=self.context['account_id'])
-            order = Order.objects.create(account=account)
+            club_order = ClubOrder.objects.create(account=account)
 
-            booking_items = BookingItem.objects.select_related('showing_type').filter(booking_id=self.validated_data['booking_id'])
-            order_items = [
-                OrderItem(
-                    order=order,
+            club_booking_items = ClubBookingItem.objects.select_related('showing_type').filter(club_booking_id=self.validated_data['club_booking_id'])
+            club_order_items = [
+                ClubOrderItem(
+                    club_order=club_order,
                     showing_type=item.showing_type,
                     showing_id=item.showing_id,
                     ticket_type=item.ticket_type,
                     quantity=item.quantity
-                ) for item in booking_items
+                ) for item in club_booking_items
             ]
 
-            OrderItem.objects.bulk_create(order_items)
+            ClubOrderItem.objects.bulk_create(club_order_items)
 
-            self.update_account_balance(order)
+            self.update_account_balance(club_order)
 
-            Booking.objects.filter(pk=booking_id).delete()
+            ClubBooking.objects.filter(pk=club_booking_id).delete()
 
             # this is for signals, not sure if we need?
             # order_created.send_robust(sender=self.__class__, order=order)
 
-            return order
+            return club_order
         
 
 
@@ -377,11 +377,11 @@ class CreateAccountSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    order = OrderSerializer(many=True, read_only=True)
+    club_order = ClubOrderSerializer(many=True, read_only=True)
     credit = CreditSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'order', 'credit', 'account_balance']
+        fields = ['id', 'account_number', 'club', 'account_title', 'discount_rate', 'club_order', 'credit', 'account_balance']
 
 
 
