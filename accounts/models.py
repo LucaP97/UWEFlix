@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 class Statement(models.Model):
     name = models.CharField(max_length=255)
     # uweflix orders
+    # what would be a good naming convention for this?
     order_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='orders', null=True, blank=True)
     order_id = models.PositiveIntegerField(null=True, blank=True)
     order_object = GenericForeignKey('order_type', 'order_id')

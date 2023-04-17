@@ -359,12 +359,13 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
         fields = ['card_name', 'card_number', 'expiry_date']
 
 class CreateAccountSerializer(serializers.ModelSerializer):
+    club = serializers.PrimaryKeyRelatedField(queryset=Club.objects.all())
     payment_details = PaymentDetailsSerializer()
     account_title = serializers.CharField(read_only=True)
     account_number = serializers.CharField(read_only=True)
     class Meta:
         model = Account
-        fields = ['id', 'club', 'account_number', 'account_title', 'account_title', 'discount_rate', 'payment_details']
+        fields = ['id', 'club', 'account_number', 'account_title', 'discount_rate', 'payment_details']
 
     def create(self, validated_data):
         payment_details_data = validated_data.pop('payment_details')
@@ -386,6 +387,8 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class AccountAddFundsSerializer(serializers.Serializer):
+    # amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    # placed_at = serializers.DateTimeField()
     credit = CreditSerializer()
 
     def update(self, instance, validated_data):
@@ -398,8 +401,22 @@ class AccountAddFundsSerializer(serializers.Serializer):
 
         credit = Credit.objects.create(account=instance, **credit_data)
         credit.save()
+        
+        credit_serializer = CreditSerializer(credit)
+        return {'credit': credit_serializer.data}
+    
+    # def update(self, instance, validated_data):
+    #     amount = validated_data['amount']
+    #     if amount > instance.account_balance:
+    #         raise serializers.ValidationError("Amount must be less or equal to account balance.")
+    #     instance.account_balance -= amount
+    #     instance.save()
 
-        return instance
+    #     credit = Credit.objects.create(account=instance, **validated_data)
+    #     credit.save()
+
+    #     return instance
+
     
     class Meta:
         model = Account
