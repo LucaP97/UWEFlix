@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from generic_relations.relations import GenericRelatedField
 from .models import *
@@ -35,12 +36,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 ### club ###
-# club repuires:
-# - order
-#   - orderitem
-#   - showing
-# - credit
-# - account
 
 
 Account = ContentType.objects.get(app_label='club', model='account').model_class()
@@ -75,22 +70,62 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ['club', 'account_title', 'discount_rate', 'account_balance', 'club_order', 'credit']
 
 
-# class StatementSerializer(serializers.ModelSerializer):
-#     order_object = GenericRelatedField({
-#         Order: OrderSerializer(),
-#     })
-#     account_object = GenericRelatedField({
-#         Account: AccountSerializer(),
-#     })
 
-#     class Meta:
-#         model = Statement
-#         fields = ['order_object', 'account_object']
+### statements ###
+
+class UweflixStatementItemsSerializer(serializers.ModelSerializer):
+    order_object = GenericRelatedField({
+        Order: OrderSerializer(),
+    }, required=False)
+    class Meta:
+        model = UweflixStatementItems
+        fields = ['statement', 'order_type', 'order_id', 'order_object']
 
 
-# class CreateStatementSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Statement
-#         fields = ['name', 'order_type', 'order_id', 'account_type', 'account_id']
+class ClubStatementItemsSerializer(serializers.ModelSerializer):
+    account_object = GenericRelatedField({
+        Account: AccountSerializer(),
+    }, required=False)
+    class Meta:
+        model = ClubStatementItems
+        fields = ['statement', 'account_type', 'account_id', 'account_object']
 
-#     # def create(self, validated_data):
+
+class StatementSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False, read_only=True)
+    uweflix_statement_items = UweflixStatementItemsSerializer(many=True, read_only=True)
+    club_statement_items = ClubStatementItemsSerializer(many=True, read_only=True)
+
+    def create(self, validated_data):
+        now = timezone.now()
+        statement = Statement.objects.create(name="statement: " + str(now.month) + "/" + str(now.year))
+
+        # uweflix
+        orders = Order.objects.filter(placed_at__month=now.month, placed_at__year=now.year)
+        for order in orders:
+            uweflix_statement_item = UweflixStatementItems.objects.create(
+                statement=statement, order_object=order)
+            uweflix_statement_item.save()
+
+        # club
+        accounts = Account.objects.all()
+        for account in accounts:
+            club_orders = ClubOrder.objects.filter(account=account, placed_at__month=now.month, placed_at__year=now.year)
+            credits = Credit.objects.filter(account=account, placed_at__month=now.month, placed_at__year=now.year)
+
+            if club_orders.exists() or credits.exists():
+                club_statement_item = ClubStatementItems.objects.create(
+                    statement=statement, account_object=account)
+                club_statement_item.save()
+
+        return statement
+
+
+    class Meta:
+        model = Statement
+        fields = ['id', 'name', 'uweflix_statement_items', 'club_statement_items']
+
+
+
+
+
