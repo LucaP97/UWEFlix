@@ -54,6 +54,11 @@ class Film(models.Model):
 
     def __str__(self) -> str:
         return f'{self.title}'
+    
+
+class FilmImage(models.Model):
+    film = models.ForeignKey(Film, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='cinema/images')
 
 class Screen(models.Model):
     screen_name = models.CharField(max_length=255, unique=True)

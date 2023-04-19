@@ -48,7 +48,7 @@ class CinemaManagerViewSet(ModelViewSet):
 
 # films
 class FilmViewSet(ModelViewSet):
-    queryset = Film.objects.all()
+    queryset = Film.objects.prefetch_related('images').all()
     serializer_class = FilmSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -59,6 +59,15 @@ class FilmViewSet(ModelViewSet):
         if Showing.objects.filter(film_id=kwargs['pk']).count() > 0:
             return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
+    
+class FilmImageViewSet(ModelViewSet):
+    serializer_class = FilmImageSerializer
+
+    def get_serializer_context(self):
+        return {'film_id': self.kwargs['film_pk']}
+    
+    def get_queryset(self):
+        return FilmImage.objects.filter(film_id=self.kwargs['film_pk'])
 
 # screens
 class ScreenViewSet(ModelViewSet):

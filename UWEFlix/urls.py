@@ -18,6 +18,9 @@ router.register('order-items', views.OrderItemViewSet)
 booking_router = routers.NestedDefaultRouter(router, 'booking', lookup='booking')
 booking_router.register('items', views.BookingItemViewSet, basename='booking-items')
 
+film_router = routers.NestedDefaultRouter(router, 'films', lookup='film')
+film_router.register('images', views.FilmImageViewSet, basename='film-images')
+
 urlpatterns = [
     # path("home/", views.home, name="home"),
     # path("login/", views.login_user, name="login"),
@@ -25,5 +28,6 @@ urlpatterns = [
     # path("logout_user/", views.logout_user, name="logout_user"),
     path('', include(router.urls)),
     path('', include(booking_router.urls)),
+    path('', include(film_router.urls)),
 ]
 

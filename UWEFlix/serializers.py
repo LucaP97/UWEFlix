@@ -53,10 +53,26 @@ class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
         fields = ['id', 'user']
 
 
+class FilmImageSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        film_id = self.context['film_id']
+        return FilmImage.objects.create(film_id=film_id, **validated_data)
+    
+    class Meta:
+        model = FilmImage
+        fields = ['id', 'image']
+
+
 class FilmSerializer(serializers.ModelSerializer):
+    images = FilmImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Film
-        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri']
+        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri', 'images']
+
+
+
 
 
 class SimpleFilmSerializer(serializers.ModelSerializer):
