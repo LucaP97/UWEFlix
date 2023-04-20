@@ -10,8 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
+from .custom_schedules import LastDayOfMonthSchedule
+# from celery.schedules import contrab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +33,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+# ive added this by internal IPs
+
 # Application definition
-CORS_ORIGIN_ALLOW_ALL=True
+# CORS_ORIGIN_ALLOW_ALL=True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,13 +46,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'corsheaders',
     'rest_framework',
     'djoser',
+    'django_celery_beat',
+    'generic_relations',
     'debug_toolbar',
     'UWEFlix',
     'authenticate',
     'club',
-    'corsheaders',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +68,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'cinema.urls'
@@ -88,6 +96,9 @@ INTERNAL_IPS = [
     "127.0.0.1"
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:3000',
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -136,6 +147,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -163,5 +178,22 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'authenticate.serializers.UserCreateSerializer',
         'current_user': 'authenticate.serializers.UserSerializer',
+    }
+}
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 2525
+DEFAULT_FROM_EMAIL = 'UWEFLIX@uwe.com'
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/1'
+CELERY_BEAT_SCHEDULE = {
+    'generate_statement': {
+        'task': 'accounts.tasks.generate_statement',
+        'schedule': crontab(day_of_month='31', hour=0, minute=0),
     }
 }

@@ -8,11 +8,19 @@ from . import views
 router = routers.DefaultRouter()
 router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
-router.register('accounts', views.AccountViewSet)
+# router.register('add_account', views.AddAccountViewSet)
+router.register('accounts', views.AccountViewSet, basename='accounts')
+router.register('club_booking', views.ClubBookingViewSet)
+router.register('club_orders', views.ClubOrderViewSet, basename='club_orders')
+router.register('club_order-items', views.ClubOrderItemViewSet)
+router.register('credit', views.CreditViewSet)
+# router.register('credit-item', views.CreditItemViewSet)
 
-accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
-accounts_router.register('statements', views.StatementsViewSet, basename='account-statement')
+# accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
+# accounts_router.register('statements', views.StatementsViewSet, basename='account-statement')
 
+booking_router = routers.NestedDefaultRouter(router, 'club_booking', lookup='club_booking')
+booking_router.register('club_items', views.ClubBookingItemViewSet, basename='club_booking-items')
 
 urlpatterns = [
 #     path("home/", views.home, name="home"),
@@ -20,5 +28,6 @@ urlpatterns = [
 #     path("register_user/", views.register, name="register_user"),
 #     path("logout_user/", views.logout_user, name="logout_user"),
     path('', include(router.urls)),
-    path('', include(accounts_router.urls)),
+    path('', include(booking_router.urls)),
+    # path('', include(accounts_router.urls)),
 ]
