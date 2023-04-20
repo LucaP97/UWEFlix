@@ -68,7 +68,7 @@ class UweflixStatementItemsViewSet(viewsets.ModelViewSet):
 ### statements ###
 
 class StatementViewSet(viewsets.ModelViewSet):
-    queryset = Statement.objects.all()
+    queryset = Statement.objects.prefetch_related('orders').all()
     serializer_class = StatementSerializer
 
 # class StatementViewSet(viewsets.ModelViewSet):

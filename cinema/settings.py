@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-from celery.schedulers import crontab
+from celery.schedules import crontab
+from .custom_schedules import LastDayOfMonthSchedule
 # from celery.schedules import contrab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -193,6 +194,6 @@ CELERY_BROKER_URL = 'redis://localhost:6379/1'
 CELERY_BEAT_SCHEDULE = {
     'generate_statement': {
         'task': 'accounts.tasks.generate_statement',
-        'schedule': crontab(minute=0, hour=0, day_of_month='last')
+        'schedule': crontab(day_of_month='31', hour=0, minute=0),
     }
 }
