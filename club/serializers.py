@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -135,6 +136,12 @@ class ClubBookingItemSerializer(serializers.ModelSerializer):
         return booking_item.quantity * booking_item.showing_object.price.student
     
 
+    def validate_showing_object(self, club_booking_item:ClubBookingItem):
+        if club_booking_item.showing_object.showing_date < timezone.now().date():
+            raise serializers.ValidationError("Showing date must be in the future")
+        return club_booking_item
+    
+
     class Meta:
         model = ClubBookingItem
         # 'content_object',
@@ -160,10 +167,31 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
         return value
     
     def validate_quantity(self, value):
-        if value < 10:
-            raise serializers.ValidationError("Quantity must be at least 10")
+        club_booking_id = self.context['club_booking_id']
+        showing_id = self.initial_data['showing_id']
+        # ticket_type = self.initial_data['ticket_type']
+
+        showing = Showing.objects.get(pk=showing_id)
+
+        try:
+            club_booking_item = ClubBookingItem.objects.get(club_booking_id=club_booking_id, showing_id=showing_id)#, ticket_type=ticket_type)
+            current_quantity = club_booking_item.quantity
+            total_quantity = current_quantity + value
+
+            if value < 10:
+                raise serializers.ValidationError("Quantity must be at least 10")
+            if total_quantity > showing.screen.capacity - showing.tickets_sold:
+                raise serializers.ValidationError(f'There are {showing.screen.capacity - showing.tickets_sold} tickets left for this showing.')
+            
+        except ClubBookingItem.DoesNotExist:
+            if value < 10:
+                raise serializers.ValidationError("Quantity must be at least 10")
+            if value > showing.screen.capacity - showing.tickets_sold:
+                raise serializers.ValidationError(f'There are {showing.screen.capacity - showing.tickets_sold} tickets left for this showing.')
+
         return value
     
+
     def save(self, **kwargs):
         club_booking_id = self.context['club_booking_id']
         showing_id = self.validated_data['showing_id']
@@ -187,6 +215,33 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
 
 
 class UpdateClubBookingItemSerializer(serializers.ModelSerializer):
+
+    def validate_quantity(self, value):
+        club_booking_id = self.context['club_booking_id']
+        showing_id = self.initial_data['showing_id']
+        ticket_type = self.initial_data['ticket_type']
+
+        showing = Showing.objects.get(pk=showing_id)
+
+        try:
+            club_booking_item = ClubBookingItem.objects.get(club_booking_id=club_booking_id, showing_id=showing_id, ticket_type=ticket_type)
+            current_quantity = club_booking_item.quantity
+            total_quantity = current_quantity + value
+
+            if value < 10:
+                raise serializers.ValidationError("Quantity must be at least 10")
+            if total_quantity > showing.screen.capacity - showing.tickets_sold:
+                raise serializers.ValidationError(f'There are {showing.screen.capacity - showing.tickets_sold} tickets left for this showing.')
+            
+        except ClubBookingItem.DoesNotExist:
+            if value < 10:
+                raise serializers.ValidationError("Quantity must be at least 10")
+            if value > showing.screen.capacity - showing.tickets_sold:
+                raise serializers.ValidationError(f'There are {showing.screen.capacity - showing.tickets_sold} tickets left for this showing.')
+            
+        return value
+
+
     class Meta:
         model = ClubBookingItem
         fields = ['quantity']
@@ -268,6 +323,20 @@ class CreateClubOrderSerializer(serializers.Serializer):
             if ClubBookingItem.objects.filter(club_booking_id=club_booking_id).count() == 0:
                 raise serializers.ValidationError("The booking is empty.")
             return club_booking_id
+        
+        def validate(self, data):
+            club_booking_id = data['club_booking_id']
+            club_booking_items = ClubBookingItem.objects.select_related('showing_type').filter(club_booking_id=club_booking_id)
+
+            for item in club_booking_items:
+                showing = item.showing_object
+                available_tickets = showing.screen.capacity - showing.tickets_sold
+                if item.quantity > available_tickets:
+                    raise serializers.ValidationError(f'There are {available_tickets} tickets remaining for the showing of {showing.film.title} on {showing.showing_date}.')
+                showing.tickets_sold += item.quantity
+                showing.save()
+
+            return data
         
         def update_account_balance(self, club_order):
             total_price = sum([ClubOrderItemSerializer(item).get_total_price(item) for item in club_order.club_items.all()])

@@ -102,6 +102,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ShowingSerializer(serializers.ModelSerializer):
     price = PriceSerializer()
+    tickets_remaining = serializers.SerializerMethodField()
     
     def create(self, validated_data):
         price_data = validated_data.pop('price')
@@ -113,10 +114,13 @@ class ShowingSerializer(serializers.ModelSerializer):
         # Price.objects.create(showing=showing, **price_data)
 
         return showing
+    
+    def get_tickets_remaining(self, showing:Showing):
+        return showing.screen.capacity - showing.tickets_sold
 
     class Meta:
         model = Showing
-        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price']
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price', 'tickets_remaining']
 
 
 class BookingItemSerializer(serializers.ModelSerializer):
@@ -179,8 +183,6 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('No showing with the given ID was found.')
         if Showing.objects.get(pk=value).showing_date < timezone.now().date():
             raise serializers.ValidationError('The showing date must be in the future.')
-        # if Showing.objects.get(pk=value).tickets_sold + int(self.initial_data['quantity']) > Showing.objects.get(pk=value).screen.capacity:
-        #     raise serializers.ValidationError('The showing is sold out.')
         return value
     
     def validate_quantity(self, value):
@@ -324,13 +326,6 @@ class CreateOrderSerializer(serializers.Serializer):
             if BookingItem.objects.filter(booking_id=booking_id).count() == 0:
                 raise serializers.ValidationError('The booking is empty.')
             return booking_id
-        
-        # this doesnt run, as there is not ticket_sold field on order model.
-        # def validate_ticket_sold(self, booking_item:BookingItem):
-        #     if booking_item.showing.tickets_sold + booking_item.quantity > booking_item.showing.screen.capacity:
-        #         raise serializers.ValidationError(f'There are only {booking_item.showing.screen.capacity - booking_item.showing.tickets_sold} seats remaining for this showing.')
-        #     booking_item.showing.tickets_sold += booking_item.quantity
-        #     return booking_item
         
 
         def validate(self, data):
