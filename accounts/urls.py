@@ -6,9 +6,9 @@ from . import views
 
 
 router = routers.DefaultRouter()
-router.register('orders', views.OrderViewSet, basename='orders')
-router.register('accounts', views.AccountViewSet, basename='accounts')
-router.register('uweflix-statement-items', views.UweflixStatementItemsViewSet, basename='uweflix-statement-items')
+# router.register('orders', views.OrderViewSet, basename='orders')
+# router.register('accounts', views.AccountViewSet, basename='accounts')
+# router.register('uweflix-statement-items', views.UweflixStatementItemsViewSet, basename='uweflix-statement-items')
 router.register('statements', views.StatementViewSet, basename='statements')
 # router.register('statements', views.StatementViewSet, basename='statements')
 

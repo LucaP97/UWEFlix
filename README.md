@@ -24,3 +24,7 @@ Link to Jira: https://uweflixgroup3.atlassian.net/jira/software/projects/UW/boar
 Club rep:
 username: 358673
 password: kZZu0YehVJJG
+
+
+heroku:
+https://git.heroku.com/uweflix-prod.git
