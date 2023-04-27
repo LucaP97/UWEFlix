@@ -60,6 +60,8 @@ class FilmViewSet(ModelViewSet):
             return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
     
+    permission_classes = [IsCinemaManagerOrReadOnly]
+    
 class FilmImageViewSet(ModelViewSet):
     serializer_class = FilmImageSerializer
 
@@ -68,6 +70,8 @@ class FilmImageViewSet(ModelViewSet):
     
     def get_queryset(self):
         return FilmImage.objects.filter(film_id=self.kwargs['film_pk'])
+    
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 # screens
 class ScreenViewSet(ModelViewSet):
@@ -76,6 +80,8 @@ class ScreenViewSet(ModelViewSet):
 
     filter_backends = [SearchFilter]
     search_fields = ['screen_name']
+
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 # showings
 # only issue is showing_time doesnt appear in the default form
@@ -94,7 +100,7 @@ class ShowingViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ShowingFilter
     search_fields = ['film__title']
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 # class TicketViewSet(ModelViewSet):
 #     queryset = Ticket.objects.all()

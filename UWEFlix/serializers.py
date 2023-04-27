@@ -43,8 +43,8 @@ class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
-        group = Group.objects.get(name='Cinema Manager')
-        group.user_set.add(user)
+        # group = Group.objects.get(name='Cinema Manager')
+        # group.user_set.add(user)
 
         return CinemaManager.objects.create(user=user, **validated_data)
 
