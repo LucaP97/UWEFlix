@@ -346,7 +346,11 @@ class CreateOrderSerializer(serializers.Serializer):
         def save(self, **kwargs):
             booking_id = self.validated_data['booking_id']
 
-            (student, created) = Student.objects.get_or_create(user_id=self.context['user_id'])
+            if 'user_id' in self.context:
+                student = Student.objects.get(user_id=self.context['user_id'])
+            else:
+                student = None
+
             order = Order.objects.create(student=student)
 
             # this is currently a queryset, we want to turn it into a collection via a list comprehension

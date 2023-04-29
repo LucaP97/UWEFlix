@@ -14,6 +14,7 @@ from .filters import *
 from .serializers import *
 import random
 from .tasks import *
+from .permissions import *
 
 
 ### celery tasks
@@ -52,6 +53,8 @@ class ClubViewSet(ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
 
+    permission_classes = [IsCinemaManagerOrReadOnly]
+
 
 # class AddAccountViewSet(ModelViewSet):
 #     queryset = Account.objects.all()
@@ -85,6 +88,8 @@ class AccountViewSet(ModelViewSet):
             return Account.objects.all()
         account_id = user.clubrepresentative.club.account.id
         return Account.objects.filter(id=account_id)
+    
+    permission_classes = [IsAccountManagerOrReadOnly, IsClubRepresentativeOrReadOnly]
 
 
 

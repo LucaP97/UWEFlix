@@ -137,10 +137,12 @@ class OrderViewSet(ModelViewSet):
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE']:
             return [IsAdminUser()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
 
     def create(self, request, *args, **kwargs):
-        serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
+        if request.user.is_authenticated:
+            serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
+        serializer = CreateOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
         serializer = OrderSerializer(order)
@@ -156,13 +158,19 @@ class OrderViewSet(ModelViewSet):
 
     # re-defining the queryset to be either admin or user associated can see the order
     def get_queryset(self):
-        user = self.request.user
 
-        if user.is_staff:
-            return Order.objects.all()
+        if self.request.user.is_authenticated:
+
+            user = self.request.user
+
+            if user.is_staff:
+                return Order.objects.all()
+            
+            # (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
+            student_id = Student.objects.only('id').get(user_id=user.id)
+            return Order.objects.filter(student_id=student_id)
         
-        (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
-        return Order.objects.filter(student_id=student_id)
+        return Order.objects.none()
 
 
 class OrderItemViewSet(ModelViewSet):
