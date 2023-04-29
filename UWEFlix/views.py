@@ -125,7 +125,10 @@ class BookingItemViewSet(ModelViewSet):
         return BookingItemSerializer
     
     def get_serializer_context(self):
-        return {'booking_id': self.kwargs['booking_pk']}
+        return {
+            'booking_id': self.kwargs['booking_pk'],
+            'request': self.request,
+        }
 
     def get_queryset(self):
         return BookingItem.objects.filter(booking__id=self.kwargs['booking_pk'])

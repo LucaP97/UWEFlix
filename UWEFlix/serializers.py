@@ -178,6 +178,16 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
     ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE)
     showing_id = serializers.IntegerField()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        user_authenticated = self.context.get('request', None) and self.context['request'].user.is_authenticated
+
+        if not user_authenticated:
+            self.fields['ticket_type'].choices = [
+                (ticket_type, label) for ticket_type, label in self.TICKET_TYPE_CHOICE if ticket_type != self.TICKET_TYPE_STUDENT
+            ]
+
     def validate_showing_id(self, value):
         if not Showing.objects.filter(pk=value).exists():
             raise serializers.ValidationError('No showing with the given ID was found.')
@@ -221,13 +231,7 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
             booking_item.save()
             self.instance = booking_item
         except BookingItem.DoesNotExist:
-            # here must create a new item
             self.instance = BookingItem.objects.create(booking_id=booking_id, **self.validated_data)
-
-        # think if tickets sold should be updated here, or in orders.
-        # showing = Showing.objects.get(pk=showing_id)
-
-
         
         return self.instance 
 
