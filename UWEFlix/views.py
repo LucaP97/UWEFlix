@@ -21,12 +21,12 @@ from .permissions import *
 class StudentViewSet(ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentRegistrationSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
