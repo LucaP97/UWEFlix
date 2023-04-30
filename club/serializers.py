@@ -12,6 +12,26 @@ from .models import *
 import random
         
 # user serializer
+class UserCreateSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ['first_name', 'last_name', 'email', 'username', 'password']
+
+
+class CreateAccountManagerSerializer(serializers.Serializer):
+    user = UserCreateSerializer()
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_data['first_name'] = user_data.pop('first_name')
+        user_data['last_name'] = user_data.pop('last_name')
+
+        user_serializer = UserCreateSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+
+        return AccountManager.objects.create(user=user, **validated_data)
+
+
 class ClubRepresentativeUserSerializer(BaseUserCreateSerializer):
     username = serializers.CharField(read_only=True)
     password = serializers.CharField(write_only=True, default=get_random_string(length=12))
@@ -377,28 +397,6 @@ class CreateClubOrderSerializer(serializers.Serializer):
 
 
 ######## accounts ########
-
-# class CreditSerializer(serializers.ModelSerializer):
-#     def validate_amount(self, value):
-#         if value < 0:
-#             raise serializers.ValidationError("Amount must be greater than 0.")
-#         return value
-
-#     class Meta:
-#         model = Credit 
-#         fields = ['id', 'amount', 'placed_at']
-
-
-# class SimpleCreditSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Credit
-#         fields = ['id', 'amount', 'placed_at']
-
-
-# class CreditListSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Credit
-#         fields = ['id', 'credit', 'account']
 
 
 class CreditSerializer(serializers.ModelSerializer):

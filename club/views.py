@@ -8,7 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, SAFE_METHODS
 from .models import *
 from .filters import *
 from .serializers import *
@@ -17,10 +17,11 @@ from .tasks import *
 from .permissions import *
 
 
-### celery tasks
+## account manager
 
-def say_hello(request):
-    create_statements().delay()
+class AccountManagerViewSet(ModelViewSet):
+    queryset = AccountManager.objects.all()
+    serializer_class = CreateAccountManagerSerializer
 
 
 
@@ -53,7 +54,7 @@ class ClubViewSet(ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
 
-    permission_classes = [IsCinemaManagerOrReadOnly]
+    permission_classes = [IsCinemaManagerOrReadOnly()]
 
 
 # class AddAccountViewSet(ModelViewSet):
@@ -68,11 +69,6 @@ class AccountViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = AccountFilter
 
-    def get_permissions(self):
-        if self.request.method in ['PATCH', 'DELETE']:
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
-
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateAccountSerializer
@@ -84,21 +80,21 @@ class AccountViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff:
+
+        if user.is_staff or hasattr(user, 'accountmanager'):
+            print('account manager = true')
             return Account.objects.all()
-        account_id = user.clubrepresentative.club.account.id
-        return Account.objects.filter(id=account_id)
+        elif hasattr(user, 'clubrepresentative'):
+            print('club rep = true')
+            account_id = user.clubrepresentative.club.account.id
+            return Account.objects.filter(id=account_id)
+        else:
+            print('none')
+            return Account.objects.none()
+        
+    permission_classes = [IsClubRepresentativeOrAccountManager]
+        
     
-    permission_classes = [IsAccountManagerOrReadOnly, IsClubRepresentativeOrReadOnly]
-
-
-
-# class StatementsViewSet(ModelViewSet):
-#     queryset = Statements.objects.all()
-#     serializer_class = StatementSerializer
-
-#     def get_serializer_context(self):
-#         return {'account_id': self.kwargs['account_pk']}
 
 
 ### Booking ###
