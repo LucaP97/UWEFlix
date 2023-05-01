@@ -19,14 +19,15 @@ from .permissions import *
 
 # student
 class StudentViewSet(ModelViewSet):
-    queryset = Student.objects.all()
+    # queryset = Student.objects.all()
     serializer_class = StudentRegistrationSerializer
     # permission_classes = [IsAuthenticated]
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [IsAuthenticated()]
-        return [AllowAny()]
+    def get_queryset(self):
+        if hasattr(self.request.user, 'cinema_manager') or self.request.user.is_staff:
+            return Student.objects.all()
+        else:
+            return Student.objects.filter(user_id=self.request.user.id)
 
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
@@ -40,10 +41,14 @@ class StudentViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         
+    permission_classes = [IsStudentOrStaffOrCinemaManager]
+        
 
 class CinemaManagerViewSet(ModelViewSet):
     queryset = CinemaManager.objects.all()
     serializer_class = CinemaManagerRegistrationSerializer
+
+    permission_classes = [IsStaffOrCinemaManager]
 
 
 # films
@@ -84,27 +89,15 @@ class ScreenViewSet(ModelViewSet):
     permission_classes = [IsCinemaManagerOrReadOnly]
 
 # showings
-# only issue is showing_time doesnt appear in the default form
 class ShowingViewSet(ModelViewSet):
     queryset = Showing.objects.select_related('film', 'screen').all()
     serializer_class = ShowingSerializer
-
-    #### the 'get_serializer_class' is wrong, need to think how to implement <<<<<<
-    # def get_serializer_class(self):
-    #     if self.request.method == 'GET':
-    #         return SimpleFilmSerializer
-    #     else:
-    #         return FilmSerializer
         
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ShowingFilter
     search_fields = ['film__title']
     permission_classes = [IsCinemaManagerOrReadOnly]
-
-# class TicketViewSet(ModelViewSet):
-#     queryset = Ticket.objects.all()
-#     serializer_class = TicketSerializer
 
 
 #### booking ####

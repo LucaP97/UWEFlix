@@ -54,7 +54,7 @@ class ClubViewSet(ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
 
-    permission_classes = [IsCinemaManagerOrReadOnly()]
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 
 # class AddAccountViewSet(ModelViewSet):
