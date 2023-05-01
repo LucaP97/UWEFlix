@@ -23,18 +23,18 @@ class AccountManagerViewSet(ModelViewSet):
     queryset = AccountManager.objects.all()
     serializer_class = CreateAccountManagerSerializer
 
+    permission_classes = [IsCinemaManagerOrStaff]
 
 
-class ClubRepresentativeViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
 
-# using this line for debugging purposes:
-# class ClubRepresentativeViewSet(ModelViewSet):
+# class ClubRepresentativeViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class ClubRepresentativeViewSet(ModelViewSet):
     queryset = ClubRepresentative.objects.all()
     serializer_class = ClubRepresentativeSerializer
 
-    def create(self, request, *args, **kwargs):
+    # def create(self, request, *args, **kwargs):
 
-        return super().create(request, *args, **kwargs)
+    #     return super().create(request, *args, **kwargs)
     
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
@@ -47,6 +47,8 @@ class ClubRepresentativeViewSet(CreateModelMixin, RetrieveModelMixin, UpdateMode
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+        
+    permission_classes = [IsCinemaManagerOrStaff]
 
     
 
@@ -54,7 +56,7 @@ class ClubViewSet(ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
 
-    permission_classes = [IsCinemaManagerOrReadOnly]
+    permission_classes = [IsCinemaManagerOrAccountManagerReadOnly]
 
 
 # class AddAccountViewSet(ModelViewSet):
@@ -79,20 +81,15 @@ class AccountViewSet(ModelViewSet):
         return AccountSerializer
 
     def get_queryset(self):
-        user = self.request.user
 
-        if user.is_staff or hasattr(user, 'accountmanager'):
-            print('account manager = true')
+        if hasattr(self.request.user, 'accountmanager'):
             return Account.objects.all()
-        elif hasattr(user, 'clubrepresentative'):
-            print('club rep = true')
-            account_id = user.clubrepresentative.club.account.id
-            return Account.objects.filter(id=account_id)
-        else:
-            print('none')
-            return Account.objects.none()
+        account_id = self.request.user.clubrepresentative.club.account.id
+        return Account.objects.filter(id=account_id)
         
-    permission_classes = [IsClubRepresentativeOrAccountManager]
+    permission_classes = [IsAccountManagerOrClubRepresentativeOnly]
+        
+    # permission_classes = [IsClubRepresentativeOrAccountManager]
         
     
 
@@ -173,6 +170,8 @@ class ClubOrderItemViewSet(ModelViewSet):
 class CreditViewSet(ModelViewSet):
     queryset = Credit.objects.all()
     serializer_class = CreditSerializer
+
+    permission_classes = [IsAccountManagerOrClubRepresentativeOnly]
 
 
 # class CreditViewSet(ModelViewSet):

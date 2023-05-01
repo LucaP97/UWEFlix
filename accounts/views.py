@@ -5,6 +5,7 @@ from .serializers import *
 from rest_framework import viewsets
 from datetime import datetime, timedelta 
 from dateutil.relativedelta import relativedelta
+from .permissions import *
 
 # Create your views here.
 
@@ -71,27 +72,5 @@ class StatementViewSet(viewsets.ModelViewSet):
     queryset = Statement.objects.prefetch_related('orders').all()
     serializer_class = StatementSerializer
 
-# class StatementViewSet(viewsets.ModelViewSet):
-#     serializer_class = StatementSerializer
+    permission_classes = [IsCinemaManagerOrAccountManagerOnly]
 
-#     def get_queryset(self):
-#         now = timezone.now()
-#         first_day_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-#         next_month = now.replace(day=1) + timedelta(days=32)
-#         last_day_of_month = next_month.replace(day=1) - timedelta(days=1)
-
-
-#         club_orders = ClubOrder.objects.filter(placed_at__range=(first_day_of_month, last_day_of_month))
-#         credits = Credit.objects.filter(placed_at__range=(first_day_of_month, last_day_of_month))
-#         orders = Order.objects.filter(placed_at__range=(first_day_of_month, last_day_of_month))
-
-#         accounts = Account.objects.prefetch_related(
-#             Prefetch('club_order', queryset=club_orders),
-#             Prefetch('credit', queryset=credits)
-#         )
-
-#         queryset = Statement.objects.filter(
-#             Q(order_type=ContentType.objects.get_for_model(Order), order_id__in=orders) |
-#             Q(order_type=ContentType.objects.get_for_model(ClubOrder), order_id__in=club_orders) |
-#             Q(account_type=ContentType.objects.get_for_model(Account), account_id__in=accounts)
-#         )
