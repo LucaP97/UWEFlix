@@ -26,5 +26,17 @@ username: 358673
 password: kZZu0YehVJJG
 
 
+Docker:
+- redis:
+docker run -d -p 6379:6379 redis
+
+
+Celery:
+celery -A cinema .... loglevel=info
+- worker
+- beat
+- flower
+
+
 heroku:
 https://git.heroku.com/uweflix-prod.git

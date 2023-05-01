@@ -21,12 +21,12 @@ from .permissions import *
 class StudentViewSet(ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentRegistrationSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
@@ -60,6 +60,8 @@ class FilmViewSet(ModelViewSet):
             return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
     
+    permission_classes = [IsCinemaManagerOrReadOnly]
+    
 class FilmImageViewSet(ModelViewSet):
     serializer_class = FilmImageSerializer
 
@@ -68,6 +70,8 @@ class FilmImageViewSet(ModelViewSet):
     
     def get_queryset(self):
         return FilmImage.objects.filter(film_id=self.kwargs['film_pk'])
+    
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 # screens
 class ScreenViewSet(ModelViewSet):
@@ -76,6 +80,8 @@ class ScreenViewSet(ModelViewSet):
 
     filter_backends = [SearchFilter]
     search_fields = ['screen_name']
+
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 # showings
 # only issue is showing_time doesnt appear in the default form
@@ -94,7 +100,7 @@ class ShowingViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ShowingFilter
     search_fields = ['film__title']
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsCinemaManagerOrReadOnly]
 
 # class TicketViewSet(ModelViewSet):
 #     queryset = Ticket.objects.all()
@@ -119,7 +125,10 @@ class BookingItemViewSet(ModelViewSet):
         return BookingItemSerializer
     
     def get_serializer_context(self):
-        return {'booking_id': self.kwargs['booking_pk']}
+        return {
+            'booking_id': self.kwargs['booking_pk'],
+            'request': self.request,
+        }
 
     def get_queryset(self):
         return BookingItem.objects.filter(booking__id=self.kwargs['booking_pk'])
@@ -131,10 +140,12 @@ class OrderViewSet(ModelViewSet):
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE']:
             return [IsAdminUser()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
 
     def create(self, request, *args, **kwargs):
-        serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
+        if request.user.is_authenticated:
+            serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
+        serializer = CreateOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
         serializer = OrderSerializer(order)
@@ -150,13 +161,19 @@ class OrderViewSet(ModelViewSet):
 
     # re-defining the queryset to be either admin or user associated can see the order
     def get_queryset(self):
-        user = self.request.user
 
-        if user.is_staff:
-            return Order.objects.all()
+        if self.request.user.is_authenticated:
+
+            user = self.request.user
+
+            if user.is_staff:
+                return Order.objects.all()
+            
+            # (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
+            student_id = Student.objects.only('id').get(user_id=user.id)
+            return Order.objects.filter(student_id=student_id)
         
-        (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
-        return Order.objects.filter(student_id=student_id)
+        return Order.objects.none()
 
 
 class OrderItemViewSet(ModelViewSet):

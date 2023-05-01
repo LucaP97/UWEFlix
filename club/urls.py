@@ -6,6 +6,7 @@ from . import views
 
 
 router = routers.DefaultRouter()
+router.register('account_manager', views.AccountManagerViewSet)
 router.register('club_representative', views.ClubRepresentativeViewSet)
 router.register('clubs', views.ClubViewSet)
 # router.register('add_account', views.AddAccountViewSet)

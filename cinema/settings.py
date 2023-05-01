@@ -194,6 +194,6 @@ CELERY_BROKER_URL = 'redis://localhost:6379/1'
 CELERY_BEAT_SCHEDULE = {
     'generate_statement': {
         'task': 'accounts.tasks.generate_statement',
-        'schedule': crontab(day_of_month='31', hour=0, minute=0),
+        'schedule': crontab(day_of_month='28-31', hour=23, minute=58),
     }
 }

@@ -43,8 +43,8 @@ class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
-        group = Group.objects.get(name='Cinema Manager')
-        group.user_set.add(user)
+        # group = Group.objects.get(name='Cinema Manager')
+        # group.user_set.add(user)
 
         return CinemaManager.objects.create(user=user, **validated_data)
 
@@ -102,6 +102,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ShowingSerializer(serializers.ModelSerializer):
     price = PriceSerializer()
+    tickets_remaining = serializers.SerializerMethodField()
     
     def create(self, validated_data):
         price_data = validated_data.pop('price')
@@ -113,10 +114,13 @@ class ShowingSerializer(serializers.ModelSerializer):
         # Price.objects.create(showing=showing, **price_data)
 
         return showing
+    
+    def get_tickets_remaining(self, showing:Showing):
+        return showing.screen.capacity - showing.tickets_sold
 
     class Meta:
         model = Showing
-        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price']
+        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time', 'price', 'tickets_remaining']
 
 
 class BookingItemSerializer(serializers.ModelSerializer):
@@ -174,13 +178,21 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
     ticket_type = serializers.ChoiceField(choices=TICKET_TYPE_CHOICE)
     showing_id = serializers.IntegerField()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        user_authenticated = self.context.get('request', None) and self.context['request'].user.is_authenticated
+
+        if not user_authenticated:
+            self.fields['ticket_type'].choices = [
+                (ticket_type, label) for ticket_type, label in self.TICKET_TYPE_CHOICE if ticket_type != self.TICKET_TYPE_STUDENT
+            ]
+
     def validate_showing_id(self, value):
         if not Showing.objects.filter(pk=value).exists():
             raise serializers.ValidationError('No showing with the given ID was found.')
         if Showing.objects.get(pk=value).showing_date < timezone.now().date():
             raise serializers.ValidationError('The showing date must be in the future.')
-        # if Showing.objects.get(pk=value).tickets_sold + int(self.initial_data['quantity']) > Showing.objects.get(pk=value).screen.capacity:
-        #     raise serializers.ValidationError('The showing is sold out.')
         return value
     
     def validate_quantity(self, value):
@@ -219,13 +231,7 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
             booking_item.save()
             self.instance = booking_item
         except BookingItem.DoesNotExist:
-            # here must create a new item
             self.instance = BookingItem.objects.create(booking_id=booking_id, **self.validated_data)
-
-        # think if tickets sold should be updated here, or in orders.
-        # showing = Showing.objects.get(pk=showing_id)
-
-
         
         return self.instance 
 
@@ -325,13 +331,6 @@ class CreateOrderSerializer(serializers.Serializer):
                 raise serializers.ValidationError('The booking is empty.')
             return booking_id
         
-        # this doesnt run, as there is not ticket_sold field on order model.
-        # def validate_ticket_sold(self, booking_item:BookingItem):
-        #     if booking_item.showing.tickets_sold + booking_item.quantity > booking_item.showing.screen.capacity:
-        #         raise serializers.ValidationError(f'There are only {booking_item.showing.screen.capacity - booking_item.showing.tickets_sold} seats remaining for this showing.')
-        #     booking_item.showing.tickets_sold += booking_item.quantity
-        #     return booking_item
-        
 
         def validate(self, data):
             booking_id = data['booking_id']
@@ -351,7 +350,11 @@ class CreateOrderSerializer(serializers.Serializer):
         def save(self, **kwargs):
             booking_id = self.validated_data['booking_id']
 
-            (student, created) = Student.objects.get_or_create(user_id=self.context['user_id'])
+            if 'user_id' in self.context:
+                student = Student.objects.get(user_id=self.context['user_id'])
+            else:
+                student = None
+
             order = Order.objects.create(student=student)
 
             # this is currently a queryset, we want to turn it into a collection via a list comprehension
