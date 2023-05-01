@@ -29,7 +29,7 @@ const LoginUser = () => {
 
 	return (
 		<div className="container">
-			<h2 style={{ marginTop: 10 }}>Create Account</h2>
+			<h2 style={{ marginTop: 10 }}>Sign in</h2>
 			<Form onSubmit={handleSubmit}>
 				<Form.Group controlId="formUsername" style={{ marginBottom: 10 }}>
 					<Form.Label>Username</Form.Label>

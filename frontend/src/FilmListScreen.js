@@ -16,7 +16,7 @@ import {
 
 //icons
 import { IonIcon } from "@ionic/react";
-import { trashOutline } from "ionicons/icons";
+import { trashOutline, filmOutline, addOutline } from "ionicons/icons";
 
 function FilmRow(props) {
 	function getShowingsForFilm(film, showings) {
@@ -58,6 +58,7 @@ function FilmRow(props) {
 
 function FilmListScreen() {
 	const [films, setFilms] = useState([]);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchFilms = async () => {
@@ -69,8 +70,19 @@ function FilmListScreen() {
 	}, []);
 
 	return (
-		<div style={{ height: "100vh" }}>
-			<div>{/* add button link to add new film */}</div>
+		<div className={"list"} style={{ justifyContent: "flex-start" }}>
+			<div className="top-row">
+				<button
+					href=""
+					className={"btn btn-primary"}
+					onClick={() => {
+						navigate("/add_film");
+					}}
+				>
+					Add New Film <IonIcon icon={addOutline} size="small" color="white" />
+					<IonIcon icon={filmOutline} size="small" color="white" />
+				</button>
+			</div>
 			<div className="list">
 				{films.map((film) => (
 					<FilmRow
