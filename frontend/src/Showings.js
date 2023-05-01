@@ -82,7 +82,6 @@ function Showings() {
 
 	return (
 		<div className="container" style={{ marginTop: 20 }}>
-			{console.log(showings)}
 			<div className="row ">
 				{films.map((film) => (
 					<Showing

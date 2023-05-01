@@ -53,6 +53,10 @@ function Booking() {
 		setTotalCost(calculatePrice());
 	}, [studentTickets, adultTickets, childTickets, showingTime, showingID]);
 
+	//post booking
+	//post order
+	
+
 	return (
 		<div style={{ height: "88vh" }}>
 			<div className="film-container">
