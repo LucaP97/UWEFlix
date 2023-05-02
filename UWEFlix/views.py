@@ -160,7 +160,7 @@ class OrderViewSet(ModelViewSet):
 
             user = self.request.user
 
-            if user.is_staff:
+            if user.is_staff or hasattr(user, 'cinema_manager'):
                 return Order.objects.all()
             
             # (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
