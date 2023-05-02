@@ -19,22 +19,6 @@ import { IonIcon } from "@ionic/react";
 import { trashOutline, filmOutline, addOutline } from "ionicons/icons";
 
 function FilmRow(props) {
-	function getShowingsForFilm(film, showings) {
-		return showings.filter((s) => s.film == film.id);
-	}
-
-	const handleDelete = async () => {
-		//delete all associated showings first
-		const showings = await getAllShowings();
-		const filmShowings = getShowingsForFilm(props.film, showings);
-
-		filmShowings.forEach((showing) => {
-			deleteFilmShowings(showing.id);
-		});
-		//delete film
-		deleteFilm(props.id);
-	};
-
 	return (
 		<div className="row-container">
 			<div class="image-container">
@@ -48,7 +32,13 @@ function FilmRow(props) {
 				{props.title.charAt(0).toUpperCase() + props.title.slice(1)}
 			</h3>
 			<div style={{ marginLeft: "auto" }}>
-				<button onClick={handleDelete}>
+				<button
+					onClick={() => {
+						props.handler(props.film, props.id);
+						const updatedFilms = props.prevfilms.filter(film => props.id !== film.id)
+						props.updateFilms(updatedFilms)
+					}}
+				>
 					<IonIcon icon={trashOutline} size="large" color="black" />
 				</button>
 			</div>
@@ -68,6 +58,27 @@ function FilmListScreen() {
 
 		fetchFilms();
 	}, []);
+
+
+	function getShowingsForFilm(film, showings) {
+		return showings.filter((s) => s.film == film.id);
+	}
+
+	const handleDelete = async (film, film_id) => {
+		//delete all associated showings first
+		const showings = await getAllShowings();
+		const filmShowings = getShowingsForFilm(film, showings);
+
+		filmShowings.forEach((showing) => {
+			deleteFilmShowings(showing.id);
+		});
+		//delete film
+		deleteFilm(film_id);
+	};
+
+	const updateFilms = (fs) => {
+		setFilms(fs);
+	};
 
 	return (
 		<div className={"list"} style={{ justifyContent: "flex-start" }}>
@@ -94,6 +105,9 @@ function FilmListScreen() {
 						duration={film.duration}
 						image={film.image_uri}
 						description={film.short_trailer_description}
+						handler={handleDelete}
+						updateFilms={updateFilms}
+						prevfilms={films}
 					/>
 				))}
 			</div>
