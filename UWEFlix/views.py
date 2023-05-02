@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
+from django.core.mail import send_mail, mail_admins, EmailMessage, BadHeaderError
+from templated_mail.mail import BaseEmailMessage
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from rest_framework.decorators import action
@@ -16,6 +18,39 @@ from .models import *
 from .serializers import *
 from .filters import *
 from .permissions import *
+
+
+# # emails
+# try:
+#     send_mail('subject', 'message', 'from', ['to'], fail_silently=False)
+# except BadHeaderError:
+#     pass
+
+# # email to site admins
+# try:
+#     mail_admins('subject', 'message', html_message='message')
+# except BadHeaderError:
+#     pass
+
+# # emails with attachments
+
+# try:
+#     message = EmailMessage('attachment email', 'message', 'UWEFlix@uwe.com', ['to'])
+#     message.attach_file('media/cinema/images/IMG_7259.jpg')
+#     message.send()
+# except BadHeaderError:
+#     pass
+
+
+# templated emails
+try:
+    message = BaseEmailMessage(
+        template_name = 'emails/booking_confirmation.html',
+        context={'name': 'Luca'}
+    )
+    message.send(['to'])
+except BadHeaderError:
+    pass
 
 
 # student
