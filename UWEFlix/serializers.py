@@ -1,4 +1,5 @@
 from django.utils import dateformat, timezone
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
 from django.db import transaction
 from rest_framework import serializers
@@ -199,6 +200,9 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
         booking_id = self.context['booking_id']
         showing_id = self.initial_data['showing_id']
         ticket_type = self.initial_data['ticket_type']
+
+        if not Showing.objects.filter(pk=showing_id).exists():
+            raise serializers.ValidationError('No showing with the given ID was found.')
 
         showing = Showing.objects.get(pk=showing_id)
 
