@@ -8,8 +8,10 @@ import Popper from "popper.js";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
 import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { useNavigate } from "react-router-dom";
+import "./styles/payment.css";
 
 function ageRatingColor(age) {
 	if (age <= 3) {
@@ -42,11 +44,16 @@ function Booking() {
 	// bootstrap modal variables
 	const [show, setShow] = useState(false);
 
-	const handleClose = () => {
+	const confirmDetails = () => {
 		setShow(false)
 		navigate("/showings")
 
 	};
+
+	const handleClose = () => {
+		setShow(false)
+	};
+
 	const handleShow = () => setShow(true);
 	//
 
@@ -154,17 +161,57 @@ function Booking() {
 		<div style={{ height: "88vh" }}>
 			<div className="film-container">
 			<>
-				<Modal show={show} onHide={handleClose}>
-					<Modal.Header closeButton>
-						<Modal.Title>Modal heading</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>Booking Confirmed</Modal.Body>
-					<Modal.Footer>
-						<Button variant="secondary" onClick={handleClose}>
-							OK
-						</Button>
-					</Modal.Footer>
-				</Modal>
+			<Modal show={show} onHide={handleClose}>
+				<Modal.Header closeButton>
+					<Modal.Title>Enter Details</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<Form>
+						<Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+							<Form.Label>Full Name</Form.Label>
+							<Form.Control
+								type="text"
+								placeholder="e.g. Jeff Winger"
+								autoFocus
+							/>
+							<Form.Label>Email address</Form.Label>
+							<Form.Control
+								type="email"
+								placeholder="name@example.com"
+								autoFocus
+							/>
+						</Form.Group>
+						<Form.Group
+							className="mb-3"
+							controlId="exampleForm.ControlTextarea1"
+							>
+							<Form.Label>Card Details</Form.Label>
+							<div class="form-group">
+								<input type="text" id="card-number" name="cardNumber" class="form-input" placeholder="Enter card number" required />
+							</div>
+
+							<Form.Label>Expiration Date</Form.Label>
+							<div class="form-group">
+								<input type="text" id="expiration-date" name="expirationDate" class="form-input" placeholder="MM/YY" required />
+							</div>
+
+							<Form.Label>Security Code</Form.Label>
+							<div class="form-group">
+								<input type="text" id="security-code" name="securityCode" class="form-input" placeholder="Enter security code" required />
+							</div>
+						</Form.Group>
+					</Form>
+				</Modal.Body>
+				<Modal.Footer>
+				<Button variant="secondary" onClick={handleClose}>
+					Back
+				</Button>
+				<Button variant="primary" onClick={confirmDetails}>
+					Confirm Details
+				</Button>
+				</Modal.Footer>
+			</Modal>
+
 				</>
 				<img
 					className="image-booking"
