@@ -1,9 +1,15 @@
-{% block subject %}This is a long subject{% endblock %}
+{% block subject %}Booking Confirmation{% endblock %}
 
 {% block text_body %}
 {% endblock %}
 
 
 {% block html_body %}
-<h1>Hello</h1>
+<h1>Details</h1>
+<p>Booking ID: {{ booking.id }}</p>
+<p>Date: {{ booking.booking_date }}</p>
+<p>Time: {{ booking.booking_time }}</p>
+<p>Ticket Type: {{ booking.ticket_type }}</p>
+
+
 {% endblock %}
