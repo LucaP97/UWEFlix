@@ -4,8 +4,10 @@ import { getAllFilms } from "./services/FilmService";
 import { event } from 'jquery';
 
 // NEED TO INSTALL DATE PICKER: npm install react-datepicker --save
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import DateTimePicker from 'react-datetime-picker'
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
 
 // ONLY CINEMA MANAGER HAS AUTHORITY TO POST NEW SHOWINGS
 
@@ -17,7 +19,9 @@ function AddShowing(){
     const [filmsList, setFilmsList] = useState([]);
     const [film, setFilm] = useState(null);
 
+
     const [date, setDate] = useState(new Date());
+    const [datetime, setDateTime] = useState(new Date());
 
     const [timeValue, setTimeValue] = useState('');
 
@@ -25,6 +29,8 @@ function AddShowing(){
 
     const [priceList, setPriceList] = useState([]);
     const [price, setPrice] = useState(null);
+
+    //ar DateTimeField = require('react-bootstrap-datetimepicker');
 
     useEffect(() => {
         const fetchScreens = async () => {
@@ -84,7 +90,6 @@ function AddShowing(){
     return(
         <div className={"col-md-4"}>
             <h2 style={{ marginTop: 10 }}>Add a new Showing</h2>
-
             <Form onSubmit={handleSubmit}>
                 {/* select screen */}
                 <Form.Group controlId="screens" style={{ marginBottom: 10}}>
@@ -114,28 +119,10 @@ function AddShowing(){
                 </Form.Group>                
                 {/* select date */}
                 <Form.Group>
-                    <Form.Label>Date</Form.Label>
+                    <Form.Label>Date Time</Form.Label>
                     <div>
-                        <DatePicker 
-                            selected={date} 
-                            onChange={(date_) => setDate(date_)}
-                            dateFormat="dd/MM/yyyy"
-                        />
+                        <DateTimePicker onChange={setDateTime} value={datetime} />
                     </div>
-                </Form.Group>
-                {/* select time */}
-                <Form.Group>
-                    <Form.Label>Time</Form.Label>
-                    <Form.Control
-                        type="text"
-                        placeholder="00:00:00"
-                        value={timeValue}
-                        onChange={
-                            (event) => {
-                                setTimeValue(event.target.value);
-                            }
-                        }
-                    />
                 </Form.Group>
                 {/* set ticket sold */}
                 <Form.Group>

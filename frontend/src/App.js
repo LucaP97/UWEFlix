@@ -6,6 +6,7 @@ import LoginUser from "./LoginUser";
 import NavBar from "./Components/NavBar";
 import FilmListScreen from "./FilmListScreen";
 import AddFilmScreen from "./AddFilmScreen";
+import AddShowing from "./AddShowing";
 
 function App() {
 	return (
@@ -38,6 +39,7 @@ function App() {
 						<Route path="/add_film" element={<AddFilmScreen />} />
 						<Route path="/showings" element={<Showings />} />
 						<Route path="/showings/booking" element={<Booking />} />
+						<Route path="/add_showings" element={<AddShowing />} />
 					</Routes>
 				</body>
 			</html>
