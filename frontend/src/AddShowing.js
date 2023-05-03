@@ -3,11 +3,19 @@ import { Form, Button } from "react-bootstrap";
 import { getAllFilms } from "./services/FilmService";
 import { event } from 'jquery';
 
-// NEED TO INSTALL DATE PICKER: npm install react-datepicker --save
-import DateTimePicker from 'react-datetime-picker'
-import 'react-datetime-picker/dist/DateTimePicker.css';
+// NEED TO INSTALL DATE PICKER: npm install react-datetime-picker
+// NEED TO INSTALL TIME PICKER: npm install react-time-picker
+
+import DatePicker from 'react-date-picker'
+import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
+
+import TimePicker from 'react-time-picker'
+import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
+
+
+
 
 // ONLY CINEMA MANAGER HAS AUTHORITY TO POST NEW SHOWINGS
 
@@ -19,11 +27,8 @@ function AddShowing(){
     const [filmsList, setFilmsList] = useState([]);
     const [film, setFilm] = useState(null);
 
-
     const [date, setDate] = useState(new Date());
-    const [datetime, setDateTime] = useState(new Date());
-
-    const [timeValue, setTimeValue] = useState('');
+    const [timeValue,setTimeValue] = useState(null);
 
     const [tickeksSold, setTickeksSold] = useState(0);
 
@@ -119,9 +124,16 @@ function AddShowing(){
                 </Form.Group>                
                 {/* select date */}
                 <Form.Group>
-                    <Form.Label>Date Time</Form.Label>
+                    <Form.Label>Date</Form.Label>
                     <div>
-                        <DateTimePicker onChange={setDateTime} value={datetime} />
+                        <DatePicker onChange={setDate} value={date} />
+                    </div>
+                </Form.Group>
+                {/* select time */}
+                <Form.Group>
+                    <Form.Label>Time</Form.Label>
+                    <div>
+                        <TimePicker onChange={setTimeValue} value={timeValue} />
                     </div>
                 </Form.Group>
                 {/* set ticket sold */}
@@ -141,7 +153,7 @@ function AddShowing(){
                     >
                         <option value="">--Select price config--</option>
                         {priceList.map(price => (
-                            <option key={price.id} value={price.id}>{price.id}</option>
+                            <option value={price.id}>{price.id}</option>
                         ))}
 					</Form.Select>
                 </Form.Group>

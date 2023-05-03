@@ -54,8 +54,12 @@ function Booking() {
 	}, [studentTickets, adultTickets, childTickets, showingTime, showingID]);
 
 	//post booking
-	//post order
-	
+	function bookShowing(){
+
+		
+	}
+
+	//post order	
 
 	return (
 		<div style={{ height: "88vh" }}>
@@ -196,7 +200,7 @@ function Booking() {
 				<button
 					className={"btn btn-primary"}
 					style={{ float: "right", marginLeft: "2vw" }}
-					onClick={() => {}}
+					onClick={bookShowing}
 				>
 					Confirm Booking
 				</button>
