@@ -71,9 +71,15 @@ function AddShowing(){
     const handleSubmit = (e) =>{
         e.preventDefault();
 
+        const token = localStorage.getItem('access_token')
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `JWT ${token}`
+        }
+
         fetch("http://127.0.0.1:8000/uweflix/showings/", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: JSON.stringify({
                 screen: screen,
                 film: film,
@@ -85,7 +91,7 @@ function AddShowing(){
         })
         .then(response => response.json())
         .then(data => {
-            console.log(`T: ${JSON.stringify(data)}`);
+            // console.log(`T: ${JSON.stringify(data)}`);
         })
         ;
     
