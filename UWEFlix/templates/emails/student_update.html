@@ -1,0 +1,11 @@
+{% block subject %}Account successfully updated{% endblock %}
+
+{% block html_body %}
+<h1>Account successfully updated</h1>
+<p>Hi {{ user.username }}, you have successfully updated your details.</p>
+<p>first name: {{ user.first_name }}</p>
+<p>last name: {{ user.last_name }}</p>
+<p>email: {{ user.email }}</p>
+<p>password: {{ user.password }}</p>
+<p>birth date: {{ student.birth_date }}</p>
+{% endblock %}

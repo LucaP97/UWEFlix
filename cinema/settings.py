@@ -178,8 +178,17 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'authenticate.serializers.UserCreateSerializer',
         'current_user': 'authenticate.serializers.UserSerializer',
-    }
+    },
+    # 'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    # 'PASSWORD_RESET_CONFIRM_URL': 'auth/password/reset/confirm/{uid}/{token}',
+    # 'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+    # 'EMIAL': {
+    #     'password_reset': 'djoser.email.PasswordResetEmail',
+    # "ACTIVATION_URL": "activate/{uid}/{token}",
+    'PASSWORD_RESET_CONFIRM_URL': 'reset_password/{uid}/{token}',
+    
 }
+
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

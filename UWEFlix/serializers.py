@@ -31,6 +31,13 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         model = Student
         fields = ['id', 'user', 'birth_date']
 
+class StudentUpdateSerializer(serializers.ModelSerializer):
+    user = UserCreateSerializer()
+
+    class Meta:
+        model = Student
+        fields = ['id', 'user', 'birth_date']
+
 
 class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
     user = UserCreateSerializer()

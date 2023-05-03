@@ -20,17 +20,6 @@ from .filters import *
 from .permissions import *
 
 
-# templated emails
-try:
-    message = BaseEmailMessage(
-        template_name = 'emails/student_registration.html',
-        context={'name': 'Luca'}
-    )
-    message.send(['to'])
-except BadHeaderError:
-    pass
-
-
 # student
 class StudentViewSet(ModelViewSet):
     # queryset = Student.objects.all()
@@ -42,6 +31,13 @@ class StudentViewSet(ModelViewSet):
             return Student.objects.all()
         else:
             return Student.objects.filter(user_id=self.request.user.id)
+        
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return StudentRegistrationSerializer
+        if self.request.method == 'PUT':
+            return StudentUpdateSerializer
+        return StudentRegistrationSerializer
 
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
@@ -67,6 +63,24 @@ class StudentViewSet(ModelViewSet):
                 message = BaseEmailMessage(
                     template_name = 'emails/student_registration.html',
                     context={'user': user}
+                )
+                message.send([user.email])
+            except BadHeaderError:
+                pass
+
+        return response
+    
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            student = Student.objects.get(pk=response.data['id'])
+            user = student.user
+
+            try:
+                message = BaseEmailMessage(
+                    template_name = 'emails/student_update.html',
+                    context={'user': user, 'student': student}
                 )
                 message.send([user.email])
             except BadHeaderError:
