@@ -70,23 +70,25 @@ class StudentViewSet(ModelViewSet):
 
         return response
     
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
+    # issue with this, as only sends post request. check mosh tutorial.
 
-        if response.status_code == 200:
-            student = Student.objects.get(pk=response.data['id'])
-            user = student.user
+    # def update(self, request, *args, **kwargs):
+    #     response = super().update(request, *args, **kwargs)
 
-            try:
-                message = BaseEmailMessage(
-                    template_name = 'emails/student_update.html',
-                    context={'user': user, 'student': student}
-                )
-                message.send([user.email])
-            except BadHeaderError:
-                pass
+    #     if response.status_code == 200:
+    #         student = Student.objects.get(pk=response.data['id'])
+    #         user = student.user
 
-        return response
+    #         try:
+    #             message = BaseEmailMessage(
+    #                 template_name = 'emails/student_update.html',
+    #                 context={'user': user, 'student': student}
+    #             )
+    #             message.send([user.email])
+    #         except BadHeaderError:
+    #             pass
+
+    #     return response
         
     # this permission class is no good. doesnt allow new users to register.
     # permission_classes = [IsStudentOrStaffOrCinemaManager]
@@ -177,22 +179,7 @@ class BookingItemViewSet(ModelViewSet):
 
 class OrderViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
-
-    def get_permissions(self):
-        if self.request.method in ['PATCH', 'DELETE']:
-            return [IsAdminUser()]
-        return [AllowAny()]
-
-    def create(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
-        serializer = CreateOrderSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        order = serializer.save()
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
-        
-
+    
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
@@ -215,6 +202,34 @@ class OrderViewSet(ModelViewSet):
             return Order.objects.filter(student_id=student_id)
         
         return Order.objects.none()
+    
+    def create(self, request, *args, **kwargs):
+        context = {'user': self.request.user} if self.request.user.is_authenticated else {}
+
+        serializer = CreateOrderSerializer(data=request.data, context=context)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+
+        response = Response(serializer.data)
+
+        if response.status_code == 200 and self.request.user.is_authenticated:
+            try:
+                message = BaseEmailMessage(
+                    template_name = 'emails/order_confirmation.html',
+                    context={'user': self.request.user, 'order': order, 'total_price': serializer.data['total_price']}
+                )
+                message.send([self.request.user.email])
+            except BadHeaderError:
+                pass
+
+        return response
+    
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [AllowAny()]
+
 
 
 class OrderItemViewSet(ModelViewSet):

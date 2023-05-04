@@ -1,0 +1,21 @@
+{% block subject %}Booking Confirmation{% endblock %}
+
+{% block html_body %}
+<p>Dear {{ user.username }},</p>
+
+<p>Thank you for your order. Your order ID is <strong>{{ order.id }}</strong>.</p>
+
+<p>Order summary:</p>
+{% for item in order.items.all %}
+    <p> Film: {{ item.showing.film.title }} </p>
+    <p> Screen: {{ item.showing.screen.name }} </p>
+    <p> Date: {{ item.showing.date }} </p>
+    <p> Time: {{ item.showing.time }} </p>
+    <p> Type: {{ item.ticket_type }} </p>
+    <p> Quantity: {{ item.quantity }} </p>
+    
+{% endfor %}
+
+<p>Total: £{{ total_price }}</p>
+
+{% endblock %}
