@@ -30,6 +30,11 @@ function NavBar() {
             </a>
           </li>
           <li className="nav-item">
+            <a className="nav-link" href="/add_showings">
+              Add Showings
+            </a>
+          </li>
+          <li className="nav-item">
             <a className="nav-link" href="#">
               Contact
             </a>

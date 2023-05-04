@@ -14,6 +14,17 @@ super user credentials
 username: admin
 password: LMicyb8=O
 
+LOGIN STEPS IN BACKEND:
+
+    1.  enter user details
+    2.  copy access key
+    3.  got to ModHeader
+    4.  press "+" button and "Request header"
+    5.  in "Name" enter - Authorization
+    6.  in "Value" enter - JTW <access key>
+    6.  go back to /uweflix, check top right corner to see "cinema1"
+        this means you are logged in
+
 
 Link to Trello: https://trello.com/b/J8gx00a2/sprints
 
