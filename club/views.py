@@ -131,10 +131,25 @@ class ClubOrderViewSet(ModelViewSet):
     
     # for now, associating the order with the user ID (which is linked to the club rep), rather than the account
     def create(self, request, *args, **kwargs):
+        context = {'user': self.request.user}
+
         serializer = CreateClubOrderSerializer(data=request.data, context={'account_id': self.request.user.clubrepresentative.club.account.id})
         serializer.is_valid(raise_exception=True)
         club_order = serializer.save()
         serializer = ClubOrderSerializer(club_order)
+
+        response = Response(serializer.data)
+
+        if response.status_code == 200:
+            try:
+                message = BaseEmailMessage(
+                    template_name = 'emails/club_order_confirmation.html',
+                    context={'user': self.request.user, 'club_order': club_order, 'discounted_total_price': serializer.data['discounted_total_price']}
+                )
+                message.send([self.request.user.email])
+            except BadHeaderError:
+                pass
+
         return Response(serializer.data)
     
     def get_serializer_class(self):
