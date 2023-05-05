@@ -60,7 +60,7 @@ class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
         fields = ['id', 'user']
 
 class TemporaryCinemaManagerRegistrationSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.filter(employee__isnull=False))
     expiration_date = serializers.DateField(required=True)
 
     class Meta:

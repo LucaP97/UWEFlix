@@ -228,5 +228,10 @@ CELERY_BEAT_SCHEDULE = {
     'generate_statement': {
         'task': 'accounts.tasks.generate_statement',
         'schedule': crontab(day_of_month='28-31', hour=23, minute=58),
+    },
+    'delete_expired_temporary_cinema_managers': {
+        'task': 'UWEFlix.tasks.delete_expired_temporary_cinema_managers',
+        'schedule': crontab(hour=0, minute=0),
+
     }
 }
