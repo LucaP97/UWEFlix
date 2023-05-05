@@ -1,0 +1,29 @@
+{% block subject %}Booking Confirmation{% endblock %}
+
+{% block html_body %}
+<div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #333; max-width: 600px; margin: 0 auto;">
+    <h1 style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 24px;">Booking Confirmation for {{ club_name }}</h1>
+    <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+
+    <p>Thank you for your order for {{ club_name }}. Your order ID is <strong>{{ club_order.id }}</strong>.</p>
+
+    <h2 style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 12px;">Order Summary</h2>
+    {% for item in club_order.club_items.all %}
+    <div style="border: 1px solid #ccc; padding: 16px; margin-bottom: 16px;">
+        <p><strong>Film:</strong> {{ club_item.showing_object.film.title }} </p>
+        <p><strong>Screen:</strong> {{ club_item.showing.screen.screen_name }} </p>
+        <p><strong>Date:</strong> {{ club_item.showing.showing_date }} </p>
+        <p><strong>Time:</strong> {{ club_item.showing.showing_time }} </p>
+        <p><strong>Type:</strong> {{ club_item.ticket_type }} </p>
+        <p><strong>Quantity:</strong> {{ club_item.quantity }} </p>
+    </div>
+    {% endfor %}
+
+    <p><strong>Before discount:</strong> £{{ total_price }}</p>
+    <p><strong>Aftee discount:</strong> £{{ discounted_total_price }}</p>
+
+    <p>Thank you for choosing UWEFlix. We hope you enjoy your movie experience!</p>
+    <p style="margin-bottom: 0;">Best regards,</p>
+    <p style="margin-top: 0;">The UWEFlix Team</p>
+</div>
+{% endblock %}

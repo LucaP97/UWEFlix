@@ -1,0 +1,28 @@
+{% block subject %}Booking Confirmation{% endblock %}
+
+{% block html_body %}
+<div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #333; max-width: 600px; margin: 0 auto;">
+    <h1 style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 24px;">Booking Confirmation</h1>
+    <p>Dear {{ user.username }},</p>
+
+    <p>Thank you for your order. Your order ID is <strong>{{ order.id }}</strong>.</p>
+
+    <h2 style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 12px;">Order Summary</h2>
+    {% for item in order.items.all %}
+    <div style="border: 1px solid #ccc; padding: 16px; margin-bottom: 16px;">
+        <p><strong>Film:</strong> {{ item.showing.film.title }} </p>
+        <p><strong>Screen:</strong> {{ item.showing.screen.screen_name }} </p>
+        <p><strong>Date:</strong> {{ item.showing.showing_date }} </p>
+        <p><strong>Time:</strong> {{ item.showing.showing_time }} </p>
+        <p><strong>Type:</strong> {{ item.ticket_type }} </p>
+        <p><strong>Quantity:</strong> {{ item.quantity }} </p>
+    </div>
+    {% endfor %}
+
+    <p><strong>Total:</strong> £{{ total_price }}</p>
+
+    <p>Thank you for choosing UWEFlix. We hope you enjoy your movie experience!</p>
+    <p style="margin-bottom: 0;">Best regards,</p>
+    <p style="margin-top: 0;">The UWEFlix Team</p>
+</div>
+{% endblock %}

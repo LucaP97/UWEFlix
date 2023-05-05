@@ -48,12 +48,7 @@ class PaymmentDetails(models.Model):
     expiry_date = models.DateField()
 
 
-
-
 #### accounts ####
-
-
-
 
 class Account(models.Model):
     club = models.OneToOneField(Club, on_delete=models.PROTECT, related_name="account")

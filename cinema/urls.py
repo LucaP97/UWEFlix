@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+# from djoser.views import PasswordResetConfirmView
 
 urlpatterns = [
     path("uweflix/", include('UWEFlix.urls')),
@@ -27,6 +28,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
+    # path('auth/', include('djoser.urls.users')),
+    # path('auth/password/reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('__debug__/', include('debug_toolbar.urls')),
 ] 
 

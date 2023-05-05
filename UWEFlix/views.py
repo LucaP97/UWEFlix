@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.core.mail import BadHeaderError
+from templated_mail.mail import BaseEmailMessage
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -29,6 +31,13 @@ class StudentViewSet(ModelViewSet):
             return Student.objects.all()
         else:
             return Student.objects.filter(user_id=self.request.user.id)
+        
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return StudentRegistrationSerializer
+        if self.request.method == 'PUT':
+            return StudentUpdateSerializer
+        return StudentRegistrationSerializer
 
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):
@@ -42,7 +51,24 @@ class StudentViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         
-    permission_classes = [IsStudentOrStaffOrCinemaManager]
+    
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+
+        if response.status_code == 201:
+            created_student = Student.objects.get(pk=response.data['id'])
+            user = created_student.user
+
+            try:
+                message = BaseEmailMessage(
+                    template_name = 'emails/student_registration.html',
+                    context={'user': user}
+                )
+                message.send([user.email])
+            except BadHeaderError:
+                pass
+
+        return response
         
 
 class CinemaManagerViewSet(ModelViewSet):
@@ -130,22 +156,7 @@ class BookingItemViewSet(ModelViewSet):
 
 class OrderViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
-
-    def get_permissions(self):
-        if self.request.method in ['PATCH', 'DELETE']:
-            return [IsAdminUser()]
-        return [AllowAny()]
-
-    def create(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
-        serializer = CreateOrderSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        order = serializer.save()
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
-        
-
+    
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
@@ -168,6 +179,34 @@ class OrderViewSet(ModelViewSet):
             return Order.objects.filter(student_id=student_id)
         
         return Order.objects.none()
+    
+    def create(self, request, *args, **kwargs):
+        context = {'user': self.request.user} if self.request.user.is_authenticated else {}
+
+        serializer = CreateOrderSerializer(data=request.data, context=context)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+
+        response = Response(serializer.data)
+
+        if response.status_code == 200 and self.request.user.is_authenticated:
+            try:
+                message = BaseEmailMessage(
+                    template_name = 'emails/order_confirmation.html',
+                    context={'user': self.request.user, 'order': order, 'total_price': serializer.data['total_price']}
+                )
+                message.send([self.request.user.email])
+            except BadHeaderError:
+                pass
+
+        return response
+    
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [AllowAny()]
+
 
 
 class OrderItemViewSet(ModelViewSet):

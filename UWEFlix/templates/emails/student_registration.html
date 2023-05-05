@@ -1,0 +1,38 @@
+{% comment %} {% block subject %}Registration successful{% endblock %}
+
+{% block html_body %}
+<h1>Welcome to UWEFlix!</h1>
+<p>Hi {{ user.username }}, you are now able to book cheaper tickets as a student.</p>
+{% endblock %} {% endcomment %}
+
+{% block subject %}Welcome to UWEFlix! Your registration is successful{% endblock %}
+
+{% block html_body %}
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center" style="background-color: #f0f2f7; padding: 50px;">
+            <table width="600" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td style="background-color: #ffffff; padding: 40px; font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #666666;">
+                        <h1 style="font-size: 24px; font-weight: bold; color: #333333; margin-bottom: 30px;">Welcome to UWEFlix!</h1>
+                        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+                        <p>Thank you for registering as a student on UWEFlix. We're delighted to have you join our community, where you can enjoy exclusive benefits, including discounted movie tickets.</p>
+                        <p>Your account has been successfully created with the following details:</p>
+                        <p><strong>Username:</strong> {{ user.username }}</p>
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p>As a member, you now have access to an extensive range of movies, special offers, and events designed just for you. We're constantly working to bring you the best movie-going experience possible.</p>
+                        <p>We look forward to seeing you at our cinema soon!</p>
+                        <p>Best regards,</p>
+                        <p>The UWEFlix Team</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color: #333333; padding: 30px; font-family: Arial, sans-serif; font-size: 14px; line-height: 20px; color: #ffffff; text-align: center;">
+                        <p>&copy; {{ now.year }} UWEFlix. All rights reserved.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+{% endblock %}

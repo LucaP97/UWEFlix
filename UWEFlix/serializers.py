@@ -31,6 +31,13 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         model = Student
         fields = ['id', 'user', 'birth_date']
 
+class StudentUpdateSerializer(serializers.ModelSerializer):
+    user = UserCreateSerializer()
+
+    class Meta:
+        model = Student
+        fields = ['id', 'user', 'birth_date']
+
 
 class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
     user = UserCreateSerializer()
@@ -354,8 +361,10 @@ class CreateOrderSerializer(serializers.Serializer):
         def save(self, **kwargs):
             booking_id = self.validated_data['booking_id']
 
-            if 'user_id' in self.context:
-                student = Student.objects.get(user_id=self.context['user_id'])
+            print('context')
+            print(self.context)
+            if 'user' in self.context:
+                student = Student.objects.get(user_id=self.context['user'].id)
             else:
                 student = None
 
