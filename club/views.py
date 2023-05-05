@@ -34,9 +34,10 @@ class ClubRepresentativeViewSet(ModelViewSet):
     queryset = ClubRepresentative.objects.all()
     serializer_class = ClubRepresentativeSerializer
 
-    # def create(self, request, *args, **kwargs):
-
-    #     return super().create(request, *args, **kwargs)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        return context
     
     @action(detail=False, methods=['GET', 'PUT'])
     def me(self, request):

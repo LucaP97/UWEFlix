@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import BadHeaderError
+from templated_mail.mail import BaseEmailMessage
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -61,13 +63,21 @@ class ClubRepresentativeSerializer(serializers.ModelSerializer):
         # user_serializer.is_valid(raise_exception=True)
 
         if not user_serializer.is_valid():
-            print("user serializer errors: ", user_serializer.errors)
             raise serializers.ValidationError(user_serializer.errors)
 
         user = user_serializer.save()
 
         club_representative = ClubRepresentative.objects.create(user=user, **validated_data)
         club_representative.__dict__['generated_password'] = generated_password
+
+        try:
+            message = BaseEmailMessage(
+                template_name='emails/club_representative_registration.html',
+                context={'username': user_data['username'], 'password': user_data['password'], 'user': user_data}
+            )
+            message.send([user_data['email']])
+        except BadHeaderError:
+            pass
 
         return club_representative
     
