@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.utils.crypto import get_random_string
 from django.db.models import Prefetch
+from django.core.mail import BadHeaderError
+from templated_mail.mail import BaseEmailMessage
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -131,7 +133,8 @@ class ClubOrderViewSet(ModelViewSet):
     
     # for now, associating the order with the user ID (which is linked to the club rep), rather than the account
     def create(self, request, *args, **kwargs):
-        context = {'user': self.request.user}
+        # context = {'user': self.request.user}
+        user = self.request.user
 
         serializer = CreateClubOrderSerializer(data=request.data, context={'account_id': self.request.user.clubrepresentative.club.account.id})
         serializer.is_valid(raise_exception=True)
@@ -144,9 +147,9 @@ class ClubOrderViewSet(ModelViewSet):
             try:
                 message = BaseEmailMessage(
                     template_name = 'emails/club_order_confirmation.html',
-                    context={'user': self.request.user, 'club_order': club_order, 'discounted_total_price': serializer.data['discounted_total_price']}
+                    context={'user': user, 'club_name': user.clubrepresentative.club.name, 'club_order': club_order, 'total_price': serializer.data['total_price'],'discounted_total_price': serializer.data['discounted_total_price']}
                 )
-                message.send([self.request.user.email])
+                message.send([user.email, user.clubrepresentative.club.contact_details.club_email])
             except BadHeaderError:
                 pass
 

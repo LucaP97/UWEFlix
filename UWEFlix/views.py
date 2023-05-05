@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.core.mail import send_mail, mail_admins, EmailMessage, BadHeaderError
+from django.core.mail import BadHeaderError
 from templated_mail.mail import BaseEmailMessage
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -69,29 +69,6 @@ class StudentViewSet(ModelViewSet):
                 pass
 
         return response
-    
-    # issue with this, as only sends post request. check mosh tutorial.
-
-    # def update(self, request, *args, **kwargs):
-    #     response = super().update(request, *args, **kwargs)
-
-    #     if response.status_code == 200:
-    #         student = Student.objects.get(pk=response.data['id'])
-    #         user = student.user
-
-    #         try:
-    #             message = BaseEmailMessage(
-    #                 template_name = 'emails/student_update.html',
-    #                 context={'user': user, 'student': student}
-    #             )
-    #             message.send([user.email])
-    #         except BadHeaderError:
-    #             pass
-
-    #     return response
-        
-    # this permission class is no good. doesnt allow new users to register.
-    # permission_classes = [IsStudentOrStaffOrCinemaManager]
         
 
 class CinemaManagerViewSet(ModelViewSet):
