@@ -89,10 +89,14 @@ function Booking() {
 			return;
 		}
 
-
+		const token = localStorage.getItem('access_token')
+		
 		fetch("http://127.0.0.1:8000/uweflix/booking/",{
 			method: "POST",
-			headers: {"Content-Type": "application/json"},
+			headers: {
+				'Content-Type': 'application/json',
+            	'Authorization': `JWT ${token}`
+			},
 		})
 		.then(response => response.json())
         .then(data => {

@@ -15,11 +15,11 @@ const RegisterUser = () => {
     //submit to server
     const response = await registerUser(
         {
-            "username": username,
-            "password": password,
-            "email": email,
-            "first_name": firstName,
-            "last_name": lastName
+            username: username,
+            password: password,
+            email: email,
+            first_name: firstName,
+            last_name: lastName
         }
     )
 

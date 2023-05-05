@@ -15,6 +15,12 @@ username: admin
 password: LMicyb8=O
 
 
+generic customer/student account:
+username: jeffjeff
+password: LMicyb8=O
+
+
+
 Link to Trello: https://trello.com/b/J8gx00a2/sprints
 
 
