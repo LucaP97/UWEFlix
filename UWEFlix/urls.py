@@ -6,6 +6,8 @@ from . import views
 router = routers.DefaultRouter()
 router.register('student', views.StudentViewSet, basename='student')
 router.register('cinema-manager', views.CinemaManagerViewSet)
+router.register('employee', views.EmployeeViewSet)
+router.register('temporary-cinema-manager', views.TemporaryCinemaManagerViewSet)
 router.register('films', views.FilmViewSet)
 router.register('screens', views.ScreenViewSet)
 router.register('showings', views.ShowingViewSet)

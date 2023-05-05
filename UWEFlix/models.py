@@ -12,6 +12,7 @@ from uuid import uuid4
 ## users
 class CinemaManager(models.Model): # this will extend the User class
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cinema_manager')
+    expiration_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
@@ -26,6 +27,10 @@ class CinemaManager(models.Model): # this will extend the User class
     
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
+
+
+class Employee(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employee')
 
 
 class CardDetails(models.Model):

@@ -78,6 +78,16 @@ class CinemaManagerViewSet(ModelViewSet):
     permission_classes = [IsStaffOrCinemaManager]
 
 
+class TemporaryCinemaManagerViewSet(ModelViewSet):
+    queryset = CinemaManager.objects.filter(expiration_date__isnull=False)
+    serializer_class = TemporaryCinemaManagerRegistrationSerializer
+
+
+class EmployeeViewSet(ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = RegisterEmployeeSerializer
+
+
 # films
 class FilmViewSet(ModelViewSet):
     queryset = Film.objects.prefetch_related('images').all()

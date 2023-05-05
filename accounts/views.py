@@ -72,5 +72,5 @@ class StatementViewSet(viewsets.ModelViewSet):
     queryset = Statement.objects.all()#prefetch_related('orders').all()
     serializer_class = StatementSerializer
 
-    permission_classes = [IsCinemaManagerOrAccountManagerOnly]
+    permission_classes = [AccountManagerOnly]
 
