@@ -47,11 +47,14 @@ function NavBar() {
 					) : (
 						<></>
 					)}
+					{userType === "CINEMAMANAGER" ? (
 					 <li className="nav-item">
             <a className="nav-link" href="/add_showings">
               Add Showings
             </a>
-          </li>  
+          </li>  ) : (
+			<></>
+		  )}
 					{userType === "CINEMAMANAGER" ? (
                  
 						<li className="nav-item">
@@ -74,7 +77,7 @@ function NavBar() {
 								localStorage.clear();
 							}}
 						>
-							{userType === "" || userType === "GUEST" ? "Login" : "Logout"}
+							{userType === "" || userType === "GUEST"  ? "Login" : "Logout"}
 						</a>
 					</li>
 					{userType === "" || userType === "GUEST" ? (
