@@ -54,7 +54,7 @@ class Film(models.Model):
     age_rating = models.SmallIntegerField()
     duration = models.DecimalField(max_digits=5, decimal_places=2)
     short_trailer_description = models.TextField(null=False)
-    image_uri = models.CharField(max_length=255, default="fightclub.jpg")
+    is_activate = models.BooleanField(default=True)
     
 
     def __str__(self) -> str:
