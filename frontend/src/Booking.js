@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./styles/booking.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -25,26 +25,33 @@ function Booking() {
 	const { state } = useLocation();
 	const { showings, image, title, duration, age, description } = state;
 
+	const navigate = useNavigate();
+
 	const [studentTickets, setStudentTickets] = useState(0);
 	const [childTickets, setChildTickets] = useState(0);
 	const [adultTickets, setAdultTickets] = useState(0);
 	const [totalCost, setTotalCost] = useState(0);
 
-	const [showingTime, setShowingTime] = useState('')
-	const [showingID, setShowingID] = useState(0)
+	const [showingTime, setShowingTime] = useState("");
+	const [showingID, setShowingID] = useState(0);
 
 	function calculatePrice() {
-		console.log(showings[0])
 		if (showingID == 0) {
-			const tempS = showings[0]
+			const tempS = showings[0];
 			const cost =
-			studentTickets * tempS.price.student + adultTickets * tempS.price.adult + childTickets * tempS.price.child;
-			return cost
+				studentTickets * tempS.price.student +
+				adultTickets * tempS.price.adult +
+				childTickets * tempS.price.child;
+			return cost;
 		} else {
-			const showingSelected = showings.find((showing) => showing.id == showingID)
+			const showingSelected = showings.find(
+				(showing) => showing.id == showingID
+			);
 			const cost =
-			studentTickets * showingSelected.price.student + adultTickets * showingSelected.price.adult + childTickets * showingSelected.price.child;
-			return cost
+				studentTickets * showingSelected.price.student +
+				adultTickets * showingSelected.price.adult +
+				childTickets * showingSelected.price.child;
+			return cost;
 		}
 	}
 
@@ -55,7 +62,6 @@ function Booking() {
 
 	//post booking
 	//post order
-	
 
 	return (
 		<div style={{ height: "88vh" }}>
@@ -111,7 +117,11 @@ function Booking() {
 								paddingRight: 10,
 								marginBottom: 5,
 							}}
-							onClick={() => setStudentTickets(studentTickets > 0 ? studentTickets - 1 : studentTickets)}
+							onClick={() =>
+								setStudentTickets(
+									studentTickets > 0 ? studentTickets - 1 : studentTickets
+								)
+							}
 						>
 							-
 						</button>
@@ -143,7 +153,11 @@ function Booking() {
 								paddingRight: 10,
 								marginBottom: 5,
 							}}
-							onClick={() => setChildTickets(childTickets > 0 ? childTickets - 1 : childTickets)}
+							onClick={() =>
+								setChildTickets(
+									childTickets > 0 ? childTickets - 1 : childTickets
+								)
+							}
 						>
 							-
 						</button>
@@ -175,7 +189,11 @@ function Booking() {
 								paddingRight: 10,
 								marginBottom: 5,
 							}}
-							onClick={() => setAdultTickets(adultTickets > 0 ? adultTickets - 1 : adultTickets)}
+							onClick={() =>
+								setAdultTickets(
+									adultTickets > 0 ? adultTickets - 1 : adultTickets
+								)
+							}
 						>
 							-
 						</button>
@@ -190,13 +208,31 @@ function Booking() {
 						textAlign: "center",
 					}}
 				>
-					<h4 style={{ padding: 2, backgroundColor: 'white', borderRadius: 10 }}>{totalCost}£</h4>
+					<h4
+						style={{ padding: 2, backgroundColor: "white", borderRadius: 10 }}
+					>
+						{totalCost}£
+					</h4>
 				</div>
 
 				<button
 					className={"btn btn-primary"}
 					style={{ float: "right", marginLeft: "2vw" }}
-					onClick={() => {}}
+					onClick={() => {
+						navigate("/showings/booking/payment", {
+							state: {
+								STickets: studentTickets,
+								ATickets: adultTickets,
+								CTickets: childTickets,
+								totalCost: totalCost,
+								showingTime: showingTime,
+								showingID: showingID,
+								image: image,
+								title: title,
+								duration: duration,
+							},
+						});
+					}}
 				>
 					Confirm Booking
 				</button>
@@ -204,14 +240,17 @@ function Booking() {
 					{
 						<Dropdown>
 							<Dropdown.Toggle variant="success" id="dropdown-basic">
-								{showingTime == '' ? 'Select Time' : showingTime.substring(0, 5)}
+								{showingTime == ""
+									? "Select Time"
+									: showingTime.substring(0, 5)}
 							</Dropdown.Toggle>
 
 							<Dropdown.Menu>
 								{showings.map((showing) => (
-									<Dropdown.Item onClick={() => {
-										setShowingTime(showing.showing_time)
-										setShowingID(showing.id)
+									<Dropdown.Item
+										onClick={() => {
+											setShowingTime(showing.showing_time);
+											setShowingID(showing.id);
 										}}
 									>
 										{showing.showing_time.substring(0, 5)}

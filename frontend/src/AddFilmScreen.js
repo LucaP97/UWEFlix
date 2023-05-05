@@ -68,7 +68,7 @@ function AddFilmScreen() {
 				<Form.Group controlId="formDuration" style={{ marginBottom: 10 }}>
 					<Form.Label>Duration</Form.Label>
 					<Form.Control
-						type="text"
+						type="number"
 						placeholder="Enter film duration"
 						value={duration}
 						onChange={(event) => setDuration(event.target.value)}
