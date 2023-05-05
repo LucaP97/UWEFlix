@@ -1,0 +1,52 @@
+
+.list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.row-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2vh;
+    padding: 10px 20px;
+    margin: 20px;
+    margin-top: 15px;
+    background-color: aliceblue;
+    border-radius: 12px;
+}
+
+
+
+.image-seat {
+    width: 3vh;
+    height: 100%;
+    margin-left: 5px;
+}
+
+.film-title {
+    margin-left: 20px;
+}
+
+button {
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+
+.top-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 20px
+}
+.form {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px
+}

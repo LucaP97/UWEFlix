@@ -6,6 +6,9 @@ import LoginUser from "./LoginUser";
 import NavBar from "./Components/NavBar";
 import FilmListScreen from "./FilmListScreen";
 import AddFilmScreen from "./AddFilmScreen";
+import ScreenListScreen from "./ScreenListScreen";
+import PaymentScreen from "./PaymentScreen";
+import AddShowing from "./AddShowing";
 
 function App() {
 	return (
@@ -31,13 +34,19 @@ function App() {
 					<NavBar />
 
 					<Routes>
-						<Route path="/" />
+						<Route path="/" element={<LoginUser />} />
 						<Route path="/register" element={<RegisterUser />} />
 						<Route path="/login" element={<LoginUser />} />
 						<Route path="/film_editing" element={<FilmListScreen />} />
 						<Route path="/add_film" element={<AddFilmScreen />} />
 						<Route path="/showings" element={<Showings />} />
 						<Route path="/showings/booking" element={<Booking />} />
+						<Route
+							path="/showings/booking/payment"
+							element={<PaymentScreen />}
+						/>
+						<Route path="/screens" element={<ScreenListScreen />} />
+						<Route path="/add_showings" element={<AddShowing />} />
 					</Routes>
 				</body>
 			</html>

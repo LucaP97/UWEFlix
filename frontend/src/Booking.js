@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { json, useLocation } from "react-router-dom";
 import "./styles/booking.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import $ from "jquery";
 import Popper from "popper.js";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import { useNavigate } from "react-router-dom";
 
 function ageRatingColor(age) {
 	if (age <= 3) {
@@ -25,6 +30,8 @@ function Booking() {
 	const { state } = useLocation();
 	const { showings, image, title, duration, age, description } = state;
 
+	const navigate = useNavigate();
+
 	const [studentTickets, setStudentTickets] = useState(0);
 	const [childTickets, setChildTickets] = useState(0);
 	const [adultTickets, setAdultTickets] = useState(0);
@@ -33,18 +40,37 @@ function Booking() {
 	const [showingTime, setShowingTime] = useState('')
 	const [showingID, setShowingID] = useState(0)
 
+	const [show, setShow] = useState(false);
+
+	const confirmDetails = () => {
+		setShow(false)
+		navigate("/showings")
+
+	};
+
+	const handleClose = () => {
+		setShow(false)
+	};
+
+	const handlePayment = () => setShow(true);
+
 	function calculatePrice() {
-		console.log(showings[0])
 		if (showingID == 0) {
-			const tempS = showings[0]
+			const tempS = showings[0];
 			const cost =
-			studentTickets * tempS.price.student + adultTickets * tempS.price.adult + childTickets * tempS.price.child;
-			return cost
+				studentTickets * tempS.price.student +
+				adultTickets * tempS.price.adult +
+				childTickets * tempS.price.child;
+			return cost;
 		} else {
-			const showingSelected = showings.find((showing) => showing.id == showingID)
+			const showingSelected = showings.find(
+				(showing) => showing.id == showingID
+			);
 			const cost =
-			studentTickets * showingSelected.price.student + adultTickets * showingSelected.price.adult + childTickets * showingSelected.price.child;
-			return cost
+				studentTickets * showingSelected.price.student +
+				adultTickets * showingSelected.price.adult +
+				childTickets * showingSelected.price.child;
+			return cost;
 		}
 	}
 
@@ -54,12 +80,147 @@ function Booking() {
 	}, [studentTickets, adultTickets, childTickets, showingTime, showingID]);
 
 	//post booking
+	const bookShowing = (e) =>{
+		e.preventDefault();
+
+		if(adultTickets === 0 && studentTickets === 0 && childTickets ===0){
+			alert("Select ticket(s)")
+			return;
+		}
+		else if(showingTime === ''){
+			alert("Select time")
+			return;
+		}
+
+		const token = localStorage.getItem('access_token')
+		
+		fetch("http://127.0.0.1:8000/uweflix/booking/",{
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+            	'Authorization': `JWT ${token}`
+			},
+		})
+		.then(response => response.json())
+        .then(data => {
+			const token = localStorage.getItem('access_token')
+        	const headers = {
+				'Content-Type': 'application/json',
+				'Authorization': `JWT ${token}`
+        	}
+            //console.log(`T: ${JSON.stringify(data.id)}`);
+			if(adultTickets > 0){
+				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
+					method: "POST",
+					headers: headers,
+					body: JSON.stringify(
+						{
+							"showing_id": showingID,
+							"ticket_type": "A",
+							"quantity": adultTickets
+						}
+					)
+					
+				})
+				.then(response => response.json())
+				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
+			}
+			if(studentTickets > 0){
+				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
+					method: "POST",
+					headers: headers,
+					body: JSON.stringify(
+						{
+							"showing_id": showingID,
+							"ticket_type": "S",
+							"quantity": studentTickets
+						}
+					)
+					
+				})
+				.then(response => response.json())
+				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
+			}
+			if(childTickets > 0){
+				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
+					method: "POST",
+					headers: headers,
+					body: JSON.stringify(
+						{
+							"showing_id": showingID,
+							"ticket_type": "C",
+							"quantity": childTickets
+						}
+					)
+					
+				})
+				.then(response => response.json())
+				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
+			}
+
+        })
+		
+		
+		handlePayment()
+	}
 	//post order
-	
 
 	return (
 		<div style={{ height: "88vh" }}>
 			<div className="film-container">
+			<>
+				<Modal show={show} onHide={handleClose}>
+					<Modal.Header closeButton>
+						<Modal.Title>Enter Details</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						<Form>
+							<Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+								<Form.Label>Full Name</Form.Label>
+								<Form.Control
+									type="text"
+									placeholder="e.g. Jeff Winger"
+									autoFocus
+								/>
+								<Form.Label>Email address</Form.Label>
+								<Form.Control
+									type="email"
+									placeholder="name@example.com"
+									autoFocus
+								/>
+							</Form.Group>
+							<Form.Group
+								className="mb-3"
+								controlId="exampleForm.ControlTextarea1"
+								>
+								<Form.Label>Card Details</Form.Label>
+								<div class="form-group">
+									<input type="number" id="card-number" name="cardNumber" class="form-input" placeholder="Enter card number" required />
+								</div>
+
+								<Form.Label>Expiration Date</Form.Label>
+								<div class="form-group">
+									<input type="month" id="expiration-date" name="expirationDate" class="form-input" placeholder="MM/YY" required />
+								</div>
+
+								<Form.Label>Security Code</Form.Label>
+								<div class="form-group">
+									<input type="number" id="security-code" name="securityCode" class="form-input" placeholder="Enter security code" required />
+								</div>
+							</Form.Group>
+						</Form>
+					</Modal.Body>
+					<Modal.Footer>
+						<Button variant="secondary" onClick={handleClose}>
+							Back
+						</Button>
+						<Button variant="primary" onClick={confirmDetails}>
+							Confirm Details
+						</Button>
+					</Modal.Footer>
+				</Modal>
+
+				</>
 				<img
 					className="image-booking"
 					src={require("./imgs/" + image)}
@@ -111,7 +272,11 @@ function Booking() {
 								paddingRight: 10,
 								marginBottom: 5,
 							}}
-							onClick={() => setStudentTickets(studentTickets > 0 ? studentTickets - 1 : studentTickets)}
+							onClick={() =>
+								setStudentTickets(
+									studentTickets > 0 ? studentTickets - 1 : studentTickets
+								)
+							}
 						>
 							-
 						</button>
@@ -143,7 +308,11 @@ function Booking() {
 								paddingRight: 10,
 								marginBottom: 5,
 							}}
-							onClick={() => setChildTickets(childTickets > 0 ? childTickets - 1 : childTickets)}
+							onClick={() =>
+								setChildTickets(
+									childTickets > 0 ? childTickets - 1 : childTickets
+								)
+							}
 						>
 							-
 						</button>
@@ -175,7 +344,11 @@ function Booking() {
 								paddingRight: 10,
 								marginBottom: 5,
 							}}
-							onClick={() => setAdultTickets(adultTickets > 0 ? adultTickets - 1 : adultTickets)}
+							onClick={() =>
+								setAdultTickets(
+									adultTickets > 0 ? adultTickets - 1 : adultTickets
+								)
+							}
 						>
 							-
 						</button>
@@ -190,13 +363,17 @@ function Booking() {
 						textAlign: "center",
 					}}
 				>
-					<h4 style={{ padding: 2, backgroundColor: 'white', borderRadius: 10 }}>{totalCost}£</h4>
+					<h4
+						style={{ padding: 2, backgroundColor: "white", borderRadius: 10 }}
+					>
+						{totalCost}£
+					</h4>
 				</div>
 
 				<button
 					className={"btn btn-primary"}
 					style={{ float: "right", marginLeft: "2vw" }}
-					onClick={() => {}}
+					onClick={bookShowing}
 				>
 					Confirm Booking
 				</button>
@@ -204,14 +381,17 @@ function Booking() {
 					{
 						<Dropdown>
 							<Dropdown.Toggle variant="success" id="dropdown-basic">
-								{showingTime == '' ? 'Select Time' : showingTime.substring(0, 5)}
+								{showingTime == ""
+									? "Select Time"
+									: showingTime.substring(0, 5)}
 							</Dropdown.Toggle>
 
 							<Dropdown.Menu>
 								{showings.map((showing) => (
-									<Dropdown.Item onClick={() => {
-										setShowingTime(showing.showing_time)
-										setShowingID(showing.id)
+									<Dropdown.Item
+										onClick={() => {
+											setShowingTime(showing.showing_time);
+											setShowingID(showing.id);
 										}}
 									>
 										{showing.showing_time.substring(0, 5)}

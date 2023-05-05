@@ -132,7 +132,7 @@ class PriceSerializer(serializers.ModelSerializer):
     child = serializers.IntegerField()
     class Meta:
         model = Price
-        fields = ['student', 'adult', 'child']
+        fields = ['id','student', 'adult', 'child']
 
 class ShowingSerializer(serializers.ModelSerializer):
     price = PriceSerializer()
