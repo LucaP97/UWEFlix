@@ -47,7 +47,13 @@ function NavBar() {
 					) : (
 						<></>
 					)}
+					 <li className="nav-item">
+            <a className="nav-link" href="/add_showings">
+              Add Showings
+            </a>
+          </li>  
 					{userType === "CINEMAMANAGER" ? (
+                 
 						<li className="nav-item">
 							<a className="nav-link" href="/screens">
 								Screens

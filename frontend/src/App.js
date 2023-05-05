@@ -8,6 +8,7 @@ import FilmListScreen from "./FilmListScreen";
 import AddFilmScreen from "./AddFilmScreen";
 import ScreenListScreen from "./ScreenListScreen";
 import PaymentScreen from "./PaymentScreen";
+import AddShowing from "./AddShowing";
 
 function App() {
 	return (
@@ -45,6 +46,7 @@ function App() {
 							element={<PaymentScreen />}
 						/>
 						<Route path="/screens" element={<ScreenListScreen />} />
+						<Route path="/add_showings" element={<AddShowing />} />
 					</Routes>
 				</body>
 			</html>
