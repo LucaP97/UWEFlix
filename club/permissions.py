@@ -19,6 +19,18 @@ class IsCinemaManagerOrAccountManagerReadOnly(permissions.BasePermission):
 class IsAccountManagerOrClubRepresentativeOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and (hasattr(request.user, 'accountmanager') or hasattr(request.user, 'clubrepresentative')))
+    
+class IsCinemaManagerOrAccountManager(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and (hasattr(request.user, 'accountmanager') or hasattr(request.user, 'cinema_manager')))
+    
+class IsClubRepresentative(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and hasattr(request.user, 'clubrepresentative'))
+    
+class IsCinemaManagerOrAccountManagerOrClubRepresentative(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and (hasattr(request.user, 'accountmanager') or hasattr(request.user, 'cinema_manager') or hasattr(request.user, 'clubrepresentative')))
 
 # class IsAccountManagerOrReadOnly(permissions.BasePermission):
 #     def has_permission(self, request, view):

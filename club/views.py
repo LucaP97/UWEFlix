@@ -94,6 +94,36 @@ class AccountViewSet(ModelViewSet):
         
     # permission_classes = [IsClubRepresentativeOrAccountManager]
         
+
+class DiscountRequestViewSet(ModelViewSet):
+    def get_queryset(self):
+        if hasattr(self.request.user, 'clubrepresentative'):
+            return DiscountRequest.objects.filter(account=self.request.user.clubrepresentative.club.account)
+        return DiscountRequest.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateDiscountRequestSerializer
+        elif self.request.method == 'PUT':
+            return UpdateDiscountRequestSerializer
+        return DiscountRequestSerializer
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        return context
+    
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = DiscountRequestFilter
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'DELETE', 'PATCH']:
+            permissions = [IsCinemaManagerOrAccountManager]
+        elif self.request.method == 'POST':
+            permissions = [IsClubRepresentative]
+        else:
+            permissions = [IsCinemaManagerOrAccountManagerOrClubRepresentative]
+        return [permission() for permission in permissions]
     
 
 

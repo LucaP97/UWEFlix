@@ -1,4 +1,4 @@
-from django_filters.rest_framework import FilterSet, IsoDateTimeFilter, DateTimeFromToRangeFilter
+from django_filters.rest_framework import FilterSet, IsoDateTimeFilter, DateTimeFromToRangeFilter, ChoiceFilter
 from .models import *
 
 class AccountFilter(FilterSet):
@@ -9,3 +9,11 @@ class AccountFilter(FilterSet):
         fields = {
             'account_number': ['exact'],
         }
+
+
+class DiscountRequestFilter(FilterSet):
+    request_status = ChoiceFilter(choices=DiscountRequest.REQUEST_STATUS_CHOICES)
+
+    class Meta:
+        model = DiscountRequest
+        fields = ['request_status']

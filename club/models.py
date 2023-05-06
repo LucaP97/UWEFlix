@@ -70,6 +70,23 @@ class Credit(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
 
+class DiscountRequest(models.Model):
+    REQUEST_STATUS_PENDING = 'P'
+    REQUEST_STATUS_APPROVED = 'A'
+    REQUEST_STATUS_REJECTED = 'R'
+    REQUEST_STATUS_CHOICES = [
+        (REQUEST_STATUS_PENDING, 'Pending'),
+        (REQUEST_STATUS_APPROVED, 'Approved'),
+        (REQUEST_STATUS_REJECTED, 'Rejected')
+    ]
+
+    request_status = models.CharField(max_length=1, choices=REQUEST_STATUS_CHOICES, default=REQUEST_STATUS_PENDING)
+
+    placed_at = models.DateTimeField(auto_now_add=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='discount_request')
+    amount = models.DecimalField(max_digits=5, decimal_places=2)
+
+
 
 class AccountManager(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

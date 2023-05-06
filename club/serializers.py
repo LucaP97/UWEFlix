@@ -464,8 +464,6 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class AccountAddFundsSerializer(serializers.Serializer):
-    # amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    # placed_at = serializers.DateTimeField()
     credit = CreditSerializer()
 
     def update(self, instance, validated_data):
@@ -481,20 +479,53 @@ class AccountAddFundsSerializer(serializers.Serializer):
         
         credit_serializer = CreditSerializer(credit)
         return {'credit': credit_serializer.data}
-    
-    # def update(self, instance, validated_data):
-    #     amount = validated_data['amount']
-    #     if amount > instance.account_balance:
-    #         raise serializers.ValidationError("Amount must be less or equal to account balance.")
-    #     instance.account_balance -= amount
-    #     instance.save()
-
-    #     credit = Credit.objects.create(account=instance, **validated_data)
-    #     credit.save()
-
-    #     return instance
 
     
     class Meta:
         model = Account
         fields = ['credit']
+
+
+class DiscountRequestSerializer(serializers.ModelSerializer):
+    club = serializers.CharField(source='account.club.name', read_only=True)
+    placed_at = serializers.DateTimeField(format="%d/%m/%Y %H:%M:%S", read_only=True)
+    class Meta:
+        model = DiscountRequest
+        fields = ['id', 'club', 'account', 'amount', 'request_status', 'placed_at']
+
+class CreateDiscountRequestSerializer(serializers.ModelSerializer):
+    account = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def create(self, validated_data):
+        user = self.context['user']
+
+        if not hasattr(user, 'clubrepresentative'):
+            raise serializers.ValidationError("You must be a club representative to request a discount.")
+        elif not hasattr(user.clubrepresentative, 'club') or user.clubrepresentative.club.account is None:
+            raise serializers.ValidationError("Your club must have an account to request a discount.")
+
+        account = user.clubrepresentative.club.account
+        discount_request = DiscountRequest.objects.create(account=account, **validated_data)
+        return discount_request
+
+    class Meta:
+        model = DiscountRequest
+        fields = ['id', 'account', 'amount']
+
+class UpdateDiscountRequestSerializer(serializers.ModelSerializer):
+    request_status = serializers.ChoiceField(choices=[(DiscountRequest.REQUEST_STATUS_APPROVED, 'Approve'),
+                                                        (DiscountRequest.REQUEST_STATUS_REJECTED, 'Reject')])
+
+    def update(self, instance, validated_data):
+        status = validated_data['request_status']
+        instance.request_status = status
+        if status == 'A':
+            instance.account.discount_rate = instance.amount
+            instance.account.save()
+        instance.save()
+        
+        return instance
+
+    class Meta:
+        model = DiscountRequest
+        fields = ['request_status']

@@ -87,22 +87,6 @@ class Showing(models.Model):
     showing_time = models.TimeField(auto_now_add=False)
     tickets_sold = models.SmallIntegerField(default=0)
     price = models.ForeignKey(Price, on_delete=models.CASCADE, related_name='showing')
-    
-
-# class Ticket(models.Model):
-#     TICKET_TYPE_STUDENT = 'S'
-#     TICKET_TYPE_ADULT = 'A'
-#     TICKET_TYPE_CHILD = 'C'
-
-#     TICKET_TYPE_CHOICE = [
-#         (TICKET_TYPE_STUDENT, 'Student'),
-#         (TICKET_TYPE_ADULT, 'Adult'),
-#         (TICKET_TYPE_CHILD, 'Child'),
-#     ]
-
-#     ticket_type = models.CharField(max_length=1, choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
-
-
 
 ### abstract objects
 
