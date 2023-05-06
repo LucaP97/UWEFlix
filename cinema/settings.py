@@ -232,6 +232,5 @@ CELERY_BEAT_SCHEDULE = {
     'delete_expired_temporary_cinema_managers': {
         'task': 'UWEFlix.tasks.delete_expired_temporary_cinema_managers',
         'schedule': crontab(hour=0, minute=0),
-
     }
 }

@@ -90,19 +90,52 @@ class EmployeeViewSet(ModelViewSet):
 
 # films
 class FilmViewSet(ModelViewSet):
-    queryset = Film.objects.prefetch_related('images').all()
-    serializer_class = FilmSerializer
+    http_method_names = ['get', 'post', 'put']
+    
+    queryset = Film.objects.prefetch_related('images').filter(is_active=True)
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateFilmSerializer
+        return FilmSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    # filterset_class = FilmFilter
     search_fields = ['title', 'short_trailer_description']
 
-    def destroy(self, request, *args, **kwargs):
-        if Showing.objects.filter(film_id=kwargs['pk']).count() > 0:
-            return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().destroy(request, *args, **kwargs)
+    # def destroy(self, request, *args, **kwargs):
+    #     if Showing.objects.filter(film_id=kwargs['pk']).count() > 0:
+    #         return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    #     return super().destroy(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        is_active = request.data.get('is_active')
+        if is_active is None or is_active == False:
+            film_id = kwargs['pk']
+            future_showings_count = Showing.objects.filter(film_id=film_id, showing_date__gte=timezone.now().date()).count()
+            if future_showings_count > 0:
+                return Response({'error': 'Film cannot be archived because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
+        return super().update(request, *args, **kwargs)
     
     permission_classes = [IsCinemaManagerOrReadOnly]
+    
+
+class ArchivedFilmViewSet(ModelViewSet):
+    http_method_names = ['get', 'put']
+
+    queryset = Film.objects.prefetch_related('images').filter(is_active=False)
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateFilmSerializer
+        return FilmSerializer
+    
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['title', 'short_trailer_description']
+
+    permission_classes = [IsCinemaManagerOnly]
+
+
     
 class FilmImageViewSet(ModelViewSet):
     serializer_class = FilmImageSerializer
@@ -127,7 +160,7 @@ class ScreenViewSet(ModelViewSet):
 
 # showings
 class ShowingViewSet(ModelViewSet):
-    queryset = Showing.objects.select_related('film', 'screen').all()
+    queryset = Showing.objects.select_related('film', 'screen', 'price').all()
     serializer_class = ShowingSerializer
         
 

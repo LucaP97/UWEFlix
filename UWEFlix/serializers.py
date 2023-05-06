@@ -103,7 +103,15 @@ class FilmSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Film
-        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri', 'images']
+        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'images']
+
+
+class UpdateFilmSerializer(serializers.ModelSerializer):
+    images = FilmImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Film
+        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'images', 'is_active']
 
 
 
@@ -136,6 +144,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ShowingSerializer(serializers.ModelSerializer):
     price = PriceSerializer()
+    film = serializers.PrimaryKeyRelatedField(queryset=Film.objects.filter(is_active=True))
     tickets_remaining = serializers.SerializerMethodField()
     
     def create(self, validated_data):
