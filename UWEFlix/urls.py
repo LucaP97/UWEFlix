@@ -33,5 +33,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(booking_router.urls)),
     path('', include(film_router.urls)),
+    path('check-user-view/', views.CheckUserView.as_view(), name='check-user-view'),
 ]
 

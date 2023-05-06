@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -19,6 +20,26 @@ from .serializers import *
 from .filters import *
 from .permissions import *
 
+
+# user check
+class CheckUserView(APIView):
+    def get(self, request):
+        if request.user.is_staff:
+            return Response({'user': 'is_staff'})
+        elif hasattr(request.user, 'cinema_manager'):
+            return Response({'user': 'cinema_manager'})
+        elif hasattr(request.user, 'clubrepresentative'):
+            return Response({'user': 'club_representative'})
+        elif hasattr(request.user, 'student'):
+            return Response({'user': 'student'})
+        elif hasattr(request.user, 'employee'):
+            return Response({'user': 'employee'})
+        elif hasattr(request.user, 'accountmanager'):
+            return Response({'user': 'account_manager'})
+        elif not request.user.is_authenticated:
+            return Response({'user': 'guest'})
+        else:
+            return Response({'user': 'anonymous'})
 
 # student
 class StudentViewSet(ModelViewSet):

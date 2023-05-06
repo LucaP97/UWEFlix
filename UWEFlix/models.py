@@ -43,10 +43,6 @@ class Student(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     card_details = models.ForeignKey(CardDetails, on_delete=models.CASCADE, related_name='customer', null=True)
 
-class Customer(models.Model):
-    pass
-
-
 
 # Uweflix items
 class Film(models.Model):

@@ -10,6 +10,12 @@ from .signals import order_created
 from .models import *
 
 
+class IsStaffCheckSerializer(serializers.Serializer):
+    is_staff = serializers.BooleanField()
+
+    class Meta:
+        fields = ['is_staff']
+
 class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
         fields = ['first_name', 'last_name', 'email', 'username', 'password']
