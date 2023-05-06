@@ -223,7 +223,8 @@ function Booking() {
 				</>
 				<img
 					className="image-booking"
-					src={require("./imgs/" + image)}
+					//src={require("./imgs/" + image)}
+					src={image}
 					alt="Fight club poster"
 				/>
 				<div className="film-details">

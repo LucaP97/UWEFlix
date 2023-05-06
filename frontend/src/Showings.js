@@ -31,7 +31,8 @@ function Showing(props) {
 					<p className={"card-text"}>Duration: {props.duration}m</p>
 					<img
 						className="image-showings"
-						src={require("./imgs/" + props.image)}
+						//src={require("./imgs/" + props.image)}
+						src={props.image}
 						alt="Fight club poster"
 					/>
 					<br />
@@ -66,6 +67,7 @@ function Showings() {
 	useEffect(() => {
 		const fetchFilms = async () => {
 			const data = await getAllFilms();
+			//console.log(`T: ${JSON.stringify(data)}`);
 			setFilms(data);
 		};
 		const fetchShowings = async () => {
@@ -90,7 +92,7 @@ function Showings() {
 						age={film.age_rating}
 						duration={film.duration}
 						showings={getShowingsForFilm(film, showings)}
-						image={film.image_uri}
+						image={film.images[0].image}
 						description={film.short_trailer_description}
 					/>
 				))}
