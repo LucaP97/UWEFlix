@@ -23,7 +23,6 @@ function AddFilmScreen() {
 			age_rating: parseInt(ageRating),
 			duration: duration,
 			short_trailer_description: shortTrailerDescription,
-			image_uri: imageUri,
 		});
 
 		const response = await addFilmImage(
@@ -85,15 +84,7 @@ function AddFilmScreen() {
 					/>
 				</Form.Group>
 
-				<Form.Group controlId="formImageURI">
-					<Form.Label>Image URI</Form.Label>
-					<Form.Control
-						type="text"
-						placeholder="Enter image uri"
-						value={imageUri}
-						onChange={(event) => setImageUri(event.target.value)}
-					/>
-				</Form.Group>
+				
 				<Form.Group controlId="formImage">
 					<Form.Label>Image</Form.Label>
 					<Form.Control

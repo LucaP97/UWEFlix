@@ -22,12 +22,6 @@ const LoginUser = () => {
 			return "ACCOUNTMANAGER";
 		}
 
-		//CLUB REP?
-		const clubrep = await getClubAccounts();
-		if (clubrep) {
-			return "CLUBREP";
-		}
-
 		//cinema man?
 		const cinemamanager = await getCinemaManager();
 		if (cinemamanager) {
@@ -40,7 +34,7 @@ const LoginUser = () => {
 			return "STUDENT";
 		}
 
-		return "GUEST";
+		return "CLUBREP";
 	};
 
 	const handleSubmit = async (event) => {
@@ -67,6 +61,9 @@ const LoginUser = () => {
 		}
 		if (userType === "CINEMAMANAGER") {
 			window.location.href = "/film_editing";
+		}
+		if (userType === "ACCOUNTMANAGER") {
+			window.location.href = "/statements";
 		}
 	};
 

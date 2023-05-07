@@ -24,7 +24,7 @@ function NavBar() {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 				<ul className={`navbar-nav ${showNav ? "show" : ""}`}>
-					{userType === "STUDENT" || userType === "GUEST" ? (
+					{userType === "STUDENT" || userType === "GUEST" || userType === "CLUBREP" ? (
 						<li className="nav-item">
 							<a
 								className="nav-link active"

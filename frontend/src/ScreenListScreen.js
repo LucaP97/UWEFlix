@@ -37,9 +37,9 @@ function ScreenListScreen() {
 
     };
 
-    // const access_token = localStorage.getItem('access_token')
-    // const decodedToken = jwtDecode(access_token)
-    // console.log(decodedToken)
+    const access_token = localStorage.getItem('access_token')
+    const decodedToken = jwtDecode(access_token)
+    console.log(decodedToken)
     
 
 	return (
