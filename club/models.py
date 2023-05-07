@@ -70,6 +70,23 @@ class Credit(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
 
+class DiscountRequest(models.Model):
+    REQUEST_STATUS_PENDING = 'P'
+    REQUEST_STATUS_APPROVED = 'A'
+    REQUEST_STATUS_REJECTED = 'R'
+    REQUEST_STATUS_CHOICES = [
+        (REQUEST_STATUS_PENDING, 'Pending'),
+        (REQUEST_STATUS_APPROVED, 'Approved'),
+        (REQUEST_STATUS_REJECTED, 'Rejected')
+    ]
+
+    request_status = models.CharField(max_length=1, choices=REQUEST_STATUS_CHOICES, default=REQUEST_STATUS_PENDING)
+
+    placed_at = models.DateTimeField(auto_now_add=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='discount_request')
+    amount = models.DecimalField(max_digits=5, decimal_places=2)
+
+
 
 class AccountManager(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -92,18 +109,10 @@ class ClubOrder(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='club_order')
+    is_active = models.BooleanField(default=True)
+    cancellation_request = models.BooleanField(default=False)
+    total_paid = models.DecimalField(max_digits=10, decimal_places=2)
 
-    # handled by signals
-    # def update_account_balance(self):
-    #     try:
-    #         total_price = sum([item.total_price() for item in self.items.all()])
-    #         discount_amount = (total_price * self.account.discount_rate) / 100
-    #         discount_price = total_price - discount_amount
-    #         self.account.account_balance += discount_price
-    #         self.account.save()
-    #         print(f"Total Price: {total_price}, Discount Amount: {discount_amount}, Discount Price: {discount_price}, New Account Balance: {self.account.account_balance}")
-    #     except Exception as e:
-    #         print(f"Error updating account balance: {e}")
 
 
 
@@ -116,6 +125,21 @@ class ClubOrderItem(models.Model):
     
     ticket_type = models.CharField(max_length=1, default='S')
     quantity = models.PositiveSmallIntegerField()
+
+
+class ClubOrderCancellationRequest(models.Model):
+    CANCELLATION_STATUS_PENDING = 'P'
+    CANCELLATION_STATUS_APPROVED = 'A'
+    CANCELLATION_STATUS_REJECTED = 'R'
+    CANCELLATION_STATUS_CHOICES = [
+        (CANCELLATION_STATUS_PENDING, 'Pending'),
+        (CANCELLATION_STATUS_APPROVED, 'Approved'),
+        (CANCELLATION_STATUS_REJECTED, 'Rejected')
+    ]
+
+    cancellation_status = models.CharField(max_length=1, choices=CANCELLATION_STATUS_CHOICES, default=CANCELLATION_STATUS_PENDING)
+    club_order = models.OneToOneField(ClubOrder, on_delete=models.CASCADE, related_name='club_cancellation')
+    placed_at = models.DateField(auto_now_add=True)
     
 
 

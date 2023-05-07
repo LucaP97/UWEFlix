@@ -139,4 +139,24 @@ export async function getStaff() {
 	}
 }
 
+export async function getUserTypeString() {
+	const token = localStorage.getItem("access_token");
+	const headers = {
+		"Content-Type": "application/json",
+		Authorization: `JWT ${token}`,
+	};
+	try {
+		const response = await fetch("http://127.0.0.1:8000/uweflix/check-user-view/", {
+			method: "GET",
+			headers: headers,
+		});
+		
+		const responseData = await response.json();
+		
+		return responseData.user;
+	} catch (error) {
+		return null;
+	}
+}
+
 

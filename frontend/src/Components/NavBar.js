@@ -24,7 +24,9 @@ function NavBar() {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 				<ul className={`navbar-nav ${showNav ? "show" : ""}`}>
-					{userType === "STUDENT" || userType === "GUEST" || userType === "CLUBREP" ? (
+					{userType === "STUDENT" ||
+					userType === "GUEST" ||
+					userType === "CLUBREP" ? (
 						<li className="nav-item">
 							<a
 								className="nav-link active"
@@ -47,16 +49,25 @@ function NavBar() {
 					) : (
 						<></>
 					)}
+					{userType === "ACCOUNTMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/statements">
+								Statements
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
 					{userType === "CINEMAMANAGER" ? (
-					 <li className="nav-item">
-            <a className="nav-link" href="/add_showings">
-              Add Showings
-            </a>
-          </li>  ) : (
-			<></>
-		  )}
+						<li className="nav-item">
+							<a className="nav-link" href="/add_showings">
+								Add Showings
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
 					{userType === "CINEMAMANAGER" ? (
-                 
 						<li className="nav-item">
 							<a className="nav-link" href="/screens">
 								Screens
@@ -77,7 +88,7 @@ function NavBar() {
 								localStorage.clear();
 							}}
 						>
-							{userType === "" || userType === "GUEST"  ? "Login" : "Logout"}
+							{userType === "" || userType === "GUEST" ? "Login" : "Logout"}
 						</a>
 					</li>
 					{userType === "" || userType === "GUEST" ? (

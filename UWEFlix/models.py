@@ -43,10 +43,6 @@ class Student(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     card_details = models.ForeignKey(CardDetails, on_delete=models.CASCADE, related_name='customer', null=True)
 
-class Customer(models.Model):
-    pass
-
-
 
 # Uweflix items
 class Film(models.Model):
@@ -54,7 +50,7 @@ class Film(models.Model):
     age_rating = models.SmallIntegerField()
     duration = models.DecimalField(max_digits=5, decimal_places=2)
     short_trailer_description = models.TextField(null=False)
-    image_uri = models.CharField(max_length=255, default="fightclub.jpg")
+    is_active = models.BooleanField(default=True)
     
 
     def __str__(self) -> str:
@@ -87,22 +83,6 @@ class Showing(models.Model):
     showing_time = models.TimeField(auto_now_add=False)
     tickets_sold = models.SmallIntegerField(default=0)
     price = models.ForeignKey(Price, on_delete=models.CASCADE, related_name='showing')
-    
-
-# class Ticket(models.Model):
-#     TICKET_TYPE_STUDENT = 'S'
-#     TICKET_TYPE_ADULT = 'A'
-#     TICKET_TYPE_CHILD = 'C'
-
-#     TICKET_TYPE_CHOICE = [
-#         (TICKET_TYPE_STUDENT, 'Student'),
-#         (TICKET_TYPE_ADULT, 'Adult'),
-#         (TICKET_TYPE_CHILD, 'Child'),
-#     ]
-
-#     ticket_type = models.CharField(max_length=1, choices=TICKET_TYPE_CHOICE, default=TICKET_TYPE_STUDENT)
-
-
 
 ### abstract objects
 
@@ -119,6 +99,8 @@ class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    is_active = models.BooleanField(default=True)
+    cancellation_request = models.BooleanField(default=False)
 
     # class Meta:
     #     permissions = [
@@ -132,6 +114,20 @@ class OrderItem(models.Model):
     ticket_type = models.CharField(max_length=255)
     quantity = models.PositiveSmallIntegerField()
 
+
+class OrderCancellationRequest(models.Model):
+    CANCELLATION_STATUS_PENDING = 'P'
+    CANCELLATION_STATUS_APPROVED = 'A'
+    CANCELLATION_STATUS_REJECTED = 'R'
+    CANCELLATION_STATUS_CHOICES = [
+        (CANCELLATION_STATUS_PENDING, 'Pending'),
+        (CANCELLATION_STATUS_APPROVED, 'Approved'),
+        (CANCELLATION_STATUS_REJECTED, 'Rejected')
+    ]
+
+    cancellation_status = models.CharField(max_length=1, choices=CANCELLATION_STATUS_CHOICES, default=CANCELLATION_STATUS_PENDING)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='cancellation')
+    placed_at = models.DateField(auto_now_add=True)
 
 
 class Booking(models.Model):

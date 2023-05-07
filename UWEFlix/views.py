@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -19,6 +20,26 @@ from .serializers import *
 from .filters import *
 from .permissions import *
 
+
+# user check
+class CheckUserView(APIView):
+    def get(self, request):
+        if request.user.is_staff:
+            return Response({'user': 'is_staff'})
+        elif hasattr(request.user, 'cinema_manager'):
+            return Response({'user': 'cinema_manager'})
+        elif hasattr(request.user, 'clubrepresentative'):
+            return Response({'user': 'club_representative'})
+        elif hasattr(request.user, 'student'):
+            return Response({'user': 'student'})
+        elif hasattr(request.user, 'employee'):
+            return Response({'user': 'employee'})
+        elif hasattr(request.user, 'accountmanager'):
+            return Response({'user': 'account_manager'})
+        elif not request.user.is_authenticated:
+            return Response({'user': 'guest'})
+        else:
+            return Response({'user': 'anonymous'})
 
 # student
 class StudentViewSet(ModelViewSet):
@@ -90,19 +111,52 @@ class EmployeeViewSet(ModelViewSet):
 
 # films
 class FilmViewSet(ModelViewSet):
-    queryset = Film.objects.prefetch_related('images').all()
-    serializer_class = FilmSerializer
+    http_method_names = ['get', 'post', 'put']
+    
+    queryset = Film.objects.prefetch_related('images').filter(is_active=True)
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateFilmSerializer
+        return FilmSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    # filterset_class = FilmFilter
     search_fields = ['title', 'short_trailer_description']
 
-    def destroy(self, request, *args, **kwargs):
-        if Showing.objects.filter(film_id=kwargs['pk']).count() > 0:
-            return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().destroy(request, *args, **kwargs)
+    # def destroy(self, request, *args, **kwargs):
+    #     if Showing.objects.filter(film_id=kwargs['pk']).count() > 0:
+    #         return Response({'error': 'Film cannot be deleted because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    #     return super().destroy(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        is_active = request.data.get('is_active')
+        if is_active is None or is_active == False:
+            film_id = kwargs['pk']
+            future_showings_count = Showing.objects.filter(film_id=film_id, showing_date__gte=timezone.now().date()).count()
+            if future_showings_count > 0:
+                return Response({'error': 'Film cannot be archived because it has a showing associated with it.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
+        return super().update(request, *args, **kwargs)
     
     permission_classes = [IsCinemaManagerOrReadOnly]
+    
+
+class ArchivedFilmViewSet(ModelViewSet):
+    http_method_names = ['get', 'put']
+
+    queryset = Film.objects.prefetch_related('images').filter(is_active=False)
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateFilmSerializer
+        return FilmSerializer
+    
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['title', 'short_trailer_description']
+
+    permission_classes = [IsCinemaManagerOnly]
+
+
     
 class FilmImageViewSet(ModelViewSet):
     serializer_class = FilmImageSerializer
@@ -127,7 +181,7 @@ class ScreenViewSet(ModelViewSet):
 
 # showings
 class ShowingViewSet(ModelViewSet):
-    queryset = Showing.objects.select_related('film', 'screen').all()
+    queryset = Showing.objects.select_related('film', 'screen', 'price').all()
     serializer_class = ShowingSerializer
         
 
@@ -165,13 +219,15 @@ class BookingItemViewSet(ModelViewSet):
 
 
 class OrderViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+    http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
         elif self.request.method == 'PATCH':
             return UpdateOrderSerializer
+        elif self.request.method == 'PUT':
+            return CancelOrderSerializer
         return OrderSerializer
 
     # re-defining the queryset to be either admin or user associated can see the order
@@ -222,6 +278,17 @@ class OrderViewSet(ModelViewSet):
 class OrderItemViewSet(ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+
+
+class OrderCancellationViewSet(ModelViewSet):
+    http_method_names = ['get', 'put']
+
+    queryset = OrderCancellationRequest.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateOrderCancellationSerializer
+        return OrderCancellationSerializer
 
 
 class PriceViewSet(ModelViewSet):

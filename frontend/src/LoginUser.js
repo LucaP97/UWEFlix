@@ -9,6 +9,7 @@ import {
 	getClubAccounts,
 	getCinemaManager,
 	getStudent,
+	getUserTypeString,
 } from "./services/LoginPermissionService";
 
 const LoginUser = () => {
@@ -34,7 +35,13 @@ const LoginUser = () => {
 			return "STUDENT";
 		}
 
-		return "CLUBREP";
+		//clubrep?
+		const clubrep = await getUserTypeString()
+		if (clubrep) {
+			return "CLUBREP"
+		}
+
+		return "STAFF";
 	};
 
 	const handleSubmit = async (event) => {

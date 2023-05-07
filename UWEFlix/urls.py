@@ -9,11 +9,13 @@ router.register('cinema-manager', views.CinemaManagerViewSet)
 router.register('employee', views.EmployeeViewSet)
 router.register('temporary-cinema-manager', views.TemporaryCinemaManagerViewSet)
 router.register('films', views.FilmViewSet)
+router.register('archived-films', views.ArchivedFilmViewSet, basename='archived-films')
 router.register('screens', views.ScreenViewSet)
 router.register('showings', views.ShowingViewSet)
 router.register('booking', views.BookingViewSet)
 router.register('orders', views.OrderViewSet, basename='orders')
 router.register('order-items', views.OrderItemViewSet)
+router.register('order-cancellation', views.OrderCancellationViewSet, basename='order-cancellation')
 router.register('prices', views.PriceViewSet)
 # router.register('ticket', views.TicketViewSet)
 # router.register('booking-item', views.BookingItemViewSet, basename='booking-item')
@@ -32,5 +34,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(booking_router.urls)),
     path('', include(film_router.urls)),
+    path('check-user-view/', views.CheckUserView.as_view(), name='check-user-view'),
 ]
 

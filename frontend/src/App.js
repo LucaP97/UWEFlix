@@ -9,6 +9,8 @@ import AddFilmScreen from "./AddFilmScreen";
 import ScreenListScreen from "./ScreenListScreen";
 import PaymentScreen from "./PaymentScreen";
 import AddShowing from "./AddShowing";
+import Statements from "./Statements";
+import TransactionHistory from "./TransactionHistory";
 
 function App() {
 	return (
@@ -47,6 +49,8 @@ function App() {
 						/>
 						<Route path="/screens" element={<ScreenListScreen />} />
 						<Route path="/add_showings" element={<AddShowing />} />
+						<Route path="/statements" element={<Statements />} />
+						<Route path="/statements/transactions" element={<TransactionHistory />} />
 					</Routes>
 				</body>
 			</html>

@@ -10,6 +10,12 @@ from .signals import order_created
 from .models import *
 
 
+class IsStaffCheckSerializer(serializers.Serializer):
+    is_staff = serializers.BooleanField()
+
+    class Meta:
+        fields = ['is_staff']
+
 class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
         fields = ['first_name', 'last_name', 'email', 'username', 'password']
@@ -60,7 +66,7 @@ class CinemaManagerRegistrationSerializer(serializers.ModelSerializer):
         fields = ['id', 'user']
 
 class TemporaryCinemaManagerRegistrationSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.filter(employee__isnull=False))
     expiration_date = serializers.DateField(required=True)
 
     class Meta:
@@ -103,7 +109,15 @@ class FilmSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Film
-        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'image_uri', 'images']
+        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'images']
+
+
+class UpdateFilmSerializer(serializers.ModelSerializer):
+    images = FilmImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Film
+        fields = ['id', 'title', 'age_rating', 'duration', 'short_trailer_description', 'images', 'is_active']
 
 
 
@@ -136,6 +150,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class ShowingSerializer(serializers.ModelSerializer):
     price = PriceSerializer()
+    film = serializers.PrimaryKeyRelatedField(queryset=Film.objects.filter(is_active=True))
     tickets_remaining = serializers.SerializerMethodField()
     
     def create(self, validated_data):
@@ -333,8 +348,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         elif booking_item.ticket_type == 'C':
             return booking_item.quantity * booking_item.showing.price.child
         else:
-            # this should return raise exception
-            return None
+            raise serializers.ValidationError('Invalid ticket type.')
     class Meta:
         model = OrderItem
         fields = ['id', 'showing', 'ticket_type', 'quantity', 'total_price']
@@ -415,3 +429,73 @@ class CreateOrderSerializer(serializers.Serializer):
             order_created.send_robust(self.__class__, order=order)
 
             return order
+        
+class CancelOrderSerializer(serializers.ModelSerializer):
+
+    def update(self, instance, validated_data):
+        instance.cancellation_request = validated_data['cancellation_request']
+
+        if instance.cancellation_request == True:
+            order_cancellation_request = OrderCancellationRequest.objects.create(order=instance)
+            order_cancellation_request.save()
+
+            # email to student
+            # email to cinema manager
+
+        instance.save()
+        return instance
+    
+
+    class Meta:
+        model = Order
+        fields = ['cancellation_request']
+        
+
+class OrderCancellationSerializer(serializers.ModelSerializer):
+    order = OrderSerializer()
+
+    def validate(self, data):
+        order = data['order']
+        for item in order.items.all():
+            showing = item.showing
+            if showing.showing_date < timezone.now().date():
+                raise serializers.ValidationError(f'You cannot cancel an order for a showing that has already taken place.')
+        return data
+
+    class Meta:
+        model = OrderCancellationRequest
+        fields = ['id', 'order', 'cancellation_status', 'placed_at']
+
+
+class UpdateOrderCancellationSerializer(serializers.ModelSerializer):
+    cancellation_status = serializers.ChoiceField(choices=[(OrderCancellationRequest.CANCELLATION_STATUS_APPROVED, 'Approve'), 
+                                                           (OrderCancellationRequest.CANCELLATION_STATUS_REJECTED, 'Reject')])
+
+    def update(self, instance, validated_data):
+        status = validated_data['cancellation_status']
+        instance.cancellation_status = status
+        if status == 'A':
+            # refund the order
+            instance.order.is_active = False
+            instance.order.save()
+            for item in instance.order.items.all():
+                showing = item.showing
+                showing.tickets_sold -= item.quantity
+                showing.save()
+
+                #email here to student
+                #email here to cinema manager
+
+        elif status == 'R':
+            instance.order.cancellation_request = False
+            instance.order.save()
+
+            # email here to student
+            # email here to cinema manager
+
+        instance.save()
+        return instance
+
+    class Meta:
+        model = OrderCancellationRequest
+        fields = ['cancellation_status'] 

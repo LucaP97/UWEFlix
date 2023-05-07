@@ -15,8 +15,8 @@ username: admin
 password: LMicyb8=O
 
 
-generic customer/student account:
-username: jeffjeff
+generic student account:
+username: aa
 password: LMicyb8=O
 
 

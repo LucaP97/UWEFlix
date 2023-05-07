@@ -332,11 +332,16 @@ class ClubOrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'account', 'placed_at', 'payment_status', 'club_items', 'total_price', 'discounted_total_price']
 
 
-class UpdateClubOrderSerializer(serializers.ModelSerializer):
+# potentially a cluborderserializer here for the cancellation
+class SimpleClubOrderSerializer(serializers.ModelSerializer):
+    club_items = ClubOrderItemSerializer(many=True)
+    
+    class Meta:
+        model = ClubOrder
+        fields = ['id', 'account', 'club_items', 'placed_at', 'total_paid']
 
-    # was going to reduce the account balance here, but.
-    # should it be done in accounts, when the club rep adds funds?
-    # this would mean removing payment status for club also.
+
+class UpdateClubOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClubOrder
@@ -377,10 +382,17 @@ class CreateClubOrderSerializer(serializers.Serializer):
         
         def save(self, **kwargs):
             club_booking_id = self.validated_data['club_booking_id']
-
-            ## need to think here about getting the account from club
+            total_price = sum([ClubOrderItemSerializer(item).get_total_price(item) for item in ClubBookingItem.objects.filter(club_booking_id=club_booking_id)])
+            
             account = Account.objects.get(id=self.context['account_id'])
-            club_order = ClubOrder.objects.create(account=account)
+            club_order = ClubOrder.objects.create(account=account, total_paid=1)
+
+            discount_amount = (total_price * club_order.account.discount_rate) / 100
+            # check if this line is correct
+            discount_price = total_price - discount_amount
+            club_order.total_paid = discount_price
+            club_order.save()
+
 
             club_booking_items = ClubBookingItem.objects.select_related('showing_type').filter(club_booking_id=self.validated_data['club_booking_id'])
             club_order_items = [
@@ -404,6 +416,82 @@ class CreateClubOrderSerializer(serializers.Serializer):
 
             return club_order
         
+class CancelClubOrderSerializer(serializers.ModelSerializer):
+
+    def update(self, instance, validated_data):
+        instance.cancellation_request = validated_data['cancellation_request']
+
+        if instance.cancellation_request == True:
+            club_order_cancellation_request = ClubOrderCancellationRequest.objects.create(club_order=instance)
+            club_order_cancellation_request.save()
+
+            # email here to rep + club
+            # email here to cinema manager
+        
+        instance.save()
+
+        # email here
+
+        return instance
+
+    class Meta:
+        model = ClubOrder
+        fields = ['cancellation_request']
+
+
+### cancellations ###
+
+class ClubOrderCancellationSerializer(serializers.ModelSerializer):
+    club_order = SimpleClubOrderSerializer()
+
+    def validate(self, data):
+        club_order = data['club_order']
+        for item in club_order.club_items.all():
+            showing = item.showing_object
+            if showing.showing_date < datetime.date.today():
+                raise serializers.ValidationError('You cannot cancel an order for a showing that has already taken place.')
+        return data
+
+    class Meta:
+        model = ClubOrderCancellationRequest
+        fields = ['id', 'club_order', 'cancellation_status', 'placed_at']
+
+class UpdateClubOrderCancellationSerializer(serializers.ModelSerializer):
+    cancellation_status = serializers.ChoiceField(choices=[(ClubOrderCancellationRequest.CANCELLATION_STATUS_APPROVED, 'Approve'), 
+                                                           (ClubOrderCancellationRequest.CANCELLATION_STATUS_REJECTED, 'Reject')])
+
+    def update(self, instance, validated_data):
+        status = validated_data['cancellation_status']
+        instance.cancellation_status = status
+        if status == 'A':
+            instance.club_order.account.account_balance -= instance.club_order.total_paid
+            instance.club_order.account.save()
+            instance.club_order.is_active = False
+            instance.club_order.save()
+            for item in instance.club_order.club_items.all():
+                showing = item.showing_object
+                showing.tickets_sold -= item.quantity
+                showing.save()
+
+            # email here to rep + club
+            # email here to cinema manager
+
+        
+        elif status == 'R':
+            instance.club_order.cancellation_request = False
+            instance.club_order.save()
+
+            # email here to rep + club
+            # email here to cinema manager
+
+            # instance.cancellation_status.save()
+            
+        instance.save()
+        return instance
+
+    class Meta:
+        model = ClubOrderCancellationRequest
+        fields = ['cancellation_status']
 
 
 ######## accounts ########
@@ -464,8 +552,6 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class AccountAddFundsSerializer(serializers.Serializer):
-    # amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    # placed_at = serializers.DateTimeField()
     credit = CreditSerializer()
 
     def update(self, instance, validated_data):
@@ -481,20 +567,53 @@ class AccountAddFundsSerializer(serializers.Serializer):
         
         credit_serializer = CreditSerializer(credit)
         return {'credit': credit_serializer.data}
-    
-    # def update(self, instance, validated_data):
-    #     amount = validated_data['amount']
-    #     if amount > instance.account_balance:
-    #         raise serializers.ValidationError("Amount must be less or equal to account balance.")
-    #     instance.account_balance -= amount
-    #     instance.save()
-
-    #     credit = Credit.objects.create(account=instance, **validated_data)
-    #     credit.save()
-
-    #     return instance
 
     
     class Meta:
         model = Account
         fields = ['credit']
+
+
+class DiscountRequestSerializer(serializers.ModelSerializer):
+    club = serializers.CharField(source='account.club.name', read_only=True)
+    placed_at = serializers.DateTimeField(format="%d/%m/%Y %H:%M:%S", read_only=True)
+    class Meta:
+        model = DiscountRequest
+        fields = ['id', 'club', 'account', 'amount', 'request_status', 'placed_at']
+
+class CreateDiscountRequestSerializer(serializers.ModelSerializer):
+    account = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def create(self, validated_data):
+        user = self.context['user']
+
+        if not hasattr(user, 'clubrepresentative'):
+            raise serializers.ValidationError("You must be a club representative to request a discount.")
+        elif not hasattr(user.clubrepresentative, 'club') or user.clubrepresentative.club.account is None:
+            raise serializers.ValidationError("Your club must have an account to request a discount.")
+
+        account = user.clubrepresentative.club.account
+        discount_request = DiscountRequest.objects.create(account=account, **validated_data)
+        return discount_request
+
+    class Meta:
+        model = DiscountRequest
+        fields = ['id', 'account', 'amount']
+
+class UpdateDiscountRequestSerializer(serializers.ModelSerializer):
+    request_status = serializers.ChoiceField(choices=[(DiscountRequest.REQUEST_STATUS_APPROVED, 'Approve'),
+                                                        (DiscountRequest.REQUEST_STATUS_REJECTED, 'Reject')])
+
+    def update(self, instance, validated_data):
+        status = validated_data['request_status']
+        instance.request_status = status
+        if status == 'A':
+            instance.account.discount_rate = instance.amount
+            instance.account.save()
+        instance.save()
+        
+        return instance
+
+    class Meta:
+        model = DiscountRequest
+        fields = ['request_status']
