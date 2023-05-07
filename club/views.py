@@ -155,11 +155,13 @@ class ClubBookingItemViewSet(ModelViewSet):
 
 
 class ClubOrderViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
 
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE']:
             return [IsAdminUser()]
+        if self.request.method == 'PUT':
+            return [IsClubRepresentative()]
         return [IsAuthenticated()]
     
     # for now, associating the order with the user ID (which is linked to the club rep), rather than the account
@@ -191,6 +193,8 @@ class ClubOrderViewSet(ModelViewSet):
             return CreateClubOrderSerializer
         elif self.request.method == 'PATCH':
             return UpdateClubOrderSerializer
+        elif self.request.method == 'PUT':
+            return CancelClubOrderSerializer
         return ClubOrderSerializer
     
     # this should check if club rep is associated with 
@@ -205,15 +209,51 @@ class ClubOrderViewSet(ModelViewSet):
         ### this should be enough for the implementation, needs testing
 
         if user.is_staff:
-            return ClubOrder.objects.all()
+            return ClubOrder.objects.filter(is_active=True)
         
         account_id = user.clubrepresentative.club.account.id
-        return ClubOrder.objects.filter(account_id=account_id)
+        return ClubOrder.objects.filter(account_id=account_id, is_active=True)
+    
+
+class ClubOrderCancellationViewSet(ModelViewSet):
+    http_method_names = ['get', 'put']
+
+    queryset = ClubOrderCancellationRequest.objects.all()
+    # serializer_class = ClubOrderCancellationSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateClubOrderCancellationSerializer
+        return ClubOrderCancellationSerializer
+    
+
+class ArchivedClubOrderViewSet(ModelViewSet):
+    queryset = ClubOrder.objects.filter(is_active=False)
+    serializer_class = SimpleClubOrderSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff:
+            return ClubOrder.objects.filter(is_active=False)
+        
+        account_id = user.clubrepresentative.club.account.id
+        return ClubOrder.objects.filter(account_id=account_id, is_active=False)
     
 
 class ClubOrderItemViewSet(ModelViewSet):
     queryset = ClubOrderItem.objects.all()
     serializer_class = ClubOrderItemSerializer
+
+
+# class ClubOrderCancellationViewSet(ModelViewSet):
+#     http_method_names = ['get', 'put']
+#     queryset = ClubOrder.objects.filter(is_active=True, cancellation_request=True)
+
+#     def get_serializer_class(self):
+#         if self.request.method == 'PUT':
+#             return CancelClubOrderRequestSerializer
+#         return ClubOrderSerializer
 
 
 class CreditViewSet(ModelViewSet):

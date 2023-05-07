@@ -15,7 +15,9 @@ router.register('discount-request', views.DiscountRequestViewSet, basename='disc
 router.register('club_booking', views.ClubBookingViewSet)
 router.register('club_orders', views.ClubOrderViewSet, basename='club_orders')
 router.register('club_order-items', views.ClubOrderItemViewSet)
+router.register('archived_club_orders', views.ArchivedClubOrderViewSet, basename='archived_club_orders')
 router.register('credit', views.CreditViewSet)
+router.register('club_order_cancellation', views.ClubOrderCancellationViewSet, basename='club_order_cancellation')
 # router.register('credit-item', views.CreditItemViewSet)
 
 # accounts_router = routers.NestedDefaultRouter(router, 'accounts', lookup='account')
