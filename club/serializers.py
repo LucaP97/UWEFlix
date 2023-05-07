@@ -476,7 +476,6 @@ class UpdateClubOrderCancellationSerializer(serializers.ModelSerializer):
             # email here to rep + club
             # email here to cinema manager
 
-            instance.save()
         
         elif status == 'R':
             instance.club_order.cancellation_request = False
@@ -485,8 +484,9 @@ class UpdateClubOrderCancellationSerializer(serializers.ModelSerializer):
             # email here to rep + club
             # email here to cinema manager
 
-            instance.save()
-        
+            # instance.cancellation_status.save()
+            
+        instance.save()
         return instance
 
     class Meta:

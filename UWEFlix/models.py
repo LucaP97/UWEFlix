@@ -99,6 +99,8 @@ class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    is_active = models.BooleanField(default=True)
+    cancellation_request = models.BooleanField(default=False)
 
     # class Meta:
     #     permissions = [
@@ -112,6 +114,20 @@ class OrderItem(models.Model):
     ticket_type = models.CharField(max_length=255)
     quantity = models.PositiveSmallIntegerField()
 
+
+class OrderCancellationRequest(models.Model):
+    CANCELLATION_STATUS_PENDING = 'P'
+    CANCELLATION_STATUS_APPROVED = 'A'
+    CANCELLATION_STATUS_REJECTED = 'R'
+    CANCELLATION_STATUS_CHOICES = [
+        (CANCELLATION_STATUS_PENDING, 'Pending'),
+        (CANCELLATION_STATUS_APPROVED, 'Approved'),
+        (CANCELLATION_STATUS_REJECTED, 'Rejected')
+    ]
+
+    cancellation_status = models.CharField(max_length=1, choices=CANCELLATION_STATUS_CHOICES, default=CANCELLATION_STATUS_PENDING)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='cancellation')
+    placed_at = models.DateField(auto_now_add=True)
 
 
 class Booking(models.Model):

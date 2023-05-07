@@ -219,13 +219,15 @@ class BookingItemViewSet(ModelViewSet):
 
 
 class OrderViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+    http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
         elif self.request.method == 'PATCH':
             return UpdateOrderSerializer
+        elif self.request.method == 'PUT':
+            return CancelOrderSerializer
         return OrderSerializer
 
     # re-defining the queryset to be either admin or user associated can see the order
@@ -276,6 +278,17 @@ class OrderViewSet(ModelViewSet):
 class OrderItemViewSet(ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+
+
+class OrderCancellationViewSet(ModelViewSet):
+    http_method_names = ['get', 'put']
+
+    queryset = OrderCancellationRequest.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return UpdateOrderCancellationSerializer
+        return OrderCancellationSerializer
 
 
 class PriceViewSet(ModelViewSet):

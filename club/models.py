@@ -138,7 +138,7 @@ class ClubOrderCancellationRequest(models.Model):
     ]
 
     cancellation_status = models.CharField(max_length=1, choices=CANCELLATION_STATUS_CHOICES, default=CANCELLATION_STATUS_PENDING)
-    club_order = models.OneToOneField(ClubOrder, on_delete=models.CASCADE, related_name='cancellation')
+    club_order = models.OneToOneField(ClubOrder, on_delete=models.CASCADE, related_name='club_cancellation')
     placed_at = models.DateField(auto_now_add=True)
     
 
