@@ -7,10 +7,19 @@ import $ from "jquery";
 import Popper from "popper.js";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
+
 import { useNavigate } from "react-router-dom";
+
+import {Elements} from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js';
+
+import PaymentForm from "./Components/PaymentForm";
+
+
+const PUBLIC_KEY = "pk_test_51N4LoiLd0kDzPKsuvJc8mH6lamfaJhh0piWQOR6zwAAnGszWaSMblJmcdS63jXSQx4nI4cn4MesJgZvJvbuosYJp00kONN7cZ9"
+const stripePromise = loadStripe(PUBLIC_KEY)
+
 
 function ageRatingColor(age) {
 	if (age <= 3) {
@@ -26,7 +35,28 @@ function ageRatingColor(age) {
 	}
 }
 
+const CARD_OPTIONS = {
+	iconStyle: "solid",
+	style: {
+		base: {
+			iconColor: "#000000",
+			color: "#000000",
+			fontWeight: 500,
+			fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
+			fontSize: "16px",
+			fontSmoothing: "antialiased",
+			":-webkit-autofill": { color: "#000000" },
+			"::placeholder": { color: "#000000" }
+		},
+		invalid: {
+			iconColor: "#000000",
+			color: "#000000"
+		}
+	}
+}
+
 function Booking() {
+
 	const { state } = useLocation();
 	const { showings, image, title, duration, age, description } = state;
 
@@ -41,12 +71,6 @@ function Booking() {
 	const [showingID, setShowingID] = useState(0)
 
 	const [show, setShow] = useState(false);
-
-	const confirmDetails = () => {
-		setShow(false)
-		navigate("/showings")
-
-	};
 
 	const handleClose = () => {
 		setShow(false)
@@ -80,7 +104,7 @@ function Booking() {
 	}, [studentTickets, adultTickets, childTickets, showingTime, showingID]);
 
 	//post booking
-	const bookShowing = (e) =>{
+	const showModal = (e) =>{
 		e.preventDefault();
 
 		if(adultTickets === 0 && studentTickets === 0 && childTickets ===0){
@@ -91,139 +115,36 @@ function Booking() {
 			alert("Select time")
 			return;
 		}
-
-		const token = localStorage.getItem('access_token')
-		
-		fetch("http://127.0.0.1:8000/uweflix/booking/",{
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-            	'Authorization': `JWT ${token}`
-			},
-		})
-		.then(response => response.json())
-        .then(data => {
-			const token = localStorage.getItem('access_token')
-        	const headers = {
-				'Content-Type': 'application/json',
-				'Authorization': `JWT ${token}`
-        	}
-            //console.log(`T: ${JSON.stringify(data.id)}`);
-			if(adultTickets > 0){
-				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
-					method: "POST",
-					headers: headers,
-					body: JSON.stringify(
-						{
-							"showing_id": showingID,
-							"ticket_type": "A",
-							"quantity": adultTickets
-						}
-					)
-					
-				})
-				.then(response => response.json())
-				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
-			}
-			if(studentTickets > 0){
-				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
-					method: "POST",
-					headers: headers,
-					body: JSON.stringify(
-						{
-							"showing_id": showingID,
-							"ticket_type": "S",
-							"quantity": studentTickets
-						}
-					)
-					
-				})
-				.then(response => response.json())
-				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
-			}
-			if(childTickets > 0){
-				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
-					method: "POST",
-					headers: headers,
-					body: JSON.stringify(
-						{
-							"showing_id": showingID,
-							"ticket_type": "C",
-							"quantity": childTickets
-						}
-					)
-					
-				})
-				.then(response => response.json())
-				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
-			}
-
-        })
-		
 		
 		handlePayment()
 	}
+	
 	//post order
 
 	return (
 		<div style={{ height: "88vh" }}>
 			<div className="film-container">
-			<>
-				<Modal show={show} onHide={handleClose}>
-					<Modal.Header closeButton>
-						<Modal.Title>Enter Details</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						<Form>
-							<Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-								<Form.Label>Full Name</Form.Label>
-								<Form.Control
-									type="text"
-									placeholder="e.g. Jeff Winger"
-									autoFocus
-								/>
-								<Form.Label>Email address</Form.Label>
-								<Form.Control
-									type="email"
-									placeholder="name@example.com"
-									autoFocus
-								/>
-							</Form.Group>
-							<Form.Group
-								className="mb-3"
-								controlId="exampleForm.ControlTextarea1"
-								>
-								<Form.Label>Card Details</Form.Label>
-								<div class="form-group">
-									<input type="number" id="card-number" name="cardNumber" class="form-input" placeholder="Enter card number" required />
-								</div>
+				<>
+					<Modal show={show} onHide={handleClose}>
+						<Modal.Header>
+							<Modal.Title><h1>Purchase Tickets</h1></Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							<div>
+								<h3>
+									Total Price: {totalCost}
+								</h3>
+							</div>
 
-								<Form.Label>Expiration Date</Form.Label>
-								<div class="form-group">
-									<input type="month" id="expiration-date" name="expirationDate" class="form-input" placeholder="MM/YY" required />
-								</div>
+							<Elements stripe={stripePromise}>
+								<PaymentForm />	
+							</Elements>
+						</Modal.Body>
 
-								<Form.Label>Security Code</Form.Label>
-								<div class="form-group">
-									<input type="number" id="security-code" name="securityCode" class="form-input" placeholder="Enter security code" required />
-								</div>
-							</Form.Group>
-						</Form>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button variant="secondary" onClick={handleClose}>
-							Back
-						</Button>
-						<Button variant="primary" onClick={confirmDetails}>
-							Confirm Details
-						</Button>
-					</Modal.Footer>
-				</Modal>
-
+					</Modal>
 				</>
 				<img
 					className="image-booking"
-					//src={require("./imgs/" + image)}
 					src={image}
 					alt="Fight club poster"
 				/>
@@ -374,7 +295,7 @@ function Booking() {
 				<button
 					className={"btn btn-primary"}
 					style={{ float: "right", marginLeft: "2vw" }}
-					onClick={bookShowing}
+					onClick={showModal}
 				>
 					Confirm Booking
 				</button>

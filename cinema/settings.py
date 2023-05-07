@@ -180,6 +180,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+########
+
+STRIPE_SECRET_KEY = 'sk_test_51N4LoiLd0kDzPKsuqT8fTfTfcmwRTojpyGbtXIaqDKHCfaeuEB1u8SWYKzCVKHNam9npzbCDKk5dEqcyFHjTKi8z00Gx4kUTq2'
+
+########
+
 STATIC_ROOT = BASE_DIR / 'static_collected'
 
 # LOGIN_REDIRECT_URL = 'home/'

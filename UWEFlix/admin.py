@@ -5,4 +5,6 @@ admin.site.register(Booking)
 admin.site.register(BookingItem)
 admin.site.register(Order)
 admin.site.register(OrderItem)
+admin.site.register(Film)
+admin.site.register(FilmImage)
 
