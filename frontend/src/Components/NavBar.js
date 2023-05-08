@@ -24,7 +24,9 @@ function NavBar() {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 				<ul className={`navbar-nav ${showNav ? "show" : ""}`}>
-					{userType === "STUDENT" || userType === "GUEST" ? (
+					{userType === "STUDENT" ||
+					userType === "GUEST" ||
+					userType === "CLUBREP" ? (
 						<li className="nav-item">
 							<a
 								className="nav-link active"
@@ -47,19 +49,73 @@ function NavBar() {
 					) : (
 						<></>
 					)}
+					{userType === "ACCOUNTMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/statements">
+								Statements
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "ACCOUNTMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/accounts">
+								Accounts
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "ACCOUNTMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/register_account">
+								Register Users
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
 					{userType === "CINEMAMANAGER" ? (
-					 <li className="nav-item">
-            <a className="nav-link" href="/add_showings">
-              Add Showings
-            </a>
-          </li>  ) : (
-			<></>
-		  )}
+						<li className="nav-item">
+							<a className="nav-link" href="/add_showings">
+								Add Showings
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
 					{userType === "CINEMAMANAGER" ? (
-                 
 						<li className="nav-item">
 							<a className="nav-link" href="/screens">
 								Screens
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "CINEMAMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/register_account/club">
+								Register Club
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "CINEMAMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/discount_approval">
+								Discount Requests
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "CLUBREP" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/discount_request">
+								Discount
 							</a>
 						</li>
 					) : (
@@ -77,7 +133,7 @@ function NavBar() {
 								localStorage.clear();
 							}}
 						>
-							{userType === "" || userType === "GUEST"  ? "Login" : "Logout"}
+							{userType === "" || userType === "GUEST" ? "Login" : "Logout"}
 						</a>
 					</li>
 					{userType === "" || userType === "GUEST" ? (

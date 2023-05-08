@@ -1,0 +1,28 @@
+.list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.row-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2vh;
+    padding: 10px 20px;
+    margin: 20px;
+    margin-top: 15px;
+    background-color: aliceblue;
+    border-radius: 12px;
+}
+.row-title-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    
+    
+}
+
+.acc-title {
+    margin-left: 20px;
+}

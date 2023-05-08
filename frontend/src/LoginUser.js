@@ -9,6 +9,7 @@ import {
 	getClubAccounts,
 	getCinemaManager,
 	getStudent,
+	getUserTypeString,
 } from "./services/LoginPermissionService";
 
 const LoginUser = () => {
@@ -16,16 +17,19 @@ const LoginUser = () => {
 	const [password, setPassword] = useState("");
 
 	const getUserType = async () => {
+		//clubrep?
+		const clubrep = await getUserTypeString();
+		// console.log(clubrep)
+		// alert({clubrep})
+		if (clubrep === "club_representative") {
+			
+			return "CLUBREP";
+		}
+
 		//ACCOUNT MANAGER?
 		const accountmanager = await getAccountManager();
 		if (accountmanager) {
 			return "ACCOUNTMANAGER";
-		}
-
-		//CLUB REP?
-		const clubrep = await getClubAccounts();
-		if (clubrep) {
-			return "CLUBREP";
 		}
 
 		//cinema man?
@@ -40,7 +44,7 @@ const LoginUser = () => {
 			return "STUDENT";
 		}
 
-		return "GUEST";
+		return "STAFF";
 	};
 
 	const handleSubmit = async (event) => {
@@ -62,11 +66,18 @@ const LoginUser = () => {
 		localStorage.setItem("user_type", userType);
 		store.dispatch({ type: userType });
 
-		if (userType === "STUDENT" || userType === "GUEST") {
+		if (
+			userType === "STUDENT" ||
+			userType === "GUEST" ||
+			userType === "CLUBREP"
+		) {
 			window.location.href = "/showings";
 		}
 		if (userType === "CINEMAMANAGER") {
 			window.location.href = "/film_editing";
+		}
+		if (userType === "ACCOUNTMANAGER") {
+			window.location.href = "/statements";
 		}
 	};
 

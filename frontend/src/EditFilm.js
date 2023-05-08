@@ -1,46 +1,53 @@
 import React, { useState } from "react";
 import "./styles/addfilm.css";
 import { Form, Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import { addFilm, addFilmImage } from "./services/FilmService";
+import { editFilm } from "./services/FilmService";
 
 const ageRatings = ["3", "12", "15", "18"];
 
-function AddFilmScreen() {
-	const [title, setTitle] = useState("");
-	const [ageRating, setAgeRating] = useState("3");
-	const [duration, setDuration] = useState("");
-	const [shortTrailerDescription, setShortTrailerDescription] = useState("");
-	const [imageUri, setImageUri] = useState("");
-	const [selectedFile, setSelectedFile] = useState(null);
+function EditFilm() {
+	const location = useLocation();
+	const data = location.state
 
-	const navigate = useNavigate()
+	const [title, setTitle] = useState(data.title);
+	const [ageRating, setAgeRating] = useState(data.age_rating);
+	const [duration, setDuration] = useState(data.duration);
+	const [shortTrailerDescription, setShortTrailerDescription] = useState(
+		data.short_trailer_description
+	);
+	//const [selectedFile, setSelectedFile] = useState(null);
+
+	const navigate = useNavigate();
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 
 		//submit to server
-		const data = await addFilm({
-			title: title,
-			age_rating: parseInt(ageRating),
-			duration: duration,
-			short_trailer_description: shortTrailerDescription,
-		});
-
-		const response = await addFilmImage(
+		const response = await editFilm(
 			{
-				image: selectedFile,
+				title: title,
+				age_rating: parseInt(ageRating),
+				duration: duration,
+				short_trailer_description: shortTrailerDescription,
 			},
 			data.id
 		);
-		navigate("/film_editing")
+
+		// const response = await addFilmImage(
+		// 	{
+		// 		image: selectedFile,
+		// 	},
+		// 	data.id
+		// );
+		navigate("/film_editing");
 	};
 
 	return (
 		//submit to server
 		<div className="container">
-			<h2 style={{ marginTop: 10 }}>Add a new film</h2>
+			<h2 style={{ marginTop: 10 }}>Edit film</h2>
 			<Form onSubmit={handleSubmit} enctype="multipart/form-data">
 				<Form.Group controlId="formTitle" style={{ marginBottom: 10 }}>
 					<Form.Label>Title</Form.Label>
@@ -87,8 +94,7 @@ function AddFilmScreen() {
 					/>
 				</Form.Group>
 
-				
-				<Form.Group controlId="formImage">
+				{/* <Form.Group controlId="formImage">
 					<Form.Label>Image</Form.Label>
 					<Form.Control
 						type="file"
@@ -97,14 +103,14 @@ function AddFilmScreen() {
 							setSelectedFile(event.target.files[0]);
 						}}
 					/>
-				</Form.Group>
+				</Form.Group> */}
 
 				<Button variant="primary" type="submit" style={{ marginTop: 20 }}>
-					Add Film
+					Edit Film
 				</Button>
 			</Form>
 		</div>
 	);
 }
 
-export default AddFilmScreen;
+export default EditFilm;
