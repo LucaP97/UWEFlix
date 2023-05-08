@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
@@ -18,6 +19,16 @@ from .models import *
 from .serializers import *
 from .filters import *
 from .permissions import *
+from django.conf import settings
+
+
+import stripe
+# This is your test secret API key.
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+DOMAIN = 'http://localhost:5000'
+
 
 
 # student
@@ -197,6 +208,43 @@ class BookingItemViewSet(ModelViewSet):
         return BookingItem.objects.filter(booking__id=self.kwargs['booking_pk'])
 
 
+
+
+class StripeCheckout(APIView):      
+    
+    def post(self,request):
+        try:
+            data = request.POST
+            
+            total_price = data.get("total_price",None)
+            int(total_price)
+            total_price = int(total_price)*100
+            print(f'            T {total_price}')
+            
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types = ['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'gbp',
+                        'unit_amount': 1000,
+                        'product_data': {
+                            'name': 'Test Product',
+                        },
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=DOMAIN + '?success=true',
+                cancel_url=DOMAIN + '?canceled=true',
+            )
+            return redirect(checkout_session.url)
+        except :
+            return Response(
+                {"error": "something went wrong"}
+            )
+
+
+
 class OrderViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     
@@ -224,6 +272,10 @@ class OrderViewSet(ModelViewSet):
         return Order.objects.none()
     
     def create(self, request, *args, **kwargs):
+        # stripe
+        
+        
+        
         context = {'user': self.request.user} if self.request.user.is_authenticated else {}
 
         serializer = CreateOrderSerializer(data=request.data, context=context)
@@ -260,3 +312,6 @@ class OrderItemViewSet(ModelViewSet):
 class PriceViewSet(ModelViewSet):
     queryset = Price.objects.all()
     serializer_class = PriceSerializer
+    
+    
+

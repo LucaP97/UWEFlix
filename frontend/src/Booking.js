@@ -103,6 +103,24 @@ function Booking() {
 		setTotalCost(calculatePrice());
 	}, [studentTickets, adultTickets, childTickets, showingTime, showingID]);
 
+	useEffect(() => {
+
+		localStorage.setItem('total_price', JSON.stringify({total_price: totalCost}));
+		// Check to see if this is a redirect back from Checkout
+		const query = new URLSearchParams(window.location.search);
+	
+		if (query.get("success")) {
+		  console.log("Order placed! You will receive an email confirmation.");
+		}
+	
+		if (query.get("canceled")) {
+			console.log(
+			"Order canceled -- continue to shop around and checkout when you're ready."
+		  );
+		}
+	  }, []);
+
+
 	//post booking
 	const showModal = (e) =>{
 		e.preventDefault();
@@ -137,7 +155,7 @@ function Booking() {
 							</div>
 
 							<Elements stripe={stripePromise}>
-								<PaymentForm />	
+								<PaymentForm totalCost={totalCost}/>	
 							</Elements>
 						</Modal.Body>
 
