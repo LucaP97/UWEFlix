@@ -229,7 +229,7 @@ class StripeCheckout(APIView):
                         'currency': 'gbp',
                         'unit_amount': total_price,
                         'product_data': {
-                            'name': 'booking',
+                            'name': f'booking',
                         },
                     },
                     'quantity': 1,
