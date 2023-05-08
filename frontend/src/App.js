@@ -11,6 +11,17 @@ import PaymentScreen from "./PaymentScreen";
 import AddShowing from "./AddShowing";
 import Statements from "./Statements";
 import TransactionHistory from "./TransactionHistory";
+import AccountList from "./AccountList";
+import EditClubAccount from "./EditClubAccount";
+import EditStudentAccount from "./EditStudentAccount";
+import EditEmployeeAccount from "./EditEmployeeAccount";
+import RegisterAccounts from "./RegisterAccounts";
+import RegisterEmployee from "./RegisterEmployee";
+import RegisterStudent from "./RegisterStudent";
+import RegisterClub from "./RegisterClub"
+import DiscountRequest from "./DiscountRequest";
+import DiscountApproval from "./DiscountApproval";
+import EditFilm from "./EditFilm";
 
 function App() {
 	return (
@@ -48,9 +59,33 @@ function App() {
 							element={<PaymentScreen />}
 						/>
 						<Route path="/screens" element={<ScreenListScreen />} />
+						<Route path="/film_editing/edit_film" element={<EditFilm />} />
 						<Route path="/add_showings" element={<AddShowing />} />
+						<Route path="/accounts" element={<AccountList />} />
+						<Route path="/accounts/edit_club" element={<EditClubAccount />} />
+						<Route
+							path="/accounts/edit_student"
+							element={<EditStudentAccount />}
+						/>
+						<Route
+							path="/accounts/edit_employee"
+							element={<EditEmployeeAccount />}
+						/>
+						<Route
+							path="/register_account/club"
+							element={<RegisterClub />}
+						/>
+						<Route path="/register_account" element={<RegisterAccounts />} />
+						<Route path="/register_account/employee" element={<RegisterEmployee />} />
+						<Route path="/register_account/student" element={<RegisterStudent />} />
+
 						<Route path="/statements" element={<Statements />} />
-						<Route path="/statements/transactions" element={<TransactionHistory />} />
+						<Route path="/discount_request" element={<DiscountRequest />} />
+						<Route path="/discount_approval" element={<DiscountApproval />} />
+						<Route
+							path="/statements/transactions"
+							element={<TransactionHistory />}
+						/>
 					</Routes>
 				</body>
 			</html>

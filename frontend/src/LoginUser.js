@@ -17,6 +17,15 @@ const LoginUser = () => {
 	const [password, setPassword] = useState("");
 
 	const getUserType = async () => {
+		//clubrep?
+		const clubrep = await getUserTypeString();
+		// console.log(clubrep)
+		// alert({clubrep})
+		if (clubrep === "club_representative") {
+			
+			return "CLUBREP";
+		}
+
 		//ACCOUNT MANAGER?
 		const accountmanager = await getAccountManager();
 		if (accountmanager) {
@@ -33,12 +42,6 @@ const LoginUser = () => {
 		const student = await getStudent();
 		if (student) {
 			return "STUDENT";
-		}
-
-		//clubrep?
-		const clubrep = await getUserTypeString()
-		if (clubrep) {
-			return "CLUBREP"
 		}
 
 		return "STAFF";
@@ -63,7 +66,11 @@ const LoginUser = () => {
 		localStorage.setItem("user_type", userType);
 		store.dispatch({ type: userType });
 
-		if (userType === "STUDENT" || userType === "GUEST") {
+		if (
+			userType === "STUDENT" ||
+			userType === "GUEST" ||
+			userType === "CLUBREP"
+		) {
 			window.location.href = "/showings";
 		}
 		if (userType === "CINEMAMANAGER") {

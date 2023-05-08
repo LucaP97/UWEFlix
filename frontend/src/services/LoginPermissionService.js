@@ -111,33 +111,7 @@ export async function getStudent() {
 }
 
 
-//STUDENT
-export async function getStaff() {
-	const token = localStorage.getItem("access_token");
-	const headers = {
-		"Content-Type": "application/json",
-		Authorization: `JWT ${token}`,
-	};
-	try {
-		const response = await fetch("http://127.0.0.1:8000/uweflix/staff/", {
-			method: "GET",
-			headers: headers,
-		});
-		
-		const responseData = await response.json();
-		try {
-			if (
-				responseData.detail ===
-				"You do not have permission to perform this action."
-			) {
-				return null;
-			}
-		} catch (error) {}
-		return responseData;
-	} catch (error) {
-		return null;
-	}
-}
+
 
 export async function getUserTypeString() {
 	const token = localStorage.getItem("access_token");

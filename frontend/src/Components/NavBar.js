@@ -58,6 +58,24 @@ function NavBar() {
 					) : (
 						<></>
 					)}
+					{userType === "ACCOUNTMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/accounts">
+								Accounts
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "ACCOUNTMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/register_account">
+								Register Users
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
 					{userType === "CINEMAMANAGER" ? (
 						<li className="nav-item">
 							<a className="nav-link" href="/add_showings">
@@ -71,6 +89,33 @@ function NavBar() {
 						<li className="nav-item">
 							<a className="nav-link" href="/screens">
 								Screens
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "CINEMAMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/register_account/club">
+								Register Club
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "CINEMAMANAGER" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/discount_approval">
+								Discount Requests
+							</a>
+						</li>
+					) : (
+						<></>
+					)}
+					{userType === "CLUBREP" ? (
+						<li className="nav-item">
+							<a className="nav-link" href="/discount_request">
+								Discount
 							</a>
 						</li>
 					) : (

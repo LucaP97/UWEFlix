@@ -45,7 +45,7 @@ class CheckUserView(APIView):
 class StudentViewSet(ModelViewSet):
     # queryset = Student.objects.all()
     serializer_class = StudentRegistrationSerializer
-    # permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         if hasattr(self.request.user, 'cinema_manager') or self.request.user.is_staff:

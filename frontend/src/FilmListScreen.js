@@ -10,23 +10,25 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { getAllShowings } from "./services/ShowingService";
 import {
 	getAllFilms,
-	deleteFilm,
+	editFilm,
 	deleteFilmShowings,
 } from "./services/FilmService";
 
 //icons
 import { IonIcon } from "@ionic/react";
-import { trashOutline, filmOutline, addOutline } from "ionicons/icons";
+import {
+	trashOutline,
+	filmOutline,
+	addOutline,
+	pencilOutline,
+} from "ionicons/icons";
 
 function FilmRow(props) {
+	const navigateEdit = useNavigate()
 	return (
 		<div className="row-container">
 			<div class="image-container">
-				<img
-					className="image-film"
-					src={require("./imgs/" + props.image)}
-					alt="Fight club poster"
-				/>
+				<img className="image-film" src={props.image} alt="Fight club poster" />
 			</div>
 			<h3 className="film-title">
 				{props.title.charAt(0).toUpperCase() + props.title.slice(1)}
@@ -34,9 +36,21 @@ function FilmRow(props) {
 			<div style={{ marginLeft: "auto" }}>
 				<button
 					onClick={() => {
+						navigateEdit("/film_editing/edit_film", {
+							state: props.film,
+						})
+					}}
+					style={{marginRight: 10}}
+				>
+					<IonIcon icon={pencilOutline} size="large" color="black" />
+				</button>
+				<button
+					onClick={() => {
 						props.handler(props.film, props.id);
-						const updatedFilms = props.prevfilms.filter(film => props.id !== film.id)
-						props.updateFilms(updatedFilms)
+						const updatedFilms = props.prevfilms.filter(
+							(film) => props.id !== film.id
+						);
+						props.updateFilms(updatedFilms);
 					}}
 				>
 					<IonIcon icon={trashOutline} size="large" color="black" />
@@ -59,7 +73,6 @@ function FilmListScreen() {
 		fetchFilms();
 	}, []);
 
-
 	function getShowingsForFilm(film, showings) {
 		return showings.filter((s) => s.film == film.id);
 	}
@@ -73,7 +86,17 @@ function FilmListScreen() {
 			deleteFilmShowings(showing.id);
 		});
 		//delete film
-		deleteFilm(film_id);
+
+		const data = {
+			title: film.title,
+			age_rating: film.age_rating,
+			duration: film.duration,
+			short_trailer_description: film.short_trailer_description,
+			is_active: false,
+		};
+		console.log(data);
+		const response = await editFilm(data, film_id);
+		console.log(response);
 	};
 
 	const updateFilms = (fs) => {
@@ -103,7 +126,7 @@ function FilmListScreen() {
 						title={film.title}
 						age={film.age_rating}
 						duration={film.duration}
-						image={film.image_uri}
+						image={film.images[0].image}
 						description={film.short_trailer_description}
 						handler={handleDelete}
 						updateFilms={updateFilms}
