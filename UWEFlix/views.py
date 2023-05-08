@@ -1,4 +1,5 @@
 import json
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
@@ -240,37 +241,18 @@ class StripeCheckout(APIView):
             )             
             
             response = requests.post("http://127.0.0.1:8000/uweflix/booking/")
-            #print(response.content)
+            # print(f"    {response.content}")
             
             response_data = response.json()
-            uuid = response_data['id']
-            print(f"New object created with UUID: {uuid}")
-            
-            if(student_ticket < 0):
-                data = {"showing_id": showing_id, "ticket_type": "S", "quantity": student_ticket}
-                response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
-            
-            if(adult_ticket < 0):
-                data = {"showing_id": showing_id, "ticket_type": "A", "quantity": adult_ticket}
-                response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
-            
-            if(child_ticket < 0):
-                data = {"showing_id": showing_id, "ticket_type": "C", "quantity": child_ticket}
-                response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
-            
+            uuid = response_data['id']          
             
             
             
             
             return redirect(checkout_session.url)
-        except :
-            return Response(
-                {"error": "something went wrong"}
-            )
-    
-    # def create_tickets():
-    #         response = requests.post("http://127.0.0.1:8000/uweflix/booking/")
-    #         print(response.content)
+        except Exception as e:
+            print(str(e))
+            return HttpResponse("An error occurred while processing your request.")
         
 
 
