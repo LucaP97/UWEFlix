@@ -3,6 +3,8 @@ from rest_framework import serializers
 from generic_relations.relations import GenericRelatedField
 from .models import *
 import datetime
+from django.db.models import Q
+from datetime import timedelta
 
 
 ### UWEFlix ###
@@ -15,7 +17,7 @@ class ShowingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Showing
-        fields = ['id', 'screen', 'film', 'showing_date', 'showing_time']
+        fields = ['id']
 
     # def get_price_student(self, showing:Showing):
     #     if 
@@ -23,15 +25,32 @@ class ShowingSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     showing = ShowingSerializer(read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, order_item:OrderItem):
+        if order_item.ticket_type == 'S':
+            return order_item.quantity * order_item.showing.price.student
+        elif order_item.ticket_type == 'A':
+            return order_item.quantity * order_item.showing.price.adult
+        elif order_item.ticket_type == 'C':
+            return order_item.quantity * order_item.showing.price.child
+        else:
+            return 0
+
     class Meta:
         model = OrderItem
-        fields = ['showing', 'ticket_type', 'quantity']
+        fields = ['showing', 'ticket_type', 'quantity', 'total_price']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, order:Order):
+        return sum([OrderItemSerializer(item).get_total_price(item) for item in order.items.all()])
+
     class Meta:
         model = Order
-        fields = ['student', 'placed_at', 'payment_status', 'items']
+        fields = ['student', 'placed_at', 'payment_status', 'items', 'total_price']
 
 
 
@@ -47,6 +66,7 @@ class ClubOrderItemSerializer(serializers.ModelSerializer):
     showing_object = GenericRelatedField({
         Showing: ShowingSerializer(),
     })
+
     class Meta:
         model = ClubOrderItem
         fields = ['showing_object', 'ticket_type', 'quantity']
@@ -55,7 +75,7 @@ class ClubOrderSerializer(serializers.ModelSerializer):
     club_items = ClubOrderItemSerializer(many=True, read_only=True)
     class Meta:
         model = ClubOrder
-        fields = ['placed_at', 'club_items']
+        fields = ['id', 'placed_at', 'club_items', 'total_paid']
 
 class CreditSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,11 +83,36 @@ class CreditSerializer(serializers.ModelSerializer):
         fields = ['amount', 'placed_at']
 
 class AccountSerializer(serializers.ModelSerializer):
-    club_order = ClubOrderSerializer(many=True, read_only=True)
-    credit = CreditSerializer(many=True, read_only=True)
+    club_order = serializers.SerializerMethodField()
+    credit = serializers.SerializerMethodField()
+
     class Meta:
         model = Account
         fields = ['club', 'account_title', 'discount_rate', 'account_balance', 'club_order', 'credit']
+
+    def get_club_order(self, obj):
+        now = timezone.now()
+        first_day_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        next_month = now.replace(day=1) + timedelta(days=32)
+
+        club_orders = obj.club_order.filter(
+            Q(placed_at__gte=first_day_of_month) &
+            Q(placed_at__lt=next_month) &
+            Q(is_active=True)
+        )
+        return ClubOrderSerializer(club_orders, many=True).data
+
+    def get_credit(self, obj):
+        now = timezone.now()
+        first_day_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        next_month = now.replace(day=1) + timedelta(days=32)
+
+        credits = obj.credit.filter(
+            Q(placed_at__gte=first_day_of_month) &
+            Q(placed_at__lt=next_month)
+        )
+        return CreditSerializer(credits, many=True).data
+
 
 
 
@@ -77,9 +122,12 @@ class UweflixStatementItemsSerializer(serializers.ModelSerializer):
     order_object = GenericRelatedField({
         Order: OrderSerializer(),
     }, required=False)
+
+    # uweflix_total = serializers.CharField()
+
     class Meta:
         model = UweflixStatementItems
-        fields = ['statement', 'order_type', 'order_id', 'order_object']
+        fields = ['order_id', 'order_object']
 
 
 class ClubStatementItemsSerializer(serializers.ModelSerializer):
@@ -88,17 +136,36 @@ class ClubStatementItemsSerializer(serializers.ModelSerializer):
     }, required=False)
     class Meta:
         model = ClubStatementItems
-        fields = ['statement', 'account_type', 'account_id', 'account_object']
+        fields = ['account_type', 'account_id', 'account_object']
 
 
 class StatementSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False, read_only=True)
     uweflix_statement_items = UweflixStatementItemsSerializer(many=True, read_only=True)
     club_statement_items = ClubStatementItemsSerializer(many=True, read_only=True)
+    uweflix_total = serializers.SerializerMethodField()
+    club_total = serializers.SerializerMethodField()
+    total = serializers.SerializerMethodField()
+
+    def get_uweflix_total(self, statement):
+        return sum([OrderSerializer(item.order_object).data['total_price'] for item in statement.uweflix_statement_items.all()])
+    
+    def get_club_total(self, statement):
+        return sum([sum(order.total_paid for order in item.account_object.club_order.all()) for item in statement.club_statement_items.all()])
+    
+    def get_total(self, statement):
+        return sum([OrderSerializer(item.order_object).data['total_price'] for item in statement.uweflix_statement_items.all()]) + sum([sum(order.total_paid for order in item.account_object.club_order.all()) for item in statement.club_statement_items.all()])
+
+
 
     def create(self, validated_data):
         now = timezone.now()
-        statement = Statement.objects.create(name="statement: " + str(now.month) + "/" + str(now.year))
+        statement_name = "statement: " + str(now.month) + "/" + str(now.year)
+
+        # Delete existing statements with the same name
+        Statement.objects.filter(name=statement_name).delete()
+
+        statement = Statement.objects.create(name=statement_name)
 
         # uweflix
         orders = Order.objects.filter(placed_at__month=now.month, placed_at__year=now.year)
@@ -123,9 +190,4 @@ class StatementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Statement
-        fields = ['id', 'name', 'uweflix_statement_items', 'club_statement_items']
-
-
-
-
-
+        fields = ['id', 'name', 'uweflix_statement_items', 'club_statement_items', 'uweflix_total', 'club_total', 'total']
