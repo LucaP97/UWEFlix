@@ -15,7 +15,7 @@ function AddFilmScreen() {
 	const [imageUri, setImageUri] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
 
-	const navigate = useNavigate()
+	const navigate = useNavigate();
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
@@ -34,15 +34,23 @@ function AddFilmScreen() {
 			},
 			data.id
 		);
-		navigate("/film_editing")
+		navigate("/film_editing");
 	};
 
 	return (
 		//submit to server
 		<div className="container">
-			<h2 style={{ marginTop: 10 }}>Add a new film</h2>
-			<Form onSubmit={handleSubmit} enctype="multipart/form-data">
-				<Form.Group controlId="formTitle" style={{ marginBottom: 10 }}>
+			<Form
+				onSubmit={handleSubmit}
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+				}}
+				enctype="multipart/form-data"
+			>
+				<h2 style={{ marginTop: 10 }}>Add a new film</h2>
+				<Form.Group controlId="formTitle" style={{ marginBottom: 10, width: "90%" }}>
 					<Form.Label>Title</Form.Label>
 					<Form.Control
 						type="text"
@@ -52,7 +60,7 @@ function AddFilmScreen() {
 					/>
 				</Form.Group>
 
-				<Form.Group controlId="formAgeRating" style={{ marginBottom: 10 }}>
+				<Form.Group controlId="formAgeRating" style={{ marginBottom: 10, width: "90%" }}>
 					<Form.Label>Age Rating</Form.Label>
 					<Form.Control
 						as="select"
@@ -67,7 +75,7 @@ function AddFilmScreen() {
 					</Form.Control>
 				</Form.Group>
 
-				<Form.Group controlId="formDuration" style={{ marginBottom: 10 }}>
+				<Form.Group controlId="formDuration" style={{ marginBottom: 10, width: "90%" }}>
 					<Form.Label>Duration</Form.Label>
 					<Form.Control
 						type="number"
@@ -77,7 +85,7 @@ function AddFilmScreen() {
 					/>
 				</Form.Group>
 
-				<Form.Group controlId="formdescription" style={{ marginBottom: 10 }}>
+				<Form.Group controlId="formdescription" style={{ marginBottom: 10, width: "90%" }}>
 					<Form.Label>Description</Form.Label>
 					<Form.Control
 						type="text"
@@ -87,19 +95,17 @@ function AddFilmScreen() {
 					/>
 				</Form.Group>
 
-				
-				<Form.Group controlId="formImage">
+				<Form.Group controlId="formImage" style={{ marginBottom: 50, width: "90%" }}>
 					<Form.Label>Image</Form.Label>
 					<Form.Control
 						type="file"
-						
 						onChange={(event) => {
 							setSelectedFile(event.target.files[0]);
 						}}
 					/>
 				</Form.Group>
 
-				<Button variant="primary" type="submit" style={{ marginTop: 20 }}>
+				<Button variant="primary" type="submit" style={{ marginBottom: 10, width: "90%" }}>
 					Add Film
 				</Button>
 			</Form>
