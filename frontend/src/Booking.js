@@ -9,7 +9,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 
 import Modal from 'react-bootstrap/Modal';
 
-import { useNavigate } from "react-router-dom";
 
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
@@ -59,8 +58,6 @@ function Booking() {
 
 	const { state } = useLocation();
 	const { showings, image, title, duration, age, description } = state;
-
-	const navigate = useNavigate();
 
 	const [studentTickets, setStudentTickets] = useState(0);
 	const [childTickets, setChildTickets] = useState(0);
@@ -137,7 +134,7 @@ function Booking() {
 		handlePayment()
 	}
 	
-	//post order
+
 
 	return (
 		<div style={{ height: "88vh" }}>
@@ -155,7 +152,12 @@ function Booking() {
 							</div>
 
 							<Elements stripe={stripePromise}>
-								<PaymentForm totalCost={totalCost}/>	
+								<PaymentForm 
+								total_price={totalCost}
+								showing_id={showingID}
+								student_ticket={studentTickets} 
+								adult_ticket={adultTickets} 
+								child_ticket={childTickets} /> 
 							</Elements>
 						</Modal.Body>
 

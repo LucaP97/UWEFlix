@@ -20,6 +20,7 @@ from .serializers import *
 from .filters import *
 from .permissions import *
 from django.conf import settings
+import requests
 
 
 import stripe
@@ -209,40 +210,68 @@ class BookingItemViewSet(ModelViewSet):
 
 
 
-
-class StripeCheckout(APIView):      
-    
-    def post(self,request):
+class StripeCheckout(APIView):   
+    def post(self,request):        
         try:
-            data = request.POST
             
-            total_price = data.get("total_price",None)
-            int(total_price)
-            total_price = int(total_price)*100
-            print(f'            T {total_price}')
+            data = request.POST            
+            
+            total_price = int(data.get("total_price",None))*100
+            showing_id = data.get("showing_id")
+            student_ticket = data.get("student_ticket")
+            adult_ticket = data.get("adult_ticket")
+            child_ticket = data.get("child_ticket")
             
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types = ['card'],
                 line_items=[{
                     'price_data': {
                         'currency': 'gbp',
-                        'unit_amount': 1000,
+                        'unit_amount': total_price,
                         'product_data': {
-                            'name': 'Test Product',
+                            'name': 'booking',
                         },
                     },
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=DOMAIN + '?success=true',
-                cancel_url=DOMAIN + '?canceled=true',
-            )
+                success_url=DOMAIN + '/showings',
+                cancel_url=DOMAIN + '?canceled=true'
+            )             
+            
+            response = requests.post("http://127.0.0.1:8000/uweflix/booking/")
+            #print(response.content)
+            
+            response_data = response.json()
+            uuid = response_data['id']
+            print(f"New object created with UUID: {uuid}")
+            
+            if(student_ticket < 0):
+                data = {"showing_id": showing_id, "ticket_type": "S", "quantity": student_ticket}
+                response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
+            
+            if(adult_ticket < 0):
+                data = {"showing_id": showing_id, "ticket_type": "A", "quantity": adult_ticket}
+                response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
+            
+            if(child_ticket < 0):
+                data = {"showing_id": showing_id, "ticket_type": "C", "quantity": child_ticket}
+                response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
+            
+            
+            
+            
+            
             return redirect(checkout_session.url)
         except :
             return Response(
                 {"error": "something went wrong"}
             )
-
+    
+    # def create_tickets():
+    #         response = requests.post("http://127.0.0.1:8000/uweflix/booking/")
+    #         print(response.content)
+        
 
 
 class OrderViewSet(ModelViewSet):
@@ -271,9 +300,7 @@ class OrderViewSet(ModelViewSet):
         
         return Order.objects.none()
     
-    def create(self, request, *args, **kwargs):
-        # stripe
-        
+    def create(self, request, *args, **kwargs):            
         
         
         context = {'user': self.request.user} if self.request.user.is_authenticated else {}

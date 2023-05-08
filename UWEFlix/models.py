@@ -147,3 +147,4 @@ class BookingItem(models.Model):
     class Meta:
         ## not sure if showing should be added to this list of unique constraints or not?
         unique_together = [['booking', 'ticket_type']]
+        

@@ -41,10 +41,7 @@ function App() {
 						<Route path="/add_film" element={<AddFilmScreen />} />
 						<Route path="/showings" element={<Showings />} />
 						<Route path="/showings/booking" element={<Booking />} />
-						<Route
-							path="/showings/booking/payment"
-							element={<PaymentScreen />}
-						/>
+						<Route path="/showings/booking/payment"	element={<PaymentScreen />} />
 						<Route path="/screens" element={<ScreenListScreen />} />
 						<Route path="/add_showings" element={<AddShowing />} />
 					</Routes>
