@@ -244,8 +244,20 @@ class StripeCheckout(APIView):
             # print(f"    {response.content}")
             
             response_data = response.json()
-            uuid = response_data['id']          
+            uuid = response_data['id']
+            # print(f"    {uuid}")
             
+            # if(student_ticket < 0):
+            #     data = {"showing_id": {showing_id}, "ticket_type": "S", "quantity": {student_ticket}}
+            #     response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
+            
+            # if(adult_ticket < 0):
+            #     data = {"showing_id": showing_id, "ticket_type": "A", "quantity": adult_ticket}
+            #     response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
+            
+            # if(child_ticket < 0):
+            #     data = {"showing_id": showing_id, "ticket_type": "C", "quantity": child_ticket}
+            #     response = requests.post(f"http://127.0.0.1:8000/uweflix/booking/{uuid}/items", data=data)
             
             
             
