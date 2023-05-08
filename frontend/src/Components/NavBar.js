@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 //import hasAccess from '../helpers/hasAccess';
 
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+
 import { useSelector } from "react-redux";
 
 function NavBar() {
@@ -14,146 +19,91 @@ function NavBar() {
 	console.log(userType);
 
 	return (
-		<nav className="navbar navbar-expand-lg navbar-light bg-light">
-			<div className="container-fluid">
-				<button
-					className="navbar-toggler"
-					type="button"
-					onClick={handleNavToggle}
-				>
-					<span className="navbar-toggler-icon"></span>
-				</button>
-				<ul className={`navbar-nav ${showNav ? "show" : ""}`}>
+		<>
+		<Navbar collapseOnSelect expand="lg" bg="light" variant="light">
+			<div>
+				<Navbar.Brand href="/login">UWEFlix</Navbar.Brand>
+				<Navbar.Collapse id="responsive-navbar-nav">
+				<Nav className="me-auto">
 					{userType === "STUDENT" ||
 					userType === "GUEST" ||
 					userType === "CLUBREP" ? (
-						<li className="nav-item">
-							<a
-								className="nav-link active"
-								aria-current="page"
-								href="/showings"
-							>
-								Showings
-							</a>
-						</li>
+						<Nav.Link href="/showings">Showings</Nav.Link>
 					) : (
 						<></>
 					)}
 
 					{userType === "CINEMAMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/film_editing">
-								Edit Films
-							</a>
-						</li>
+						<Nav.Link href="/film_editing">Edit Film</Nav.Link>
 					) : (
 						<></>
 					)}
+
 					{userType === "ACCOUNTMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/statements">
-								Statements
-							</a>
-						</li>
+						<Nav.Link href="/statements">Statement</Nav.Link>
 					) : (
 						<></>
 					)}
+
 					{userType === "ACCOUNTMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/accounts">
-								Accounts
-							</a>
-						</li>
+						<Nav.Link href="/accounts">Accounts</Nav.Link>
 					) : (
 						<></>
 					)}
-					{userType === "ACCOUNTMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/register_account">
-								Register Users
-							</a>
-						</li>
+
+					{userType === "ACCOUNTMANAGER" ? (						
+						<Nav.Link  href="/register_account">Accounts</Nav.Link>
 					) : (
 						<></>
 					)}
+
 					{userType === "CINEMAMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/add_showings">
-								Add Showings
-							</a>
-						</li>
+						<Nav.Link  href="/add_showings">Add Showings</Nav.Link>
 					) : (
 						<></>
 					)}
+
 					{userType === "CINEMAMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/screens">
-								Screens
-							</a>
-						</li>
+						<Nav.Link  href="/screens">Screens</Nav.Link>
 					) : (
 						<></>
 					)}
-					{userType === "CINEMAMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/register_account/club">
-								Register Club
-							</a>
-						</li>
+	 				{userType === "CINEMAMANAGER" ? (						
+						<Nav.Link  href="/register_account/club">Register Club</Nav.Link>
 					) : (
 						<></>
 					)}
-					{userType === "CINEMAMANAGER" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/discount_approval">
-								Discount Requests
-							</a>
-						</li>
+	 				{userType === "CINEMAMANAGER" ? (
+						<Nav.Link href="/discount_approval">Discount Requests</Nav.Link>
 					) : (
 						<></>
 					)}
 					{userType === "CLUBREP" ? (
-						<li className="nav-item">
-							<a className="nav-link" href="/discount_request">
-								Discount
-							</a>
-						</li>
+						<Nav.Link href="/discount_request">Discount</Nav.Link>
 					) : (
 						<></>
 					)}
-				</ul>
-				{/* Change login to logout if user is logged in */}
-				<ul className="navbar-nav">
-					<li className="nav-item">
-						<a
-							className="nav-link"
-							href={"/login"}
-							style={{ fontWeight: "bold" }}
-							onClick={() => {
-								localStorage.clear();
-							}}
-						>
-							{userType === "" || userType === "GUEST" ? "Login" : "Logout"}
-						</a>
-					</li>
+				</Nav>
+			
+				<Nav>
+
+					 <Nav.Link href={"/login"} onClick={() => {
+						localStorage.clear();
+						}}
+						>{userType === "" || userType === "GUEST" ? "Login" : "Logout"}
+					</Nav.Link>
 					{userType === "" || userType === "GUEST" ? (
-						<ul className="navbar-nav">
-							<li className="nav-item">
-								<a
-									className="nav-link"
-									href="/register"
-									style={{ fontWeight: "bold" }}
-								>
-									Register
-								</a>
-							</li>
-						</ul>
+						<Nav.Link href="/register">Register</Nav.Link>
 					) : (
 						<></>
 					)}
-				</ul>
+				</Nav>
+				</Navbar.Collapse>
 			</div>
-		</nav>
+			
+			<Navbar.Toggle aria-controls="responsive-navbar-nav" />
+		</Navbar>
+		</>
 	);
 }
 
