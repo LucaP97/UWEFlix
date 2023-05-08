@@ -166,6 +166,12 @@ class ClubOrderViewSet(ModelViewSet):
     
     # for now, associating the order with the user ID (which is linked to the club rep), rather than the account
     def create(self, request, *args, **kwargs):
+
+
+        #stripe
+
+        
+
         # context = {'user': self.request.user}
         user = self.request.user
 
@@ -244,16 +250,6 @@ class ArchivedClubOrderViewSet(ModelViewSet):
 class ClubOrderItemViewSet(ModelViewSet):
     queryset = ClubOrderItem.objects.all()
     serializer_class = ClubOrderItemSerializer
-
-
-# class ClubOrderCancellationViewSet(ModelViewSet):
-#     http_method_names = ['get', 'put']
-#     queryset = ClubOrder.objects.filter(is_active=True, cancellation_request=True)
-
-#     def get_serializer_class(self):
-#         if self.request.method == 'PUT':
-#             return CancelClubOrderRequestSerializer
-#         return ClubOrderSerializer
 
 
 class CreditViewSet(ModelViewSet):

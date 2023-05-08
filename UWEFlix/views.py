@@ -45,7 +45,7 @@ class CheckUserView(APIView):
 class StudentViewSet(ModelViewSet):
     # queryset = Student.objects.all()
     serializer_class = StudentRegistrationSerializer
-    # permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         if hasattr(self.request.user, 'cinema_manager') or self.request.user.is_staff:
@@ -238,11 +238,11 @@ class OrderViewSet(ModelViewSet):
             user = self.request.user
 
             if user.is_staff or hasattr(user, 'cinema_manager'):
-                return Order.objects.all()
+                return Order.objects.filter(is_active=True)
             
             # (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
             student_id = Student.objects.only('id').get(user_id=user.id)
-            return Order.objects.filter(student_id=student_id)
+            return Order.objects.filter(student_id=student_id, is_active=True)
         
         return Order.objects.none()
     
@@ -289,6 +289,29 @@ class OrderCancellationViewSet(ModelViewSet):
         if self.request.method == 'PUT':
             return UpdateOrderCancellationSerializer
         return OrderCancellationSerializer
+    
+
+class ArchivedOrderViewSet(ModelViewSet):
+    http_method_names = ['get']
+
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+
+        if self.request.user.is_authenticated:
+
+            user = self.request.user
+
+            if user.is_staff or hasattr(user, 'cinema_manager'):
+                return Order.objects.filter(is_active=False)
+            
+            # (student_id, created) = Student.objects.only('id').get_or_create(user_id=user.id)
+            student_id = Student.objects.only('id').get(user_id=user.id)
+            return Order.objects.filter(student_id=student_id, is_active=False)
+        
+        return Order.objects.none()
+    
+
 
 
 class PriceViewSet(ModelViewSet):
