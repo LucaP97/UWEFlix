@@ -140,6 +140,7 @@ class FilmViewSet(ModelViewSet):
     
     permission_classes = [IsCinemaManagerOrReadOnly]
     
+    
 
 class ArchivedFilmViewSet(ModelViewSet):
     http_method_names = ['get', 'put']
