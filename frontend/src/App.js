@@ -7,7 +7,6 @@ import NavBar from "./Components/NavBar";
 import FilmListScreen from "./FilmListScreen";
 import AddFilmScreen from "./AddFilmScreen";
 import ScreenListScreen from "./ScreenListScreen";
-import PaymentScreen from "./PaymentScreen";
 import AddShowing from "./AddShowing";
 import Statements from "./Statements";
 import TransactionHistory from "./TransactionHistory";
@@ -22,6 +21,7 @@ import RegisterClub from "./RegisterClub"
 import DiscountRequest from "./DiscountRequest";
 import DiscountApproval from "./DiscountApproval";
 import EditFilm from "./EditFilm";
+import PaymentSuccessView from "./PaymentSuccessView";
 
 function App() {
 	return (
@@ -54,10 +54,7 @@ function App() {
 						<Route path="/add_film" element={<AddFilmScreen />} />
 						<Route path="/showings" element={<Showings />} />
 						<Route path="/showings/booking" element={<Booking />} />
-						<Route
-							path="/showings/booking/payment"
-							element={<PaymentScreen />}
-						/>
+						<Route path="/payment_success" element={<PaymentSuccessView />} />
 						<Route path="/screens" element={<ScreenListScreen />} />
 						<Route path="/film_editing/edit_film" element={<EditFilm />} />
 						<Route path="/add_showings" element={<AddShowing />} />

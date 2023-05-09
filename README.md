@@ -14,6 +14,9 @@ super user credentials
 username: admin
 password: LMicyb8=O
 
+cinema credentials
+username: cc
+password: LMicyb8=O
 
 generic student account:
 username: aa

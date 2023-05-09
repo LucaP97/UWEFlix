@@ -357,9 +357,9 @@ class StripeCheckout(APIView):
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=DOMAIN + f'/showings?id={uuid}&showing_id={showing_id}&child_ticket={child_ticket}&adult_ticket={adult_ticket}&student_ticket={student_ticket}',
+                success_url=DOMAIN + f'/payment_success?id={uuid}&showing_id={showing_id}&child_ticket={child_ticket}&adult_ticket={adult_ticket}&student_ticket={student_ticket}',
                 cancel_url=DOMAIN + '?canceled=true'
-            )             
+            )   
                         
             
             return redirect(checkout_session.url)

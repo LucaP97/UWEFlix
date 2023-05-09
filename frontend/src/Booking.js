@@ -103,8 +103,6 @@ function Booking() {
 			alert("Select time")
 			return;
 		}
-
-		const token = localStorage.getItem('access_token')
 		
 		handlePayment()
 	}
