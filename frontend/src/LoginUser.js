@@ -18,17 +18,18 @@ const LoginUser = () => {
 
 	const getUserType = async () => {
 		//clubrep?
-		const clubrep = await getUserTypeString();
+		const typeu = await getUserTypeString();
 		// console.log(clubrep)
 		// alert({clubrep})
-		if (clubrep === "club_representative") {
+		if (typeu === "club_representative") {
 			
 			return "CLUBREP";
 		}
+		
 
 		//ACCOUNT MANAGER?
-		const accountmanager = await getAccountManager();
-		if (accountmanager) {
+		
+		if (typeu === "account_manager") {
 			return "ACCOUNTMANAGER";
 		}
 

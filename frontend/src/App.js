@@ -48,7 +48,7 @@ function App() {
 
 					<Routes>
 						<Route path="/" element={<LoginUser />} />
-						<Route path="/register" element={<RegisterUser />} />
+						<Route path="/register" element={<RegisterStudent />} />
 						<Route path="/login" element={<LoginUser />} />
 						<Route path="/film_editing" element={<FilmListScreen />} />
 						<Route path="/add_film" element={<AddFilmScreen />} />
