@@ -13,15 +13,11 @@ OrderItem = ContentType.objects.get(app_label='UWEFlix', model='orderitem').mode
 Showing = ContentType.objects.get(app_label='UWEFlix', model='showing').model_class()
 
 class ShowingSerializer(serializers.ModelSerializer):
-    # ticket_price = serializers.SerializerMethodField()
+    ticket_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Showing
         fields = ['id']
-
-    # def get_price_student(self, showing:Showing):
-    #     if 
-    #     return showing.price.student
 
 class OrderItemSerializer(serializers.ModelSerializer):
     showing = ShowingSerializer(read_only=True)
@@ -174,7 +170,7 @@ class StatementSerializer(serializers.ModelSerializer):
                 statement=statement, order_object=order)
             uweflix_statement_item.save()
 
-        # club
+        ## club
         accounts = Account.objects.all()
         for account in accounts:
             club_orders = ClubOrder.objects.filter(account=account, placed_at__month=now.month, placed_at__year=now.year)

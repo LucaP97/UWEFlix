@@ -29,7 +29,7 @@ class Club(models.Model):
     name = models.CharField(max_length=255)
     address = models.OneToOneField(Address, on_delete=models.PROTECT, related_name='club')
     contact_details = models.OneToOneField(ContactDetails, on_delete=models.PROTECT, related_name='club')
-    club_number = models.SmallIntegerField()
+    club_number = models.IntegerField()
 
     def __str__(self) -> str:
         return self.name

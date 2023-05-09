@@ -15,6 +15,7 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+import stripe
 from .models import *
 from .serializers import *
 from .filters import *
@@ -248,6 +249,37 @@ class OrderViewSet(ModelViewSet):
         return Order.objects.none()
     
     def create(self, request, *args, **kwargs):
+        # # def stripe_payment(stripe):
+        # public = 'pk_test_51N2bKfFHp8PAiHwAlHmLWQUwu8Q8uoikyJ1ljYTzkwjvhRsm5sgzvdZkDRjAn0E0so69mGEVX3tTZwH0L4oLH7PO00zVmmFcOg'
+        # stripe.api_key = 'sk_test_51N2bKfFHp8PAiHwAYmXYVzUpnX8nodGWNN1ppgjYuEmsxwEaijATGGS0uHpnDVTW0iftRln4OVLlt7JNCrOHoexD003brCcnkH'
+
+        # customer = stripe.Customer.create(email=self.request.user.email)
+        # payment_data = {'customer': customer['id']}
+
+        # session = stripe.checkout.Session.create(
+        #     payment_method_types=['card'],
+        #     line_items=[{
+        #         'price_data': {
+        #             'currency': 'gbp',
+        #             'product_data': {
+        #                 'name': 'Account top up',
+        #                 'description': 'Quanity',
+        #             },
+        #             'unit_amount':  100,
+        #         },
+        #         'quantity': 1,
+        #     }],
+        #     mode='payment',
+        #     success_url='https://example.com/success',
+        #     cancel_url='https://example.com/cancel',
+        # )
+
+        # render(request, 'UWEFlix/stripe.html', {'session_id': session.id})
+        
+        # stripe_payment(stripe)
+
+
+        # context = {'user': self.request.user, 'session_id': session.id} if self.request.user.is_authenticated else {'session_id': session.id}
         context = {'user': self.request.user} if self.request.user.is_authenticated else {}
 
         serializer = CreateOrderSerializer(data=request.data, context=context)
@@ -268,7 +300,9 @@ class OrderViewSet(ModelViewSet):
                 pass
 
         return response
-    
+
+
+
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE']:
             return [IsAdminUser()]

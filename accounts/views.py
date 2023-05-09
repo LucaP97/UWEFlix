@@ -64,11 +64,15 @@ class UweflixStatementItemsViewSet(viewsets.ModelViewSet):
 ### statements ###
 
 class StatementViewSet(viewsets.ModelViewSet):
-    queryset = Statement.objects.all()#prefetch_related('orders').all()
+    queryset = (
+        Statement.objects
+        .prefetch_related(
+            Prefetch("uweflix_statement_items__order_object__items__showing__price"),
+            Prefetch("uweflix_statement_items__order_object__items__showing"),
+            Prefetch("club_statement_items__account_object__club_order"),
+        ).all()
+    )
     serializer_class = StatementSerializer
-
-    
-
 
     # permission_classes = [AccountManagerOnly]
 

@@ -401,8 +401,6 @@ class CreateOrderSerializer(serializers.Serializer):
         def save(self, **kwargs):
             booking_id = self.validated_data['booking_id']
 
-            print('context')
-            print(self.context)
             if 'user' in self.context:
                 student = Student.objects.get(user_id=self.context['user'].id)
             else:
