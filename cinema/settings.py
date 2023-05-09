@@ -138,7 +138,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'uweflixDB',
-        'USER': 'user',
+        'USER': 'root',
         'PASSWORD': 'password',
         'HOST': 'mysql',
         'PORT': '3306',
@@ -227,14 +227,14 @@ DJOSER = {
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
+EMAIL_HOST = 'smtp4dev'
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 2525
 DEFAULT_FROM_EMAIL = 'UWEFLIX@uwe.com'
 
 
-CELERY_BROKER_URL = 'redis://localhost:6379/1'
+CELERY_BROKER_URL = 'redis://redis:6379/1'
 CELERY_BEAT_SCHEDULE = {
     'generate_statement': {
         'task': 'accounts.tasks.generate_statement',

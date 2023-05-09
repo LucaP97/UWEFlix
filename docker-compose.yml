@@ -15,10 +15,10 @@
 #   mysql:
 #     image: mysql:8.0
 #     ports:
-#       - "3306:3306"
+#       - "3307:3306"
 #     restart: always
 #     environment:
-#       - MYSQL_DATABASE=uweflixDB
+#       - MYSQL_DATABSE=uweflixDB
 #       - MYSQL_ROOT_PASSWORD=password
 #     volumes:
 #       - mysql-data:/var/lib/mysql
@@ -61,9 +61,10 @@
 #       - CELERY_BACKEND=redis://redis:6379/0
 #     ports:
 #       - 5555:5555
+
 # volumes:
-#   mysqldata:
-#   redisdata:
+#   mysql-data: 
+#   redis-data: 
 
 version: '3.9'
 
@@ -85,8 +86,10 @@ services:
       - "3306:3306"
     restart: always
     environment:
-      - MYSQL_DATABSE=uweflixDB
+      - MYSQL_DATABASE=uweflixDB
       - MYSQL_ROOT_PASSWORD=password
+      # - MYSQL_USER=user
+      # - MYSQL_PASSWORD=password
     volumes:
       - mysql-data:/var/lib/mysql
   redis:
@@ -109,6 +112,9 @@ services:
       - redis
     volumes: 
       - .:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
   celery-beat:
     build: .
     command: celery -A cinema beat --loglevel=info
@@ -116,6 +122,9 @@ services:
       - redis
     volumes: 
       - .:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
   flower:
     build: .
     command: celery -A cinema flower
@@ -125,7 +134,7 @@ services:
     environment:
       - DEBUG=true
       - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     ports:
       - 5555:5555
 
