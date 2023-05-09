@@ -1,7 +1,7 @@
 # version: '3.9'
 
 # services:
-#   web:
+#   api:
 #     build: .
 #     command: python manage.py runserver 0.0.0.0:8000
 #     ports:
@@ -12,13 +12,20 @@
 #     restart: on-failure
 #     volumes:
 #       - .:/app
+#   web:
+#     build: ./frontend
+#     # command: npm run serve
+#     ports:
+#       - "3000:3000"
+#     volumes:
+#       - ./frontend:/frontend
 #   mysql:
 #     image: mysql:8.0
 #     ports:
-#       - "3307:3306"
+#       - "3306:3306"
 #     restart: always
 #     environment:
-#       - MYSQL_DATABSE=uweflixDB
+#       - MYSQL_DATABASE=uweflixDB
 #       - MYSQL_ROOT_PASSWORD=password
 #     volumes:
 #       - mysql-data:/var/lib/mysql
@@ -42,6 +49,9 @@
 #       - redis
 #     volumes: 
 #       - .:/app
+#     environment:
+#       - CELERY_BROKER_URL=redis://redis:6379/0
+#       - CELERY_RESULT_BACKEND=redis://redis:6379/0
 #   celery-beat:
 #     build: .
 #     command: celery -A cinema beat --loglevel=info
@@ -49,6 +59,9 @@
 #       - redis
 #     volumes: 
 #       - .:/app
+#     environment:
+#       - CELERY_BROKER_URL=redis://redis:6379/0
+#       - CELERY_RESULT_BACKEND=redis://redis:6379/0
 #   flower:
 #     build: .
 #     command: celery -A cinema flower
@@ -58,13 +71,14 @@
 #     environment:
 #       - DEBUG=true
 #       - CELERY_BROKER_URL=redis://redis:6379/0
-#       - CELERY_BACKEND=redis://redis:6379/0
+#       - CELERY_RESULT_BACKEND=redis://redis:6379/0
 #     ports:
 #       - 5555:5555
 
 # volumes:
 #   mysql-data: 
 #   redis-data: 
+
 
 version: '3.9'
 
@@ -88,8 +102,6 @@ services:
     environment:
       - MYSQL_DATABASE=uweflixDB
       - MYSQL_ROOT_PASSWORD=password
-      # - MYSQL_USER=user
-      # - MYSQL_PASSWORD=password
     volumes:
       - mysql-data:/var/lib/mysql
   redis:
@@ -99,6 +111,11 @@ services:
     restart: always
     volumes:
       - redis-data:/data
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    restart: always
   smtp4dev:
     image: rnwood/smtp4dev:v3
     ports:

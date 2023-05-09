@@ -226,12 +226,11 @@ DJOSER = {
 
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp4dev'
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 2525
-DEFAULT_FROM_EMAIL = 'UWEFLIX@uwe.com'
+EMAIL_PORT = 25
 
 
 CELERY_BROKER_URL = 'redis://redis:6379/1'
