@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -20,6 +20,12 @@ from .serializers import *
 from .filters import *
 from .permissions import *
 
+import requests
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+DOMAIN = 'http://localhost:5000'
 
 # user check
 class CheckUserView(APIView):
@@ -318,3 +324,46 @@ class ArchivedOrderViewSet(ModelViewSet):
 class PriceViewSet(ModelViewSet):
     queryset = Price.objects.all()
     serializer_class = PriceSerializer
+
+            
+
+    
+class StripeCheckout(APIView):   
+    def post(self,request):        
+        try:
+            
+            data = request.POST            
+            
+            total_price = int(data.get("total_price",None))*100
+            showing_id = data.get("showing_id")
+            student_ticket = data.get("student_ticket")
+            adult_ticket = data.get("adult_ticket")
+            child_ticket = data.get("child_ticket")
+            
+            response = requests.post("http://127.0.0.1:8000/uweflix/booking/")
+            response_data = response.json()
+            uuid = response_data['id']
+            
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types = ['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'gbp',
+                        'unit_amount': total_price,
+                        'product_data': {
+                            'name': f'booking',
+                        },
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=DOMAIN + f'/showings?id={uuid}&showing_id={showing_id}&child_ticket={child_ticket}&adult_ticket={adult_ticket}&student_ticket={student_ticket}',
+                cancel_url=DOMAIN + '?canceled=true'
+            )             
+                        
+            
+            return redirect(checkout_session.url)
+        except Exception as e:
+            print(str(e))
+            return HttpResponse("An error occurred while processing your request.")
+        

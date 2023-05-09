@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(booking_router.urls)),
     path('', include(film_router.urls)),
+    path('create-checkout-session', views.StripeCheckout.as_view()),
     path('check-user-view/', views.CheckUserView.as_view(), name='check-user-view'),
 ]
 

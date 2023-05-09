@@ -12,6 +12,16 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { useNavigate } from "react-router-dom";
 
+import {Elements} from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js';
+
+import PaymentForm from "./Components/PaymentForm";
+
+import { useSelector } from "react-redux";
+
+const PUBLIC_KEY = "pk_test_51N4LoiLd0kDzPKsuvJc8mH6lamfaJhh0piWQOR6zwAAnGszWaSMblJmcdS63jXSQx4nI4cn4MesJgZvJvbuosYJp00kONN7cZ9"
+const stripePromise = loadStripe(PUBLIC_KEY)
+
 function ageRatingColor(age) {
 	if (age <= 3) {
 		return "green";
@@ -41,6 +51,8 @@ function Booking() {
 	const [showingID, setShowingID] = useState(0)
 
 	const [show, setShow] = useState(false);
+
+	const userType = useSelector((state) => state.userType);
 
 	const confirmDetails = () => {
 		setShow(false)
@@ -94,73 +106,6 @@ function Booking() {
 
 		const token = localStorage.getItem('access_token')
 		
-		fetch("http://127.0.0.1:8000/uweflix/booking/",{
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-            	'Authorization': `JWT ${token}`
-			},
-		})
-		.then(response => response.json())
-        .then(data => {
-			const token = localStorage.getItem('access_token')
-        	const headers = {
-				'Content-Type': 'application/json',
-				'Authorization': `JWT ${token}`
-        	}
-            //console.log(`T: ${JSON.stringify(data.id)}`);
-			if(adultTickets > 0){
-				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
-					method: "POST",
-					headers: headers,
-					body: JSON.stringify(
-						{
-							"showing_id": showingID,
-							"ticket_type": "A",
-							"quantity": adultTickets
-						}
-					)
-					
-				})
-				.then(response => response.json())
-				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
-			}
-			if(studentTickets > 0){
-				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
-					method: "POST",
-					headers: headers,
-					body: JSON.stringify(
-						{
-							"showing_id": showingID,
-							"ticket_type": "S",
-							"quantity": studentTickets
-						}
-					)
-					
-				})
-				.then(response => response.json())
-				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
-			}
-			if(childTickets > 0){
-				fetch(`http://127.0.0.1:8000/uweflix/booking/${data.id}/items/`,{
-					method: "POST",
-					headers: headers,
-					body: JSON.stringify(
-						{
-							"showing_id": showingID,
-							"ticket_type": "C",
-							"quantity": childTickets
-						}
-					)
-					
-				})
-				.then(response => response.json())
-				.then(data => {console.log(`T: ${JSON.stringify(data)}}`)})
-			}
-
-        })
-		
-		
 		handlePayment()
 	}
 	//post order
@@ -169,57 +114,28 @@ function Booking() {
 		<div style={{ height: "88vh" }}>
 			<div className="film-container">
 			<>
-				<Modal show={show} onHide={handleClose}>
-					<Modal.Header closeButton>
-						<Modal.Title>Enter Details</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						<Form>
-							<Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-								<Form.Label>Full Name</Form.Label>
-								<Form.Control
-									type="text"
-									placeholder="e.g. Jeff Winger"
-									autoFocus
-								/>
-								<Form.Label>Email address</Form.Label>
-								<Form.Control
-									type="email"
-									placeholder="name@example.com"
-									autoFocus
-								/>
-							</Form.Group>
-							<Form.Group
-								className="mb-3"
-								controlId="exampleForm.ControlTextarea1"
-								>
-								<Form.Label>Card Details</Form.Label>
-								<div class="form-group">
-									<input type="number" id="card-number" name="cardNumber" class="form-input" placeholder="Enter card number" required />
-								</div>
+					<Modal show={show} onHide={handleClose}>
+						<Modal.Header>
+							<Modal.Title><h1>Purchase Tickets</h1></Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							<div>
+								<h3>
+									Total Price: {totalCost}
+								</h3>
+							</div>
 
-								<Form.Label>Expiration Date</Form.Label>
-								<div class="form-group">
-									<input type="month" id="expiration-date" name="expirationDate" class="form-input" placeholder="MM/YY" required />
-								</div>
+							<Elements stripe={stripePromise}>
+								<PaymentForm 
+								total_price={totalCost}
+								showing_id={showingID}
+								student_ticket={studentTickets} 
+								adult_ticket={adultTickets} 
+								child_ticket={childTickets} /> 
+							</Elements>
+						</Modal.Body>
 
-								<Form.Label>Security Code</Form.Label>
-								<div class="form-group">
-									<input type="number" id="security-code" name="securityCode" class="form-input" placeholder="Enter security code" required />
-								</div>
-							</Form.Group>
-						</Form>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button variant="secondary" onClick={handleClose}>
-							Back
-						</Button>
-						<Button variant="primary" onClick={confirmDetails}>
-							Confirm Details
-						</Button>
-					</Modal.Footer>
-				</Modal>
-
+					</Modal>
 				</>
 				<img
 					className="image-booking"
@@ -247,42 +163,50 @@ function Booking() {
 				</div>
 			</div>
 			<div className="booking-container">
-				<div style={{ float: "left" }}>
-					<p style={{ fontSize: 22, float: "left" }}>Students:</p>
-					<div style={{ float: "left", marginLeft: "1vw", fontSize: 22 }}>
-						{studentTickets}
-						{"  "}
-						<button
-							className="btn btn-outline-success"
-							style={{
-								padding: 3,
-								paddingLeft: 7,
-								paddingRight: 7,
-								marginBottom: 5,
-							}}
-							onClick={() => setStudentTickets(studentTickets + 1)}
-						>
-							+
-						</button>
-						{"   "}
-						<button
-							className="btn btn-outline-success"
-							style={{
-								padding: 3,
-								paddingLeft: 10,
-								paddingRight: 10,
-								marginBottom: 5,
-							}}
-							onClick={() =>
-								setStudentTickets(
-									studentTickets > 0 ? studentTickets - 1 : studentTickets
-								)
-							}
-						>
-							-
-						</button>
+				
+				{userType !== "GUEST" ? (
+					
+					<div style={{ float: "left" }}>
+						<p style={{ fontSize: 22, float: "left" }}>Students:</p>
+						<div style={{ float: "left", marginLeft: "1vw", fontSize: 22 }}>
+							{studentTickets}
+							{"  "}
+							<button
+								className="btn btn-outline-success"
+								style={{
+									padding: 3,
+									paddingLeft: 7,
+									paddingRight: 7,
+									marginBottom: 5,
+								}}
+								onClick={() => setStudentTickets(studentTickets + 1)}
+							>
+								+
+							</button>
+							{"   "}
+							<button
+								className="btn btn-outline-success"
+								style={{
+									padding: 3,
+									paddingLeft: 10,
+									paddingRight: 10,
+									marginBottom: 5,
+								}}
+								onClick={() =>
+									setStudentTickets(
+										studentTickets > 0 ? studentTickets - 1 : studentTickets
+									)
+								}
+							>
+								-
+							</button>
+						</div>
 					</div>
-				</div>
+
+				) : (
+					<></>
+				)}
+
 				<div style={{ float: "left", marginLeft: "3vw" }}>
 					<p style={{ fontSize: 22, float: "left" }}>Children:</p>
 					<div style={{ float: "left", marginLeft: "1vw", fontSize: 22 }}>
