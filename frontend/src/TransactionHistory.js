@@ -24,6 +24,10 @@ function TransactionHistory() {
 
 	return (
 		<div className={"list-conta"}>
+      <div style={{ width: "100vw", textAlign: "center" }}>
+				<h4 style={{ marginTop: 20 }}>{data.name}</h4>
+			</div>
+			<hr></hr>
 			<h5 style={{ marginLeft: 20, marginTop: 20 }}>
 				Total revenue from all accounts this month:{"  "}
 				<span style={{ color: "green" }}>{data.total}£</span>
@@ -38,7 +42,7 @@ function TransactionHistory() {
 			<hr></hr>
 			{data.uweflix_statement_items.map((item) => (
 				<div className="row-conta">
-					<h5>{formatDate(item.order_object.placed_at)}</h5>
+					<h5><span style={{ color: "blue" }}>Order ID: {item.order_id +"  "}</span>{formatDate(item.order_object.placed_at)}</h5>
 					<div style={{ marginLeft: "auto" }}>
 						<h3 style={{ color: "green" }}>
 							+{item.order_object.total_price}£
