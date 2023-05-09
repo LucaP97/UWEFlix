@@ -19,7 +19,7 @@ from .tasks import *
 from .permissions import *
 
 
-# ## account manager
+## account manager
 
 class AccountManagerViewSet(ModelViewSet):
     queryset = AccountManager.objects.all()
@@ -92,7 +92,6 @@ class AccountViewSet(ModelViewSet):
         
     permission_classes = [IsAccountManagerOrClubRepresentativeOnly]
         
-    # permission_classes = [IsClubRepresentativeOrAccountManager]
         
 
 class DiscountRequestViewSet(ModelViewSet):
@@ -166,13 +165,6 @@ class ClubOrderViewSet(ModelViewSet):
     
     # for now, associating the order with the user ID (which is linked to the club rep), rather than the account
     def create(self, request, *args, **kwargs):
-
-
-        #stripe
-
-        
-
-        # context = {'user': self.request.user}
         user = self.request.user
 
         serializer = CreateClubOrderSerializer(data=request.data, context={'account_id': self.request.user.clubrepresentative.club.account.id})
@@ -231,6 +223,8 @@ class ClubOrderCancellationViewSet(ModelViewSet):
         if self.request.method == 'PUT':
             return UpdateClubOrderCancellationSerializer
         return ClubOrderCancellationSerializer
+    
+    permission_classes = [IsCinemaManagerOrStaff]
     
 
 class ArchivedClubOrderViewSet(ModelViewSet):
