@@ -1,0 +1,17 @@
+.list-conta {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.row-conta {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2vh;
+    padding: 10px 20px;
+    margin: 15px;
+    margin-top: 8px;
+    background-color: aliceblue;
+    border-radius: 12px;
+}

@@ -3,34 +3,62 @@ import { useLocation } from "react-router-dom";
 
 import { Form, Button } from "react-bootstrap";
 
+import axios from "axios";
+
+import store from "./store";
+
 import { addStudent } from "./services/AccountManagerServices";
+import { loginUser } from "./services/UserService";
+import {
+	getAccountManager,
+	getClubAccounts,
+	getCinemaManager,
+	getStudent,
+	getUserTypeString,
+} from "./services/LoginPermissionService";
 
 function RegisterStudent() {
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [email, setEmail] = useState("");
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const [birthDate, setBirthDate] = useState("");
 
-
-	const [firstName, setFirstName] = useState('');
-	const [lastName, setLastName] = useState('');
-	const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [birthDate, setBirthDate] = useState('')
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 
 		//submit to server
 		const response = await addStudent({
-            user: {username: username,
-			password: password,
-			email: email,
-			first_name: firstName,
-			last_name: lastName,},
-			birth_date: birthDate
-			
+			user: {
+				username: username,
+				password: password,
+				email: email,
+				first_name: firstName,
+				last_name: lastName,
+			},
+			birth_date: birthDate,
 		});
-        console.log(response)
-		window.location.reload()
-    }
+		console.log(response);
+
+		//submit to server
+		const data = await loginUser({
+			username: username,
+			password: password,
+		});
+
+		localStorage.clear();
+		localStorage.setItem("access_token", data.access);
+		localStorage.setItem("refresh_token", data.refresh);
+
+		axios.defaults.headers.common["Authorization"] = `Bearer ${data["access"]}`;
+
+		const userType = "STUDENT";
+		localStorage.setItem("user_type", userType);
+		store.dispatch({ type: userType });
+
+		window.location.href = "/showings"
+	};
 
 	return (
 		<div className="container">
@@ -42,7 +70,7 @@ function RegisterStudent() {
 					alignItems: "center",
 				}}
 			>
-				<h2 style={{ marginTop: 10 }}>Register Student Account</h2>
+				<h2 style={{ marginTop: 10 }}>Register as Student</h2>
 				<Form.Group
 					controlId="formUsername"
 					style={{ marginBottom: 10, width: "90%" }}
@@ -94,7 +122,7 @@ function RegisterStudent() {
 						onChange={(event) => setUsername(event.target.value)}
 					/>
 				</Form.Group>
-                <Form.Group
+				<Form.Group
 					controlId="formFirstName"
 					style={{ marginBottom: 10, width: "90%" }}
 				>
@@ -106,7 +134,7 @@ function RegisterStudent() {
 						onChange={(event) => setPassword(event.target.value)}
 					/>
 				</Form.Group>
-                <Form.Group
+				<Form.Group
 					controlId="formFirstName"
 					style={{ marginBottom: 10, width: "90%" }}
 				>
@@ -118,8 +146,6 @@ function RegisterStudent() {
 						onChange={(event) => setBirthDate(event.target.value)}
 					/>
 				</Form.Group>
-                
-                
 
 				<Button
 					variant="primary"
@@ -132,7 +158,6 @@ function RegisterStudent() {
 			</Form>
 		</div>
 	);
-
 }
 
 export default RegisterStudent;

@@ -96,10 +96,8 @@ export async function addEmployee(data) {
     }
 }
 export async function addStudent(data) {
-	const token = localStorage.getItem('access_token')
 	const headers = {
 		'Content-Type': 'application/json',
-  		'Authorization': `JWT ${token}`
 	}
     try {
         const response = await fetch('http://localhost:8000/uweflix/student/', {

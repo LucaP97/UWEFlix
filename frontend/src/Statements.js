@@ -4,7 +4,6 @@ import { getAllStatements } from "./services/AccountManagerServices";
 import "./styles/statements.css";
 import { Button } from "react-bootstrap";
 
-function statementRow(props) {}
 
 function Statements() {
 	const [statements, setStatements] = useState([]);
@@ -34,8 +33,7 @@ function Statements() {
 						<Button
 							onClick={() =>
 								handleNavigate({
-									uweflix_items: statement.uweflix_statement_items,
-									club_items: statement.club_statement_items,
+									statement: statement
 								})
 							}
 						>
