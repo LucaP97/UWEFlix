@@ -140,8 +140,8 @@ DATABASES = {
         'NAME': 'uweflixDB',
         'USER': 'user',
         'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '3307',
+        'HOST': 'mysql',
+        'PORT': '3306',
     }
 }
 
