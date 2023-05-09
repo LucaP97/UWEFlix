@@ -55,7 +55,15 @@ const LoginUser = () => {
 			username: username,
 			password: password,
 		});
-		console.log(data);
+		
+		if (data.hasOwnProperty('detail')) {
+			alert(data.detail)
+			setUsername("")
+			setPassword("")
+			return
+		}
+		
+		
 		localStorage.clear();
 		localStorage.setItem("access_token", data.access);
 		localStorage.setItem("refresh_token", data.refresh);
