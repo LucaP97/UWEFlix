@@ -19,7 +19,7 @@ from .tasks import *
 from .permissions import *
 
 
-## account manager
+# ## account manager
 
 class AccountManagerViewSet(ModelViewSet):
     queryset = AccountManager.objects.all()

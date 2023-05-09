@@ -163,6 +163,8 @@ class ClubBookingItemSerializer(serializers.ModelSerializer):
     })
 
     def get_total_price(self, booking_item:ClubBookingItem):
+        print('self')
+        print(self)
         return booking_item.quantity * booking_item.showing_object.price.student
     
 
@@ -189,7 +191,7 @@ class AddBookingItemSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
+        # self.showing_content_type = ContentType.objects.get(app_label='UWEFlix', model='showing')
 
     def validate_showing_id(self, value):
         if not Showing.objects.filter(pk=value).exists():
